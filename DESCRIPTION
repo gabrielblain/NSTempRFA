@@ -1,8 +1,7 @@
 Package: NSTempRFA
 Title: Adapts the Regional Frequency Analysis to Air Temperature
 Version: 0.0.0.9000
-Authors@R: 
-   Authors@R: c(
+Authors@R: c(
     person("Gabriel Constantino", "Blain", , "gabriel.blain@sp.gov.br", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-8832-7734")),
     person("Graciela R.", "Sobierajski", role = "aut",
@@ -13,8 +12,20 @@ Authors@R:
 Description: Adapts the index-flood technique to extreme air temperature data. The package uses 
     the additive approach proposed in Martins et al. (2022) <doi:10.1590/1678-4499.20220061> 
     and adapt it to climate change conditions through the use of nonstationary parametric distributions.
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+License: MIT + file LICENSE
+Imports:
+    lmomRFA,
+    rrcov,
+    lmom,
+    MASS,
+    stats,
+    extRemes,
+    spsUtil,
+    dplyr,
+    utils
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
+Depends: 
+    R (>= 3.5)
+LazyData: true
