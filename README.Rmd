@@ -38,7 +38,7 @@ Although the study by Martins et al. (2022) showed promising results, it did not
 
 This package proposes a new methodology for applying the RFA to extreme Tmax and Tmin data under nonstationary climate conditions.
 
-## Example
+## Examples
 
 
 ```{r example}
@@ -46,3 +46,38 @@ library(NSTempRFA)
 ## basic example code
 ```
 
+# Methodological Details
+
+From a statistical perspective, ongoing climate change has altered the frequency and intensity of extreme weather events, leading to a nonstationary environment (O’Brien et al., 2014). As a result, the original RFA technique must be extended to account for nonstationarities in the data. To the best of our knowledge, O’Brien et al. (2014) was the first study to propose such an extension. This package adapted this extension to the additive approach (equation 1):
+
+$$
+Q_{i,t}(F) = mu_t + q_t(F), \quad i = 1, \dots, N \quad \text{and} \quad 0 < F < 1
+$$
+
+Where:
+- \( Q_{i,t}(F) \) is the quantile function at site *i* and time *t*,
+- \( q_t(F) \) is the time-varying regional quantile function (growth curve),
+- \( mu_t \) is the time-dependent index value (regional location parameter),
+- and *N* is the number of sites in the homogeneous region.
+
+Add more information
+
+## BugReports:
+
+<https://github.com/gabrielblain/NSTempRFA/issues>
+
+## License:
+
+MIT
+
+## Authors:
+
+Gabriel Constantino Blain, Graciela da Rocha Sobierajski, Leticia Lopes
+Martins. Maintainer: Gabriel Constantino Blain,
+<gabriel.blain@sp.gov.br>
+
+## Acknowledgments:
+
+
+
+## References
