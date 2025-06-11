@@ -26,6 +26,6 @@ Add_Heterogenety
 \examples{
 rho <- 0.5
 Ns <- 100
-scaled_data <- scaled_data
-Add_Heterogenety(dataset.add=scaled_data,rho = rho,Ns = Ns)
+dataset.add <- add_data
+Add_Heterogenety(dataset.add=dataset.add,rho = rho,Ns = Ns)
 }

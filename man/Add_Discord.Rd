@@ -2,7 +2,7 @@
 % Please edit documentation in R/Add_Discord.R
 \name{Add_Discord}
 \alias{Add_Discord}
-\title{Discordance measure calculated from the additive approach}
+\title{Discordance measures calculated from the additive approach}
 \usage{
 Add_Discord(dataset)
 }
@@ -12,7 +12,7 @@ The first column must contain the years, and the remaining columns contain
 temperature data from each site.}
 }
 \value{
-A \code{data.frame} with 8 columns:
+A \code{data.frame} with 9 columns:
 \describe{
 \item{Local}{Site identifier.}
 \item{SampleSize}{Number of observations for each site.}
@@ -21,23 +21,19 @@ A \code{data.frame} with 8 columns:
 \item{t_3}{L-moment ratio (L-skewness).}
 \item{t_4}{L-moment ratio (L-kurtosis).}
 \item{t_5}{L-moment ratio (higher-order L-moment).}
-\item{discord}{Discordance statistic indicating potential outlier status.}
+\item{discord}{Original discordance statistic indicating potential outlier status.}
+\item{Rdiscord}{Robust discordance statistic indicating potential outlier status.}
 }
 }
 \description{
-This function calculates the Hosking and Wallis' discordance measure using an additive approach,
-as proposed in Martins et al. (2022) \url{doi:10.1590/1678-4499.20220061}.
-The discordance measure identifies sites that are potentially discordant within a regional
-frequency analysis framework for extreme air temperature series.
+This function calculates the Hosking and Wallis' discordance measure (discord) and
+the robust discordance measure (Neykov et al. 2007) <10.1029/2006WR005322> using
+the additive approach proposed in Martins et al. (2022) \url{doi:10.1590/1678-4499.20220061}.
 }
 \details{
-The discordance measure is computed using the squared Mahalanobis distance
-between the site's L-moment ratios and the regional average, based on the additive
-approach to regional frequency analysis.
+The discordance measures identify sites that are potentially discordant
+within a regional frequency analysis framework for extreme air temperature series.
 }
 \examples{
-
-dataset <- dataset
-d <- Add_Discord(dataset)
-
+# d <- Add_Discord(dataset)
 }

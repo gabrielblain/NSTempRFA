@@ -11,8 +11,6 @@
 #'  * 5th is the sigma1 parameter,
 #' @param site_mean
 #' A single number with site's average value for the air temperature data.
-#' @param site_sd
-#' A single number with site's standard deviation for the air temperature data.
 #' @param max_time
 #' A single number describing the number of years that the time-varying parameters
 #' should be calculated.
@@ -25,22 +23,20 @@
 #' RegQuant <- Add_RegQuant(prob=prob,
 #'                   reg_par=reg_par,
 #'                   site_mean=35.9,
-#'                   site_sd=1.38,
 #'                   max_time=30)
 
 Add_RegQuant <- function(prob,
                          reg_par,
                          site_mean,
-                         site_sd,
                          max_time){
   loc <- reg_par$weighted_mu0 + reg_par$weighted_mu1 * max_time + reg_par$weighted_mu2 * max_time^2
   scale <- (reg_par$weighted_sigma0 + reg_par$weighted_sigma1 * max_time)
   shape <-  reg_par$weighted_shape
 
-  scaled.Qt <- as.matrix(extRemes::qevd(prob, loc = loc,
+  add.Qt <- as.matrix(extRemes::qevd(prob, loc = loc,
                                         scale = scale,
                                         shape = shape,
                                         type = c("GEV")))
-  Qt <- (scaled.Qt * site_sd) + site_mean
+  Qt <- add.Qt + site_mean
   return(Qt)
 }

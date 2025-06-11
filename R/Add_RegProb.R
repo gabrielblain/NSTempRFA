@@ -12,8 +12,6 @@
 #'  * 6th is the shape parameter
 #' @param site_mean
 #' A single number with site's average value for the air temperature data.
-#' @param site_sd
-#' A single number with site's standard deviation for the air temperature data.
 #' @param max_time
 #' A single number describing the number of the year that the time-varying parameters
 #' should be calculated. For example, if the users need to calculated the parameters
@@ -21,25 +19,23 @@
 #' @export
 #' @importFrom extRemes pevd
 #' @examples
-#' quantiles <- c(35,35.5,36,36.5,37,37.5,38,38.5,39,39.5,40)
+#' quantiles <- c(39.5,39.8,40.1,40.3,40.4,40.5,40.6,41.0,41.7)
 #' reg_par <- regional_pars
 #' RegProb <- Add_RegProb(quantiles=quantiles,
 #'                   reg_par=reg_par,
 #'                   site_mean=35.9,
-#'                   site_sd=1.38,
 #'                   max_time=30)
 
 Add_RegProb <- function(quantiles,
                       reg_par,
                       site_mean,
-                      site_sd,
                       max_time){
-  scaled.quantiles <- (quantiles-site_mean)/site_sd
+  add.quantiles <- quantiles-site_mean
   loc <- as.numeric(reg_par[1] + reg_par[2] * max_time + reg_par[3] * max_time^2)
   scale <- as.numeric(reg_par[4] + reg_par[5] * max_time)
   shape <-  as.numeric(reg_par[6])
 
-  RegProb <- as.matrix(extRemes::pevd(scaled.quantiles, loc = loc,
+  RegProb <- as.matrix(extRemes::pevd(add.quantiles, loc = loc,
                                    scale = scale,
                                    shape = shape,
                                    type = c("GEV")))

@@ -14,17 +14,26 @@
 #' as proposed in Martins et al. (2022) <doi:10.1590/1678-4499.20220061>.
 #' @export
 #' @importFrom lmomRFA regsamlmu
-#' @importFrom lmom pelkap pelglo quakap quaglo
+#' @importFrom lmom pelkap pelwak quakap quawak
 #' @importFrom MASS mvrnorm
 #' @importFrom stats pnorm sd
 #' @examples
 #' rho <- 0.5
 #' Ns <- 100
-#' scaled_data <- scaled_data
-#' Add_Heterogenety(dataset.add=scaled_data,rho = rho,Ns = Ns)
-
+#' dataset.add <- add_data
+#' Add_Heterogenety(dataset.add=dataset.add,rho = rho,Ns = Ns)
 Add_Heterogenety <- function(dataset.add,rho,Ns){
   n.sites <- ncol(dataset.add)
+  if (n.sites < 7) {
+    stop("The number of sites should be larger than 6.")
+  }
+
+  min_sample_size <- min(colSums(!is.na(dataset.add)))
+
+  if (min_sample_size < 10) {
+    stop("All sites must have at least 10 years of records. So sorry, we cannot proceed.")
+  }
+
   if (Ns<100){stop("Ns should be larger than 99.")}
   if (!is.numeric(rho) || length(rho) != 1 ||
       rho >= 1 || rho <= -1) {
@@ -46,7 +55,7 @@ Add_Heterogenety <- function(dataset.add,rho,Ns){
   rmom <- c(0,reg.l2,reg.t3,reg.t4,reg.t5)
   reg.par <- try(pelkap(rmom),TRUE)
   is.kap=length(reg.par)
-  if (is.kap==1){reg.par=try(pelglo(rmom),TRUE)}
+  if (is.kap==1){reg.par=try(pelwak(rmom),TRUE)}
   for (v in 1:n.sites){
     vetor.numerador[v] <- x1.atoutset[v,2]*(x1.atoutset[v,4]-reg.l2)^2}
   V <- sqrt(sum(vetor.numerador)/weight)
@@ -58,10 +67,10 @@ Add_Heterogenety <- function(dataset.add,rho,Ns){
     u.sim <- pnorm(mvrnorm(n  =  max.n.years, mu = rep(0,n.sites), Sigma = sigma, tol  =  1e-06, empirical  =  FALSE))
     for (site in 1:n.sites){
       if (is.kap==1){
-        data.sim[1:x1.atoutset[site,2],site] <- as.numeric(scale(quaglo(u.sim[1:x1.atoutset[site,2],site],
-                                                                        c(reg.par[1],reg.par[2],reg.par[3]))))} else {
-                                                                          data.sim[1:x1.atoutset[site,2],site] <- as.numeric(scale(quakap(u.sim[1:x1.atoutset[site,2],site],
-                                                                                                                                          c(reg.par[1],reg.par[2],reg.par[3],reg.par[4]))))}
+        data.sim[1:x1.atoutset[site,2],site] <- quawak(u.sim[1:x1.atoutset[site,2],site],
+                                                c(reg.par[1],reg.par[2],reg.par[3],reg.par[4],reg.par[5]))} else {
+                                                data.sim[1:x1.atoutset[site,2],site] <- quakap(u.sim[1:x1.atoutset[site,2],site],
+                                                                                        c(reg.par[1],reg.par[2],reg.par[3],reg.par[4]))}
     }
     x1.sim <- regsamlmu(data.sim, lcv  =  FALSE)
     vet.l2.sim<- as.matrix(x1.atoutset[,2]*x1.sim[,4])

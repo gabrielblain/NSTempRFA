@@ -44,6 +44,7 @@ Site_parCI <- function(data_site,site_par,max_time,n.boots){
   site_par <- as.numeric(site_par)
   par.temporal <- matrix(NA,max_time,3)
   time <- 1L:max_time
+  time <- time - mean(time)
   IDD.series <- data_site
   par.temporal[,1] <- site_par[1] + site_par[2] * time + site_par[3] * time^2
   par.temporal[,2] <- site_par[4] + site_par[5] * time

@@ -9,24 +9,35 @@
   #' \describe{
   #'   \item{scaled_data}{A matrix of standardized (z-score) temperature values for each site.}
 #'   \item{reg_mean}{Mean temperature values for each site.}
-#'   \item{reg_sd}{Standard deviation of temperature values for each site.}
 #'  }
 #' @export
-#' @importFrom stats sd
 #' @examples
 #'
 #' dataset <- dataset
-#' dataset_add <- dataset_add(dataset)
+#' dataset.add <- dataset_add(dataset)
 #'
 dataset_add <- function(dataset) {
-  n <- ncol(dataset)
-  scaled_data <- dataset[,-c(1)]
-  reg_mean <- apply(dataset[2:n], 2, mean, na.rm = TRUE)
-  reg_sd <- apply(dataset[2:n], 2, sd, na.rm = TRUE)
-  for (site in 2:n){
-    scaled_data[,(site-1)] <- as.numeric(scale(dataset[,site]))
+
+  if (anyNA(dataset[, 1])) {
+    stop("Column 'Years' cannot have missing data.")
   }
-  return(list(scaled_data = scaled_data,
-              reg_mean = reg_mean,
-              reg_sd = reg_sd))
+  n <- ncol(dataset)
+  dataset.year <- dataset[, 2:n]
+  n <- ncol(dataset.year)
+  if (n < 7) {
+    stop("The number of sites should be larger than 6.")
+  }
+
+  min_sample_size <- min(colSums(!is.na(dataset.year)))
+
+  if (min_sample_size < 10) {
+    stop("All sites must have at least 10 years of records. So sorry, we cannot proceed.")
+  }
+
+  reg_mean <- apply(dataset.year, 2, mean, na.rm = TRUE)
+  for (site in 1:n){
+    add_data[,(site)] <- dataset.year[,site] - reg_mean[(site)]
+  }
+  return(list(add_data = add_data,
+              reg_mean = reg_mean))
 }

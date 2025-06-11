@@ -4,7 +4,7 @@
 \alias{Add_RegProb}
 \title{Add_RegProb}
 \usage{
-Add_RegProb(quantiles, reg_par, site_mean, site_sd, max_time)
+Add_RegProb(quantiles, reg_par, site_mean, max_time)
 }
 \arguments{
 \item{quantiles}{A numeric vector with no missing data with extreme air temperatures}
@@ -21,8 +21,6 @@ Add_RegProb(quantiles, reg_par, site_mean, site_sd, max_time)
 
 \item{site_mean}{A single number with site's average value for the air temperature data.}
 
-\item{site_sd}{A single number with site's standard deviation for the air temperature data.}
-
 \item{max_time}{A single number describing the number of the year that the time-varying parameters
 should be calculated. For example, if the users need to calculated the parameters
 for the first year max_time is set to 1 and the 30th year max_time is set to 30.}
@@ -31,11 +29,10 @@ for the first year max_time is set to 1 and the 30th year max_time is set to 30.
 Add_RegProb
 }
 \examples{
-quantiles <- c(35,35.5,36,36.5,37,37.5,38,38.5,39,39.5,40)
+quantiles <- c(39.5,39.8,40.1,40.3,40.4,40.5,40.6,41.0,41.7)
 reg_par <- regional_pars
 RegProb <- Add_RegProb(quantiles=quantiles,
                   reg_par=reg_par,
                   site_mean=35.9,
-                  site_sd=1.38,
                   max_time=30)
 }

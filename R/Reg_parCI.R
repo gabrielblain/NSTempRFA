@@ -27,7 +27,7 @@
 #' @export
 #' @importFrom stats quantile
 #' @examplesIf interactive()
-#' temperatures <- scaled_data
+#' temperatures <- add_data
 #' reg_par <- regional_pars
 #' max_time <- 30
 #' n.boots <- 100
@@ -40,6 +40,7 @@ Reg_parCI <- function(temperatures,reg_par,max_time,n.boots){
   reg_par <- as.numeric(reg_par)
   par.temporal <- matrix(NA,max_time,3)
   time <- 1L:max_time
+  time <- time - mean(time)
   IDD.series <- temperatures
   n.stations <- ncol(temperatures)
   for (site in 1:n.stations){

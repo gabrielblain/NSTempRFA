@@ -38,7 +38,7 @@ Reg_parCI
 }
 \examples{
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
-temperatures <- scaled_data
+temperatures <- add_data
 reg_par <- regional_pars
 max_time <- 30
 n.boots <- 100

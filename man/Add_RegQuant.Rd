@@ -4,7 +4,7 @@
 \alias{Add_RegQuant}
 \title{Add_RegQuant}
 \usage{
-Add_RegQuant(prob, reg_par, site_mean, site_sd, max_time)
+Add_RegQuant(prob, reg_par, site_mean, max_time)
 }
 \arguments{
 \item{prob}{A numeric vector with no missing data with the probabilities (between 0 and 1).}
@@ -20,8 +20,6 @@ Add_RegQuant(prob, reg_par, site_mean, site_sd, max_time)
 
 \item{site_mean}{A single number with site's average value for the air temperature data.}
 
-\item{site_sd}{A single number with site's standard deviation for the air temperature data.}
-
 \item{max_time}{A single number describing the number of years that the time-varying parameters
 should be calculated.}
 }
@@ -35,6 +33,5 @@ reg_par <- reg_par(best_model=best_model)
 RegQuant <- Add_RegQuant(prob=prob,
                   reg_par=reg_par,
                   site_mean=35.9,
-                  site_sd=1.38,
                   max_time=30)
 }

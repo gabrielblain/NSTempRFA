@@ -13,8 +13,9 @@
 #' @importFrom extRemes fevd
 #' @importFrom spsUtil quiet
 #' @importFrom stats na.omit
-#' @examples
-#' best.parms <- best_model(temperatures=scaled_data)
+#' @examplesIf interactive()
+#' add_data <- add_data
+#' best.parms <- best_model(temperatures=add_data)
 best_model <- function(temperatures){
   temperatures <- as.matrix(temperatures)
   n.sites <- ncol(temperatures)
@@ -31,6 +32,7 @@ best_model <- function(temperatures){
     local <- na.omit(temperatures[,i])
     size[i,1] <- length(local)
     time <- 1L:size[i,1]
+    time <- time - mean(time)
     selecting <- fit.models(local,time)
     at.site.AICs[i,] <- selecting$at.site.AIC
     at.site.model1[i,] <- selecting$models1

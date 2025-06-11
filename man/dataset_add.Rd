@@ -16,7 +16,6 @@ A \code{list} object with the following elements:
 \describe{
 \item{scaled_data}{A matrix of standardized (z-score) temperature values for each site.}
 \item{reg_mean}{Mean temperature values for each site.}
-\item{reg_sd}{Standard deviation of temperature values for each site.}
 }
 }
 \description{
@@ -25,6 +24,6 @@ dataset_add
 \examples{
 
 dataset <- dataset
-dataset_add <- dataset_add(dataset)
+dataset.add <- dataset_add(dataset)
 
 }
