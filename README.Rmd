@@ -38,12 +38,75 @@ Although the study by Martins et al. (2022) showed promising results, it did not
 
 This package proposes a new methodology for applying the RFA to extreme Tmax and Tmin data under nonstationary climate conditions.
 
-## Examples
+## Basic Instructions: Functions
 
-
-```{r example}
+```{r, echo=FALSE, include=FALSE}
+# Load the library for examples below (not included in output)
 library(NSTempRFA)
-## basic example code
+```
+
+## Function `Add_Discord()`
+
+### Description
+This function calculates the Hosking and Wallis’ discordance measure (discord) and the robust
+discordance measure (Neykov et al. 2007) <10.1029/2006WR005322> using the additive approach
+proposed in Martins et al. (2022) doi:10.1590/1678-4499.20220061.
+
+### Usage
+Add_Discord(dataset)
+
+### Arguments
+**dataset:** A numeric matrix with extreme air temperature data from multiple sites. The
+first column must contain the years, and the remaining columns contain temperature
+data from each site.
+
+### Details
+The discordance measures identify sites that are potentially discordant within a regional frequency analysis framework for extreme air temperature series.
+
+### Value
+A data.frame with 9 columns:\
+- Local Site identifier.\
+- SampleSize Number of observations for each site.\
+- l_1 L-moment ratio (mean).\
+- l_2 L-moment ratio (L-scale).\
+- t_3 L-moment ratio (L-skewness).\
+- t_4 L-moment ratio (L-kurtosis).\
+- t_5 L-moment ratio (higher-order L-moment).\
+- discord Original discordance statistic indicating potential outlier status.\
+- Rdiscord Robust discordance statistic indicating potential outlier status.
+
+### Example
+
+```{r example 1}
+d <- Add_Discord(dataset)
+d
+```
+
+## Function `dataset_add()`
+
+### Description
+
+Subtract the sample mean of each column from their corresponding data.
+
+### Usage
+dataset_add(dataset)
+
+### Arguments
+**dataset:** A numeric matrix with extreme air temperature data from multiple sites. The
+first column must contain the years, and the remaining columns contain temperature
+data from each site.
+
+### Value
+A list object with the following elements:\
+- Subtracted_data: A matrix of temperature values subtracted by their sample mean.\
+- reg_mean: Sample mean for each site.
+
+### Example
+
+```{r example 2}
+dataset <- dataset
+dataset.add <- dataset_add(dataset)
+dataset.add
 ```
 
 # Methodological Details
