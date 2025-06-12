@@ -32,7 +32,7 @@ best_model <- function(temperatures){
     local <- na.omit(temperatures[,i])
     size[i,1] <- length(local)
     time <- 1L:size[i,1]
-    time <- time - mean(time)
+    #time <- time - mean(time)
     selecting <- fit.models(local,time)
     at.site.AICs[i,] <- selecting$at.site.AIC
     at.site.model1[i,] <- selecting$models1
