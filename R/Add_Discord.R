@@ -47,12 +47,10 @@ Add_Discord <- function(dataset) {
     stop("All sites must have at least 10 years of records. So sorry, we cannot proceed.")
   }
 
-  n.sites <- n - 1
-  d <- as.data.frame(matrix(NA, n.sites, 9))
+  d <- as.data.frame(matrix(NA, n, 9))
   d[, 1:7] <- regsamlmu(dataset.year, lcv = FALSE)
   d[, 8] <- sqrt(getDistance(Cov(d[, 4:6])))
   d[, 9] <- sqrt(getDistance(CovMcd(d[, 4:6])))
   colnames(d) <- c("Local", "SampleSize", "l_1", "l_2", "t_3", "t_4", "t_5", "discord", "Rdiscord")
-
   return(d)
 }
