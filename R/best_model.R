@@ -31,8 +31,10 @@ best_model <- function(temperatures){
   for (i in 1:n.sites){
     local <- na.omit(temperatures[,i])
     size[i,1] <- length(local)
-    time <- 1L:size[i,1]
-    #time <- time - mean(time)
+    scaled <- scale(1L:size[i,1])
+    time <- scaled[,1]
+    Avg <- attr(scaled,"scaled:center")
+    S <- attr(scaled,"scaled:scale")
     selecting <- fit.models(local,time)
     at.site.AICs[i,] <- selecting$at.site.AIC
     at.site.model1[i,] <- selecting$models1
