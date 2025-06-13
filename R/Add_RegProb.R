@@ -10,12 +10,12 @@
 #'  * 4th is the sigma0 parameter,
 #'  * 5th is the sigma1 parameter,
 #'  * 6th is the shape parameter
-#' @param site_mean
-#' A single number with site's average value for the air temperature data.
-#' @param max_time
+#' @param site_temp
+#' A vector or 1-column matrix with site's air temperature (original) data.
+#' @param n.year
 #' A single number describing the number of the year that the time-varying parameters
 #' should be calculated. For example, if the users need to calculated the parameters
-#' for the first year max_time is set to 1 and the 30th year max_time is set to 30.
+#' for the first year n.year is set to 1.
 #' @export
 #' @importFrom extRemes pevd
 #' @examples
@@ -23,16 +23,21 @@
 #' reg_par <- regional_pars
 #' RegProb <- Add_RegProb(quantiles=quantiles,
 #'                   reg_par=reg_par,
-#'                   site_mean=35.9,
-#'                   max_time=30)
+#'                   site_temp=dataset$station1,
+#'                   n.year=30)
 
 Add_RegProb <- function(quantiles,
                       reg_par,
-                      site_mean,
-                      max_time){
+                      site_temp,
+                      n.year){
+  max_time <- length(site_temp)
+  site_mean <- mean(site_temp,na.rm = TRUE)
+  scaled <- scale(1L:max_time)
+  time <- scaled[,1]
+  selected.time <- time[n.year]
   add.quantiles <- quantiles-site_mean
-  loc <- as.numeric(reg_par[1] + reg_par[2] * max_time + reg_par[3] * max_time^2)
-  scale <- as.numeric(reg_par[4] + reg_par[5] * max_time)
+  loc <- as.numeric(reg_par[1] + reg_par[2] * selected.time + reg_par[3] * selected.time^2)
+  scale <- as.numeric(reg_par[4] + reg_par[5] * selected.time)
   shape <-  as.numeric(reg_par[6])
 
   RegProb <- as.matrix(extRemes::pevd(add.quantiles, loc = loc,

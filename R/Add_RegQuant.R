@@ -9,11 +9,12 @@
 #'  * 3rd is the mu2 parameter,
 #'  * 4th is the sigma0 parameter,
 #'  * 5th is the sigma1 parameter,
-#' @param site_mean
-#' A single number with site's average value for the air temperature data.
-#' @param max_time
-#' A single number describing the number of years that the time-varying parameters
-#' should be calculated.
+#' @param site_temp
+#' A vector or 1-column matrix with site's air temperature (original) data.
+#' @param n.year
+#' A single number describing the number of the year that the time-varying parameters
+#' should be calculated. For example, if the users need to calculated the parameters
+#' for the first year n.year is set to 1.
 #' @export
 #' @importFrom extRemes qevd
 #' @examples
@@ -22,15 +23,20 @@
 #' reg_par <- reg_par(best_model=best_model)
 #' RegQuant <- Add_RegQuant(prob=prob,
 #'                   reg_par=reg_par,
-#'                   site_mean=35.9,
-#'                   max_time=30)
+#'                   site_temp=dataset$station1,
+#'                   n.year=30)
 
 Add_RegQuant <- function(prob,
                          reg_par,
-                         site_mean,
-                         max_time){
-  loc <- reg_par$weighted_mu0 + reg_par$weighted_mu1 * max_time + reg_par$weighted_mu2 * max_time^2
-  scale <- (reg_par$weighted_sigma0 + reg_par$weighted_sigma1 * max_time)
+                         site_temp,
+                         n.year){
+  max_time <- length(site_temp)
+  site_mean <- mean(site_temp,na.rm = TRUE)
+  scaled <- scale(1L:max_time)
+  time <- scaled[,1]
+  selected.time <- time[n.year]
+  loc <- reg_par$weighted_mu0 + reg_par$weighted_mu1 * selected.time + reg_par$weighted_mu2 * selected.time^2
+  scale <- (reg_par$weighted_sigma0 + reg_par$weighted_sigma1 * selected.time)
   shape <-  reg_par$weighted_shape
 
   add.Qt <- as.matrix(extRemes::qevd(prob, loc = loc,

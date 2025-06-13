@@ -12,10 +12,6 @@
 #'  * 4th is the sigma0 parameter,
 #'  * 5th is the sigma1 parameter,
 #'  * 6th is the shape parameter
-#' @param max_time
-#' A single number describing the number of the year that the time-varying parameters
-#' should be calculated. For example, if the users need to calculated the parameters
-#' for the first year max_time is set to 1 and the 30th year max_time is set to 30.
 #' @param n.boots
 #' A single number describing the number of copies of the original dataset.
 #' Whenever possible n.boots should be set to 999 (its default value),
@@ -29,18 +25,18 @@
 #' @examplesIf interactive()
 #' temperatures <- add_data
 #' reg_par <- regional_pars
-#' max_time <- 30
 #' n.boots <- 100
-#' Reg_parCI(temperatures, reg_par, max_time, n.boots)
-Reg_parCI <- function(temperatures,reg_par,max_time,n.boots){
+#' Reg_parCI(temperatures, reg_par, n.boots)
+Reg_parCI <- function(temperatures,reg_par,n.boots){
   if (is.null(n.boots)) {
     n.boots <- 999
   }
   if (n.boots < 100) {stop("n.boots must be larger than 100 and, if possible, equal to 999.")}
   reg_par <- as.numeric(reg_par)
+  max_time <- nrow(temperatures)
   par.temporal <- matrix(NA,max_time,3)
-  time <- 1L:max_time
-  time <- time - mean(time)
+  scaled <- scale(1L:max_time)
+  time <- scaled[,1]
   IDD.series <- temperatures
   n.stations <- ncol(temperatures)
   for (site in 1:n.stations){
