@@ -154,9 +154,8 @@ A list object with the following elements:\
 
 ### Example
 ```{r example 4}
-temperatures <- add_data
-best.parms <- best_model(temperatures=temperatures)
-best.parms
+add_data <- add_data
+best.parms <- best_model(temperatures=add_data)
 ```
 
 ### Function `reg_par()`
@@ -214,12 +213,11 @@ A matrix containing the 95% confidence intervals (lower and upper bounds) of the
 
 
 ### Example
-```{r example 6, eval = FALSE}
+```{r example 6, eval=FALSE}
 temperatures <- add_data
 reg_par <- regional_pars
-max_time <- 30
 n.boots <- 999
-Reg_parCI(temperatures, reg_par, max_time, n.boots)
+Reg_parCI(temperatures, reg_par, n.boots)
 ```
 
 ### Function `Site_parCI`
@@ -252,11 +250,10 @@ A matrix containing the 95% confidence intervals of the time-varying parameter e
 
 ### Example
 ```{r example 7}
-data_site <- add_data[,2]
-site_par <- best_sites[1,1:6]
-max_time <- 30
-n.boots <- 100
-Site_parCI(data_site, site_par, max_time, n.boots)
+ atsite_temp <- add_data[,1]
+ site_par <- best_sites[1,1:6]
+ n.boots <- 500
+ Site_parCI(atsite_temp, site_par, n.boots)
 ```
 
 ### Function `Add_RegProb`
@@ -288,12 +285,12 @@ the Additional nonstationary RFA approach.
 
 ### Example
 ```{r example 8}
-quantiles <- c(39.5,39.8,40.1,40.3,40.4,40.5,40.6,41.0,41.7)
-reg_par <- regional_pars
-RegProb <- Add_RegProb(quantiles=quantiles,
-reg_par=reg_par,
-site_mean=35.9,
-max_time=30)
+ quantiles <- c(39.5,39.8,40.1,40.3,40.4,40.5,40.6,41.0,41.7)
+ reg_par <- regional_pars
+ RegProb <- Add_RegProb(quantiles=quantiles,
+                   reg_par=reg_par,
+                   site_temp=dataset$station1,
+                   n.year=30)
 ```
 
 ### Function `Add_RegQuant`
@@ -325,13 +322,13 @@ the Additional nonstationary RFA approach.
 
 ### Example
 ```{r example 9}
-prob <- c(0.8,0.85,0.90,0.92,0.93,0.94,0.95,0.97,0.99)
-best_model <- best_sites
-reg_par <- reg_par(best_model=best_model)
-RegQuant <- Add_RegQuant(prob=prob,
-reg_par=reg_par,
-site_mean=35.9,
-max_time=30)
+ prob <- c(0.8,0.85,0.90,0.92,0.93,0.94,0.95,0.97,0.99)
+ best_model <- best_sites
+ reg_par <- reg_par(best_model=best_model)
+ RegQuant <- Add_RegQuant(prob=prob,
+                   reg_par=reg_par,
+                   site_temp=dataset$station1,
+                   n.year=30)
 ```
 
 ## Data files included in the package
