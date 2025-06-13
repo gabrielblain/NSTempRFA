@@ -40,9 +40,9 @@ Add_RegQuant <- function(prob,
   shape <-  reg_par$weighted_shape
 
   add.Qt <- as.matrix(extRemes::qevd(prob, loc = loc,
-                                        scale = scale,
-                                        shape = shape,
-                                        type = c("GEV")))
+                                     scale = scale,
+                                     shape = shape,
+                                     type = c("GEV")))
   Qt <- add.Qt + site_mean
   return(Qt)
 }
