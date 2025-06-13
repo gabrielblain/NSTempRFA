@@ -27,7 +27,7 @@ A \code{data.frame} with 9 columns:
 }
 \description{
 This function calculates the Hosking and Wallis' discordance measure (discord) and
-the robust discordance measure (Neykov et al. 2007) <10.1029/2006WR005322> using
+the robust discordance measure (Neykov et al. 2007) \url{doi:10.1029/2006WR005322} using
 the additive approach proposed in Martins et al. (2022) \url{doi:10.1590/1678-4499.20220061}.
 }
 \details{
