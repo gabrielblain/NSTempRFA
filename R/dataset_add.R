@@ -23,6 +23,7 @@ dataset_add <- function(dataset) {
   }
   n <- ncol(dataset)
   dataset.year <- dataset[, 2:n]
+  add_data <- dataset.year
   n <- ncol(dataset.year)
   if (n < 7) {
     stop("The number of sites should be larger than 6.")
@@ -36,7 +37,7 @@ dataset_add <- function(dataset) {
 
   reg_mean <- apply(dataset.year, 2, mean, na.rm = TRUE)
   for (site in 1:n){
-    add_data[,(site)] <- dataset.year[,site] - reg_mean[(site)]
+    add_data[,site] <- dataset.year[,site] - as.numeric(reg_mean[site])
   }
   return(list(add_data = add_data,
               reg_mean = reg_mean))
