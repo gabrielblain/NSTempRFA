@@ -4,11 +4,11 @@
 \alias{best_model}
 \title{Time-varying parameters of the best fitted GEV model.}
 \usage{
-best_model(temperatures)
+best_model(add_data)
 }
 \arguments{
-\item{temperatures}{A numeric matrix of scaled (z-score) or divided air temperature data for each site,
-as calculated by the Add_Discord() or Mult_Discord() functions.}
+\item{add_data}{A numeric matrix of air temperature data subtracted by their sample means
+for each site, as calculated by the dataset_add().}
 }
 \value{
 A \code{list} object with the following elements:
@@ -23,6 +23,6 @@ Time-varying parameters of the best fitted GEV model.
 \examples{
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 add_data <- add_data
-best.parms <- best_model(temperatures=add_data)
+best.parms <- best_model(add_data=add_data)
 \dontshow{\}) # examplesIf}
 }

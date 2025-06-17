@@ -1,8 +1,8 @@
 #' Time-varying parameters of a given GEV model.
 #'
-#' @param temperatures
-#' A numeric matrix of scaled (z-score) or divided air temperature data for each site,
-#' as calculated by the Add_Discord().
+#' @param add_data
+#' A numeric matrix of air temperature data subtracted by their sample means
+#' for each site, as calculated by the dataset_add().
 #' @param model
 #' A single interger number from 1 to 6 defining the GEV model.
 #' May be provided by `best_model()`
@@ -13,18 +13,18 @@
 #' @importFrom spsUtil quiet
 #' @importFrom stats na.omit
 #' @examples
-#' temperatures <- add_data
+#' add_data <- add_data
 #' model <- 2
-#' fit_model(temperatures=temperatures,model=model)
-fit_model <- function(temperatures, model){
+#' fit_model(add_data=add_data,model=model)
+fit_model <- function(add_data, model){
   if(!is.numeric(model) || length(model) != 1 || model < 1 || model > 6) {
     stop("Model must be a single interger number from 1 to 6 defining the GEV model.")}
-  temperatures <- as.matrix(temperatures)
-  n.sites <- ncol(temperatures)
+  add_data <- as.matrix(add_data)
+  n.sites <- ncol(add_data)
   size <- matrix(NA,n.sites,1)
   at.site.pars <- as.data.frame(matrix(NA,n.sites,7))
   for (i in 1:n.sites){
-    local <- na.omit(temperatures[,i])
+    local <- na.omit(add_data[,i])
     size[i,1] <- length(local)
     scaled <- scale(1L:size[i,1])
     time <- scaled[,1]

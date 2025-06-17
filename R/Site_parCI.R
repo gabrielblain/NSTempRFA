@@ -65,7 +65,7 @@ Site_parCI <- function(atsite_temp,model,site_par,n.boots){
   for (r in seq_len(n.boots)) {
     rows <- ((r - 1) * max_time + 1):(r * max_time)
     back.orig <- par.temporal[,1] + (par.temporal[,2] / par.temporal[,3]) * (1 - IDD.series.boot[rows]^par.temporal[,3])
-    parameters <- fit_model(temperatures=back.orig,model=model)
+    parameters <- fit_model(add_data=back.orig,model=model)
     site_par.overall.boot[r,] <- as.matrix(parameters[1:6])
     setTxtProgressBar(pb, r)
   }

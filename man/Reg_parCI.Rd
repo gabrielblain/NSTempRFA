@@ -4,11 +4,11 @@
 \alias{Reg_parCI}
 \title{Reg_parCI}
 \usage{
-Reg_parCI(temperatures, model, reg_par, n.boots)
+Reg_parCI(add_data, model, reg_par, n.boots)
 }
 \arguments{
-\item{temperatures}{A numeric matrix of scaled (z-score) or divided air temperature data for each site,
-as calculated by the Add_Discord() or Mult_Discord() functions.}
+\item{add_data}{A numeric matrix of air temperature data subtracted by their sample means
+for each site, as calculated by the dataset_add().}
 
 \item{model}{A single interger number from 1 to 6 defining the GEV model.
 May be provided by \code{best_model()}}
@@ -36,9 +36,9 @@ of the time-varying parameter estimates. The spatial dependence between sites is
 Reg_parCI
 }
 \examples{
-temperatures <- add_data
+add_data <- add_data
 model <- 2
 reg_par <- regional_pars
 n.boots <- 100
-Reg_parCI(temperatures, model, reg_par, n.boots)
+Reg_parCI(add_data, model, reg_par, n.boots)
 }

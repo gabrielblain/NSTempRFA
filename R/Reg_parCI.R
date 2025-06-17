@@ -1,9 +1,9 @@
 #' Reg_parCI
 #'
 #' @name Reg_parCI
-#' @param temperatures
-#' A numeric matrix of scaled (z-score) or divided air temperature data for each site,
-#' as calculated by the Add_Discord() or Mult_Discord() functions.
+#' @param add_data
+#' A numeric matrix of air temperature data subtracted by their sample means
+#' for each site, as calculated by the dataset_add().
 #' @param model
 #' A single interger number from 1 to 6 defining the GEV model.
 #' May be provided by `best_model()`
@@ -26,28 +26,28 @@
 #' @export
 #' @importFrom stats quantile
 #' @examples
-#' temperatures <- add_data
+#' add_data <- add_data
 #' model <- 2
 #' reg_par <- regional_pars
 #' n.boots <- 100
-#' Reg_parCI(temperatures, model, reg_par, n.boots)
-Reg_parCI <- function(temperatures,model,reg_par,n.boots){
+#' Reg_parCI(add_data, model, reg_par, n.boots)
+Reg_parCI <- function(add_data,model,reg_par,n.boots){
   if (is.null(n.boots)) {
     n.boots <- 999
   }
   if (n.boots < 100) {stop("n.boots must be larger than 100 and, if possible, equal to 999.")}
   reg_par <- as.numeric(reg_par)
-  max_time <- nrow(temperatures)
+  max_time <- nrow(add_data)
   par.temporal <- matrix(NA,max_time,3)
   scaled <- scale(1L:max_time)
   time <- scaled[,1]
-  IDD.series <- temperatures
-  n.stations <- ncol(temperatures)
+  IDD.series <- add_data
+  n.stations <- ncol(add_data)
   for (site in 1:n.stations){
     par.temporal[,1] <- reg_par[1] + reg_par[2] * time + reg_par[3] * time^2
     par.temporal[,2] <- reg_par[4] + reg_par[5] * time
     par.temporal[,3] <-  rep(reg_par[6],max_time)
-    IDD.series[,site] <- (1- par.temporal[,3]*(temperatures[,site]-par.temporal[,1])/par.temporal[,2])^(1/par.temporal[,3])
+    IDD.series[,site] <- (1- par.temporal[,3]*(add_data[,site]-par.temporal[,1])/par.temporal[,2])^(1/par.temporal[,3])
   }
   ##################
   all.lines <- n.boots * max_time
@@ -70,7 +70,7 @@ Reg_parCI <- function(temperatures,model,reg_par,n.boots){
   for (r in seq_len(n.boots)) {
     rows <- ((r - 1) * max_time + 1):(r * max_time)
     back.orig <- par.temporal[,1] + (par.temporal[,2] / par.temporal[,3]) * (1 - IDD.series.boot[rows, ]^par.temporal[,3])
-    find.best.boot <- fit_model(temperatures=back.orig,model=model)
+    find.best.boot <- fit_model(add_data=back.orig,model=model)
     reg_par.overall.boot[r, ] <- as.matrix(reg_par(best_model=find.best.boot))
     setTxtProgressBar(pb, r)
   }

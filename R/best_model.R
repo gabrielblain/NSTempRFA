@@ -1,8 +1,8 @@
 #' Time-varying parameters of the best fitted GEV model.
 #'
-#' @param temperatures
-#' A numeric matrix of scaled (z-score) or divided air temperature data for each site,
-#' as calculated by the Add_Discord() or Mult_Discord() functions.
+#' @param add_data
+#' A numeric matrix of air temperature data subtracted by their sample means
+#' for each site, as calculated by the dataset_add().
 #' @returns
 #' A `list` object with the following elements:
 #' \describe{
@@ -15,10 +15,10 @@
 #' @importFrom stats na.omit
 #' @examplesIf interactive()
 #' add_data <- add_data
-#' best.parms <- best_model(temperatures=add_data)
-best_model <- function(temperatures){
-  temperatures <- as.matrix(temperatures)
-  n.sites <- ncol(temperatures)
+#' best.parms <- best_model(add_data=add_data)
+best_model <- function(add_data){
+  add_data <- as.matrix(add_data)
+  n.sites <- ncol(add_data)
   size <- matrix(NA,n.sites,1)
   at.site.model1 <- as.data.frame(matrix(NA,n.sites,6))
   at.site.model2 <- as.data.frame(matrix(NA,n.sites,6))
@@ -29,7 +29,7 @@ best_model <- function(temperatures){
   at.site.AICs <- as.data.frame(matrix(NA,n.sites,6))
   atsite.models <- as.data.frame(matrix(NA,n.sites,7))
   for (i in 1:n.sites){
-    local <- na.omit(temperatures[,i])
+    local <- na.omit(add_data[,i])
     size[i,1] <- length(local)
     scaled <- scale(1L:size[i,1])
     time <- scaled[,1]

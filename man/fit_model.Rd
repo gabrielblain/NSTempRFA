@@ -4,11 +4,11 @@
 \alias{fit_model}
 \title{Time-varying parameters of a given GEV model.}
 \usage{
-fit_model(temperatures, model)
+fit_model(add_data, model)
 }
 \arguments{
-\item{temperatures}{A numeric matrix of scaled (z-score) or divided air temperature data for each site,
-as calculated by the Add_Discord().}
+\item{add_data}{A numeric matrix of air temperature data subtracted by their sample means
+for each site, as calculated by the dataset_add().}
 
 \item{model}{A single interger number from 1 to 6 defining the GEV model.
 May be provided by \code{best_model()}}
@@ -20,7 +20,7 @@ A \code{data.frame} with the time-varying parameters of the given model.
 Time-varying parameters of a given GEV model.
 }
 \examples{
-temperatures <- add_data
+add_data <- add_data
 model <- 2
-fit_model(temperatures=temperatures,model=model)
+fit_model(add_data=add_data,model=model)
 }
