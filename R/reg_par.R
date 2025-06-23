@@ -17,7 +17,29 @@
 #' @examples
 #' best_model <- best_sites
 #' reg_par <- reg_par(best_model=best_model)
-reg_par <- function(best_model){
+reg_par <- function(best_model) {
+  # Check: Must be a data.frame
+  if (!is.data.frame(best_model)) {
+    stop("Input 'best_model' must be a data frame.")
+  }
+
+  # Check: Must have exactly 7 required columns
+  required_cols <- c("mu0", "mu1", "mu2", "sigma0", "sigma1", "shape", "size")
+  if (!all(required_cols %in% colnames(best_model))) {
+    stop("Input 'best_model' must contain the columns: mu0, mu1, mu2, sigma0, sigma1, shape, size.")
+  }
+
+  # Check: All columns must be numeric
+  if (!all(sapply(best_model[, required_cols], is.numeric))) {
+    stop("All columns in 'best_model' must be numeric.")
+  }
+
+  # Check: No NA or zero total size
+  if (any(is.na(best_model$size)) || sum(best_model$size) == 0) {
+    stop("Invalid or missing values in 'size' column.")
+  }
+
+  # Weighted means calculation
   weighted_means <- best_model %>%
     summarise(
       weighted_mu0 = sum(mu0 * size) / sum(size),
@@ -27,5 +49,6 @@ reg_par <- function(best_model){
       weighted_sigma1 = sum(sigma1 * size) / sum(size),
       weighted_shape = sum(shape * size) / sum(size)
     )
+
   return(weighted_means)
 }

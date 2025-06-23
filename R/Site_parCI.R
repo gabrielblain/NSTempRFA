@@ -40,8 +40,18 @@ Site_parCI <- function(atsite_temp,model,site_par,n.boots){
     n.boots <- 999
   }
   if (n.boots < 100) {stop("n.boots must be larger than 100 and, if possible, equal to 999.")}
-  site_par <- as.numeric(site_par)
   max_time <- length(data_site)
+  if (max_time < 10) {
+    stop("Site must have at least 10 years of records. So sorry, we cannot proceed.")
+  }
+  # Check that site_par is numeric
+  if (!is.data.frame(site_par) || !all(sapply(site_par, is.numeric))) {
+    stop("Input 'site_par' must be a numeric data frame with 6 columns.")
+  }
+  if (ncol(site_par) != 6 || nrow(site_par) != 1) {
+    stop("Input 'site_par' must have exactly 1 row and 6 columns.")
+  }
+  site_par <- as.numeric(site_par)
   par.temporal <- matrix(NA,max_time,3)
   scaled <- scale(1L:max_time)
   time <- scaled[,1]

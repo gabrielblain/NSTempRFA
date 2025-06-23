@@ -39,7 +39,6 @@ Add_Heterogenety <- function(dataset.add,rho,Ns){
       rho >= 1 || rho <= -1) {
     stop("`rho` must be a single smaller (larger) than -1 (1).")
   }
-  if (n.sites<3){stop("The number of sites should be larger than 2.")}
   vetor.numerador <- matrix(NA,n.sites,1)
   V.sim <- matrix(NA,Ns,1)
   x1.atoutset <- regsamlmu(dataset.add, lcv = FALSE)

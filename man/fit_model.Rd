@@ -10,8 +10,8 @@ fit_model(add_data, model)
 \item{add_data}{A numeric matrix of air temperature data subtracted by their sample means
 for each site, as calculated by the dataset_add().}
 
-\item{model}{A single interger number from 1 to 6 defining the GEV model.
-May be provided by \code{best_model()}}
+\item{model}{A single integer number from 1 to 6 defining the GEV model.
+May be provided by \code{best_model()}.}
 }
 \value{
 A \code{data.frame} with the time-varying parameters of the given model.
@@ -22,5 +22,5 @@ Time-varying parameters of a given GEV model.
 \examples{
 add_data <- add_data
 model <- 2
-fit_model(add_data=add_data,model=model)
+fit_model(add_data = add_data, model = model)
 }

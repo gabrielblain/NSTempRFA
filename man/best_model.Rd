@@ -21,8 +21,6 @@ A \code{list} object with the following elements:
 Time-varying parameters of the best fitted GEV model.
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 add_data <- add_data
 best.parms <- best_model(add_data=add_data)
-\dontshow{\}) # examplesIf}
 }
