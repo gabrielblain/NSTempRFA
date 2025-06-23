@@ -14,13 +14,14 @@ knitr::opts_chunk$set(
 # NSTempRFA
 
 <!-- badges: start -->
+<!-- Example badges you can add after uploading to GitHub: [![R-CMD-check](https://github.com/yourusername/NSTempRFA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/yourusername/NSTempRFA/actions) [![CRAN status](https://www.r-pkg.org/badges/version/NSTempRFA)](https://CRAN.R-project.org/package=NSTempRFA) [![License: GPL-3](https://img.shields.io/badge/license-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) --> 
 <!-- badges: end -->
 
 A package designed to apply the RFA technique to air temperature data under climate change conditions
 
 ## Installation
 
-You can install the development version of NSTempRFA like so:
+You can install the development version of NSTempRFA from GitHub with:
 
 ``` r
 # install.packages("devtools")
@@ -50,7 +51,7 @@ library(NSTempRFA)
 
 ### Description
 This function calculates the Hosking and Wallis’ discordance measure (discord) and the robust
-discordance measure (Neykov et al. 2007) <10.1029/2006WR005322> using the additive approach
+discordance measure (Neykov et al. 2007) doi:10.1029/2006WR005322 using the additive approach
 proposed in Martins et al. (2022) doi:10.1590/1678-4499.20220061.
 
 ### Usage
