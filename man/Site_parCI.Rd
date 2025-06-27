@@ -7,7 +7,7 @@
 Site_parCI(atsite_temp, model, site_par, n.boots)
 }
 \arguments{
-\item{atsite_temp}{A vector or single column matrix of air temperature data subtracted by its sample mean.}
+\item{atsite_temp}{A vector or single column matrix of air temperature data subtracted (or not) by its sample mean.}
 
 \item{model}{A single interger number from 1 to 6 defining the GEV model.
 May be provided by \code{best_model()}}

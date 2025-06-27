@@ -7,8 +7,7 @@
 Reg_parCI(add_data, model, reg_par, n.boots)
 }
 \arguments{
-\item{add_data}{A numeric matrix of air temperature data subtracted by their sample means
-for each site, as calculated by the dataset_add().}
+\item{add_data}{A numeric matrix of air temperature data as that calculated by the dataset_add().}
 
 \item{model}{A single interger number from 1 to 6 defining the GEV model.
 May be provided by best_model()}

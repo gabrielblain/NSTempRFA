@@ -7,8 +7,7 @@
 Add_Heterogenety(dataset.add, rho, Ns)
 }
 \arguments{
-\item{dataset.add}{A numeric matrix of standardized (z-score) temperature values for each site,
-as calculated by the Add_Discord() function.}
+\item{dataset.add}{A numeric matrix of air temperature data as that calculated by the dataset_add().}
 
 \item{rho}{A single numeric value (constant) describing the average correlation among the sites.
 It must be larger than -1.0 and lower than 1.0.}

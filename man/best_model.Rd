@@ -7,8 +7,7 @@
 best_model(add_data)
 }
 \arguments{
-\item{add_data}{A numeric matrix of air temperature data subtracted by their sample means
-for each site, as calculated by the dataset_add().}
+\item{add_data}{A numeric matrix of air temperature data as that calculated by the dataset_add().}
 }
 \value{
 A \code{list} object with the following elements:
