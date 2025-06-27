@@ -2,7 +2,7 @@
 #'
 #' @name Site_parCI
 #' @param atsite_temp
-#' A vector or single column matrix of air temperature data subtracted by its sample mean.
+#' A vector or single column matrix of air temperature data subtracted (or not) by its sample mean.
 #' @param model
 #' A single interger number from 1 to 6 defining the GEV model.
 #' May be provided by `best_model()`
@@ -75,7 +75,7 @@ Site_parCI <- function(atsite_temp,model,site_par,n.boots){
   for (r in seq_len(n.boots)) {
     rows <- ((r - 1) * max_time + 1):(r * max_time)
     back.orig <- par.temporal[,1] + (par.temporal[,2] / par.temporal[,3]) * (1 - IDD.series.boot[rows]^par.temporal[,3])
-    parameters <- fit_model(add_data=back.orig,model=model)
+    parameters <- fit_model(temperatures=back.orig,model=model)
     site_par.overall.boot[r,] <- as.matrix(parameters[1:6])
     setTxtProgressBar(pb, r)
   }

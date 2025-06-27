@@ -1,8 +1,7 @@
 #' Time-varying parameters of the best fitted GEV model.
 #'
 #' @param add_data
-#' A numeric matrix of air temperature data subtracted by their sample means
-#' for each site, as calculated by the dataset_add().
+#' A numeric matrix of air temperature data as that calculated by the dataset_add().
 #' @returns
 #' A `list` object with the following elements:
 #' \describe{

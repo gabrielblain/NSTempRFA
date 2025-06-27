@@ -1,8 +1,7 @@
 #' Time-varying parameters of a given GEV model.
 #'
-#' @param add_data
-#' A numeric matrix of air temperature data subtracted by their sample means
-#' for each site, as calculated by the dataset_add().
+#' @param temperatures
+#' A vector or single column matrix of air temperature data subtracted (or not) by its sample mean.
 #' @param model
 #' A single integer number from 1 to 6 defining the GEV model.
 #' May be provided by `best_model()`.
@@ -13,21 +12,21 @@
 #' @importFrom spsUtil quiet
 #' @importFrom stats na.omit
 #' @examples
-#' add_data <- add_data
+#' temperatures <- dataset[,2:16]
 #' model <- 2
-#' fit_model(add_data = add_data, model = model)
-fit_model <- function(add_data, model) {
+#' fit_model(temperatures = temperatures, model = model)
+fit_model <- function(temperatures, model) {
   if (!is.numeric(model) || length(model) != 1 || model < 1 || model > 6) {
     stop("Model must be a single interger number from 1 to 6 defining the GEV model.")
   }
 
-  add_data <- as.matrix(add_data)
-  n.sites <- ncol(add_data)
+  temperatures <- as.matrix(temperatures)
+  n.sites <- ncol(temperatures)
   size <- matrix(NA, n.sites, 1)
   at.site.pars <- as.data.frame(matrix(NA, n.sites, 7))
 
   for (i in 1:n.sites) {
-    local <- na.omit(add_data[, i])
+    local <- na.omit(temperatures[, i])
     size[i, 1] <- length(local)
 
     if (size[i, 1] == 0) {
@@ -43,6 +42,7 @@ fit_model <- function(add_data, model) {
     # Se o ajuste por máxima verossimilhança falhar, tenta via Lmoments
     if (!is.numeric(at.site.par1)) {
       at.site.par1 <- quiet(try(fitLmom(local, time), silent = TRUE))
+      message("GMLE did not converge. L-moments instead.")
     }
 
     # Se ainda assim falhar, preenche com NA

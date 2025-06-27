@@ -2,8 +2,7 @@
 #'
 #' @name Reg_parCI
 #' @param add_data
-#' A numeric matrix of air temperature data subtracted by their sample means
-#' for each site, as calculated by the dataset_add().
+#' A numeric matrix of air temperature data as that calculated by the dataset_add().
 #' @param model
 #' A single interger number from 1 to 6 defining the GEV model.
 #' May be provided by best_model()
@@ -85,7 +84,7 @@ Reg_parCI <- function(add_data,model,reg_par,n.boots){
   for (r in seq_len(n.boots)) {
     rows <- ((r - 1) * max_time + 1):(r * max_time)
     back.orig <- par.temporal[,1] + (par.temporal[,2] / par.temporal[,3]) * (1 - IDD.series.boot[rows, ]^par.temporal[,3])
-    find.best.boot <- fit_model(add_data=back.orig,model=model)
+    find.best.boot <- fit_model(temperatures=back.orig,model=model)
     reg_par.overall.boot[r, ] <- as.matrix(reg_par(best_model=find.best.boot))
     setTxtProgressBar(pb, r)
   }
