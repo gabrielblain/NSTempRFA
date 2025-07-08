@@ -9,7 +9,7 @@ fit_model(temperatures, model)
 \arguments{
 \item{temperatures}{A vector or single column matrix of air temperature data subtracted (or not) by its sample mean.}
 
-\item{model}{A single integer number from 1 to 6 defining the GEV model.
+\item{model}{A single integer number from 1 to 4 defining the GEV model.
 May be provided by \code{best_model()}.}
 }
 \value{

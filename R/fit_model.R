@@ -3,7 +3,7 @@
 #' @param temperatures
 #' A vector or single column matrix of air temperature data subtracted (or not) by its sample mean.
 #' @param model
-#' A single integer number from 1 to 6 defining the GEV model.
+#' A single integer number from 1 to 4 defining the GEV model.
 #' May be provided by `best_model()`.
 #' @returns
 #' A `data.frame` with the time-varying parameters of the given model.
@@ -16,21 +16,21 @@
 #' model <- 2
 #' fit_model(temperatures = temperatures, model = model)
 fit_model <- function(temperatures, model) {
-  if (!is.numeric(model) || length(model) != 1 || model < 1 || model > 6) {
-    stop("Model must be a single interger number from 1 to 6 defining the GEV model.")
+  if (!is.numeric(model) || length(model) != 1 || model < 1 || model > 4) {
+    stop("Model must be a single interger number from 1 to 4 defining the GEV model.")
   }
 
   temperatures <- as.matrix(temperatures)
   n.sites <- ncol(temperatures)
   size <- matrix(NA, n.sites, 1)
-  at.site.pars <- as.data.frame(matrix(NA, n.sites, 7))
+  at.site.pars <- as.data.frame(matrix(NA, n.sites, 6))
 
   for (i in 1:n.sites) {
     local <- na.omit(temperatures[, i])
     size[i, 1] <- length(local)
 
     if (size[i, 1] == 0) {
-      at.site.pars[i, 1:6] <- rep(NA, 6)
+      at.site.pars[i, 1:5] <- rep(NA, 5)
       next
     }
 
@@ -47,14 +47,14 @@ fit_model <- function(temperatures, model) {
 
     # Se ainda assim falhar, preenche com NA
     if (!is.numeric(at.site.par1)) {
-      at.site.par1 <- rep(NA, 6)
+      at.site.par1 <- rep(NA, 5)
     }
 
-    at.site.pars[i, 1:6] <- at.site.par1
+    at.site.pars[i, 1:5] <- at.site.par1
   }
 
-  at.site.pars[, 7] <- size
-  colnames(at.site.pars) <- c("mu0", "mu1", "mu2", "sigma0", "sigma1", "shape", "size")
+  at.site.pars[, 6] <- size
+  colnames(at.site.pars) <- c("mu0", "mu1", "sigma0", "sigma1", "shape", "size")
   return(at.site.pars)
 }
 
@@ -79,10 +79,6 @@ fevd_call <- function(local, time, model) {
                        "3" = fevd(local, location.fun = ~1, scale.fun = ~time, shape.fun = ~1,
                                   type = "GEV", method = "GMLE", use.phi = FALSE),
                        "4" = fevd(local, location.fun = ~time, scale.fun = ~time, shape.fun = ~1,
-                                  type = "GEV", method = "GMLE", use.phi = FALSE),
-                       "5" = fevd(local, location.fun = ~time + I(time^2), scale.fun = ~1, shape.fun = ~1,
-                                  type = "GEV", method = "GMLE", use.phi = FALSE),
-                       "6" = fevd(local, location.fun = ~time + I(time^2), scale.fun = ~time, shape.fun = ~1,
                                   type = "GEV", method = "GMLE", use.phi = FALSE)
   )
 
@@ -93,12 +89,10 @@ fevd_call <- function(local, time, model) {
   if (inherits(parms, "try-error") || is.null(parms)) return(NA)
 
   # Preenche o vetor de parâmetros conforme o modelo
-  if (model == 1) return(c(parms[1], 0, 0, parms[2], 0, parms[3]))
-  if (model == 2) return(c(parms[1], parms[2], 0, parms[3], 0, parms[4]))
-  if (model == 3) return(c(parms[1], 0, 0, parms[2], parms[3], parms[4]))
-  if (model == 4) return(c(parms[1], parms[2], 0, parms[3], parms[4], parms[5]))
-  if (model == 5) return(c(parms[1], parms[2], parms[3], parms[4], 0, parms[5]))
-  if (model == 6) return(c(parms[1], parms[2], parms[3], parms[4], parms[5], parms[6]))
+  if (model == 1) return(c(parms[1], 0, parms[2], 0, parms[3]))
+  if (model == 2) return(c(parms[1], parms[2], parms[3], 0, parms[4]))
+  if (model == 3) return(c(parms[1], 0, parms[2], parms[3], parms[4]))
+  if (model == 4) return(c(parms[1], parms[2], parms[3], parms[4], parms[5]))
 }
 
 #---------------------------------------
@@ -109,7 +103,7 @@ fitLmom <- function(local, time) {
     fit_result <- fevd(local, location.fun = ~1, scale.fun = ~1, shape.fun = ~1,
                        type = "GEV", method = "Lmoments", use.phi = FALSE)
     parms <- summary(fit_result)$par
-    c(parms[1], 0, 0, parms[2], 0, parms[3])
+    c(parms[1], 0, parms[2], 0, parms[3])
   }, silent = TRUE)
 
   if (inherits(result, "try-error") || is.null(result)) return(NA)

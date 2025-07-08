@@ -16,6 +16,7 @@
 #' @importFrom lmom pelkap pelwak quakap quawak
 #' @importFrom MASS mvrnorm
 #' @importFrom stats pnorm sd
+#' @importFrom Matrix nearPD
 #' @examples
 #' rho <- 0.5
 #' Ns <- 100
@@ -23,61 +24,95 @@
 #' Add_Heterogenety(dataset.add=dataset.add,rho = rho,Ns = Ns)
 Add_Heterogenety <- function(dataset.add,rho,Ns){
   n.sites <- ncol(dataset.add)
-  if (n.sites < 7) {
-    stop("The number of sites should be larger than 6.")
-  }
+  if (n.sites < 7) stop("The number of sites should be larger than 6.")
 
   min_sample_size <- min(colSums(!is.na(dataset.add)))
-
-  if (min_sample_size < 10) {
+  if (min_sample_size < 10)
     stop("All sites must have at least 10 years of records. So sorry, we cannot proceed.")
+
+  if (Ns < 100) stop("Ns should be larger than 99.")
+  if (!is.numeric(rho) || length(rho) != 1 || rho >= 1 || rho <= -1)
+    stop("`rho` must be a single smaller (larger) than -1 (1).")
+
+  V.sim <- numeric(Ns)
+  vetor.numerador <- numeric(n.sites)
+
+  x1.atoutset <- regsamlmu(dataset.add, lcv = FALSE)
+  weight <- sum(x1.atoutset[, 2])
+
+  # Regional L-moments
+  reg.l2 <- sum(x1.atoutset[, 2] * x1.atoutset[, 4]) / weight
+  reg.t3 <- sum(x1.atoutset[, 2] * x1.atoutset[, 5]) / weight
+  reg.t4 <- sum(x1.atoutset[, 2] * x1.atoutset[, 6]) / weight
+  reg.t5 <- sum(x1.atoutset[, 2] * x1.atoutset[, 7]) / weight
+
+  rmom <- c(0, reg.l2, reg.t3, reg.t4, reg.t5)
+
+  reg.par <- try(pelkap(rmom), silent = TRUE)
+  is.kap <- length(reg.par)
+
+  if (is.kap == 1 || any(!is.finite(reg.par))) {
+    reg.par <- try(pelwak(rmom), silent = TRUE)
+    is.kap <- length(reg.par)
   }
 
-  if (Ns<100){stop("Ns should be larger than 99.")}
-  if (!is.numeric(rho) || length(rho) != 1 ||
-      rho >= 1 || rho <= -1) {
-    stop("`rho` must be a single smaller (larger) than -1 (1).")
+  if (is.kap == 1 || any(!is.finite(reg.par))) {
+    warning("Failed to fit regional distribution. Returning NA.")
+    return(NA)
   }
-  vetor.numerador <- matrix(NA,n.sites,1)
-  V.sim <- matrix(NA,Ns,1)
-  x1.atoutset <- regsamlmu(dataset.add, lcv = FALSE)
-  weight <- sum(x1.atoutset[,2])
-  vet.l2<- as.matrix(x1.atoutset[,2]*x1.atoutset[,4])
-  vet.t3<- as.matrix(x1.atoutset[,2]*x1.atoutset[,5])
-  vet.t4<- as.matrix(x1.atoutset[,2]*x1.atoutset[,6])
-  vet.t5<- as.matrix(x1.atoutset[,2]*x1.atoutset[,7])
-  reg.l2 <- sum(vet.l2)/weight
-  reg.t3 <- sum(vet.t3)/weight
-  reg.t4 <- sum(vet.t4)/weight
-  reg.t5 <- sum(vet.t5)/weight
-  rmom <- c(0,reg.l2,reg.t3,reg.t4,reg.t5)
-  reg.par <- try(pelkap(rmom),TRUE)
-  is.kap=length(reg.par)
-  if (is.kap==1){reg.par=try(pelwak(rmom),TRUE)}
-  for (v in 1:n.sites){
-    vetor.numerador[v] <- x1.atoutset[v,2]*(x1.atoutset[v,4]-reg.l2)^2}
-  V <- sqrt(sum(vetor.numerador)/weight)
-  max.n.years <- max(x1.atoutset[,2])
-  data.sim <- matrix(NA,max.n.years,n.sites)
-  sigma <- matrix(rho,n.sites,n.sites)
+
+  for (v in 1:n.sites) {
+    vetor.numerador[v] <- x1.atoutset[v, 2] * (x1.atoutset[v, 4] - reg.l2)^2
+  }
+  V <- sqrt(sum(vetor.numerador) / weight)
+
+  max.n.years <- max(x1.atoutset[, 2])
+  sigma <- matrix(rho, n.sites, n.sites)
   diag(sigma) <- 1
-  for (ns in 1:Ns){
-    u.sim <- pnorm(mvrnorm(n  =  max.n.years, mu = rep(0,n.sites), Sigma = sigma, tol  =  1e-06, empirical  =  FALSE))
-    for (site in 1:n.sites){
-      if (is.kap==1){
-        data.sim[1:x1.atoutset[site,2],site] <- quawak(u.sim[1:x1.atoutset[site,2],site],
-                                                c(reg.par[1],reg.par[2],reg.par[3],reg.par[4],reg.par[5]))} else {
-                                                data.sim[1:x1.atoutset[site,2],site] <- quakap(u.sim[1:x1.atoutset[site,2],site],
-                                                                                        c(reg.par[1],reg.par[2],reg.par[3],reg.par[4]))}
-    }
-    x1.sim <- regsamlmu(data.sim, lcv  =  FALSE)
-    vet.l2.sim<- as.matrix(x1.atoutset[,2]*x1.sim[,4])
-    reg.l2.sim <- sum(vet.l2.sim)/weight
-    for (v in 1:n.sites){
-      vetor.numerador[v] <- x1.atoutset[v,2]*(x1.sim[v,4]-reg.l2.sim)^2}
-    V.sim[ns,1] <- sqrt(sum(vetor.numerador)/weight)
+
+  # Ensure positive definiteness
+  if (any(eigen(sigma)$values <= 0)) {
+    sigma <- as.matrix(nearPD(sigma, corr = TRUE)$mat)
   }
-  H <- c((V-mean(V.sim))/sd(V.sim))
+
+  for (ns in 1:Ns) {
+    u.sim <- tryCatch({
+      pnorm(mvrnorm(n = max.n.years, mu = rep(0, n.sites), Sigma = sigma))
+    }, error = function(e) {
+      warning("mvrnorm failed (simulation ", ns, "): ", conditionMessage(e))
+      return(matrix(NA, max.n.years, n.sites))
+    })
+
+    if (anyNA(u.sim)) {
+      V.sim[ns] <- NA
+      next
+    }
+
+    data.sim <- matrix(NA, max.n.years, n.sites)
+    for (site in 1:n.sites) {
+      site_years <- x1.atoutset[site, 2]
+      if (is.kap == 5) {
+        data.sim[1:site_years, site] <- quawak(u.sim[1:site_years, site], reg.par)
+      } else {
+        data.sim[1:site_years, site] <- quakap(u.sim[1:site_years, site], reg.par)
+      }
+    }
+
+    x1.sim <- regsamlmu(data.sim, lcv = FALSE)
+    reg.l2.sim <- sum(x1.atoutset[, 2] * x1.sim[, 4]) / weight
+
+    for (v in 1:n.sites) {
+      vetor.numerador[v] <- x1.atoutset[v, 2] * (x1.sim[v, 4] - reg.l2.sim)^2
+    }
+    V.sim[ns] <- sqrt(sum(vetor.numerador) / weight)
+  }
+
+  if (all(is.finite(V.sim)) && sd(V.sim, na.rm = TRUE) > 0) {
+    H <- (V - mean(V.sim, na.rm = TRUE)) / sd(V.sim, na.rm = TRUE)
+  } else {
+    warning("V.sim contains invalid values or zero variance. Returning NA.")
+    H <- NA
+  }
 
   return(H)
 }

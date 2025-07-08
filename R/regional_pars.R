@@ -4,12 +4,11 @@
 #'  averaged from 15 simulated extreme air temperature series.
 #'
 #' @format ## `regional_pars`
-#' A `dataframe` with 6 columns and 1 row.
+#' A `dataframe` with 5 columns and 1 row.
 #'
 #' \describe{
 #' \item{mu0}{1st factor of the location parameter for each site}
 #' \item{mu1}{2nd factor of the location parameter}
-#' \item{mu2}{3rd factor of the location parameter}
 #' \item{sigma0}{1st factor of the scale parameter for each site}
 #' \item{sigma1}{2nd factor of the scale parameter for each site}
 #' \item{shape}{shape parameter for each site}

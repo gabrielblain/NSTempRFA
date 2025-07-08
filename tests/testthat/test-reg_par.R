@@ -3,7 +3,6 @@ test_that("reg_par returns expected output for valid input", {
   best_model_df <- data.frame(
     mu0 = c(1, 2, 3),
     mu1 = c(0.1, 0.2, 0.3),
-    mu2 = c(0.01, 0.02, 0.03),
     sigma0 = c(5, 6, 7),
     sigma1 = c(0.5, 0.6, 0.7),
     shape = c(0.2, 0.3, 0.4),
@@ -13,7 +12,7 @@ test_that("reg_par returns expected output for valid input", {
   result <- reg_par(best_model_df)
 
   expect_s3_class(result, "data.frame")
-  expect_named(result, c("weighted_mu0", "weighted_mu1", "weighted_mu2", "weighted_sigma0", "weighted_sigma1", "weighted_shape"))
+  expect_named(result, c("weighted_mu0", "weighted_mu1", "weighted_sigma0", "weighted_sigma1", "weighted_shape"))
   expect_true(all(sapply(result, is.numeric)))
 })
 
@@ -22,7 +21,7 @@ test_that("reg_par throws error if input is not a data frame", {
 })
 
 test_that("reg_par throws error if required columns are missing", {
-  incomplete_df <- data.frame(mu0 = 1:3, mu1 = 1:3, mu2 = 1:3)  # Missing other columns
+  incomplete_df <- data.frame(mu0 = 1:3, mu1 = 1:3)  # Missing other columns
   expect_error(reg_par(incomplete_df), "must contain the columns")
 })
 
@@ -30,7 +29,6 @@ test_that("reg_par throws error if columns are non-numeric", {
   bad_df <- data.frame(
     mu0 = c(1, 2, 3),
     mu1 = c(0.1, 0.2, 0.3),
-    mu2 = c(0.01, 0.02, 0.03),
     sigma0 = c(5, 6, 7),
     sigma1 = c(0.5, 0.6, 0.7),
     shape = c("a", "b", "c"),  # Non-numeric
@@ -43,7 +41,6 @@ test_that("reg_par throws error if size column contains NA", {
   df_with_na <- data.frame(
     mu0 = c(1, 2, 3),
     mu1 = c(0.1, 0.2, 0.3),
-    mu2 = c(0.01, 0.02, 0.03),
     sigma0 = c(5, 6, 7),
     sigma1 = c(0.5, 0.6, 0.7),
     shape = c(0.2, 0.3, 0.4),
@@ -56,7 +53,6 @@ test_that("reg_par throws error if total size is zero", {
   df_zero_size <- data.frame(
     mu0 = c(1, 2, 3),
     mu1 = c(0.1, 0.2, 0.3),
-    mu2 = c(0.01, 0.02, 0.03),
     sigma0 = c(5, 6, 7),
     sigma1 = c(0.5, 0.6, 0.7),
     shape = c(0.2, 0.3, 0.4),

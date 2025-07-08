@@ -12,8 +12,8 @@ test_that("fit_model returns correct output structure for 15 sites", {
   expect_equal(nrow(result), 15)
 
   # Deve ter 7 colunas com nomes específicos
-  expect_equal(ncol(result), 7)
-  expect_named(result, c("mu0", "mu1", "mu2", "sigma0", "sigma1", "shape", "size"))
+  expect_equal(ncol(result), 6)
+  expect_named(result, c("mu0", "mu1", "sigma0", "sigma1", "shape", "size"))
 })
 
 test_that("fit_model handles invalid model input", {
@@ -21,11 +21,11 @@ test_that("fit_model handles invalid model input", {
 
   # Testa para modelo não numérico
   expect_error(fit_model(temperatures, model = "two"),
-               "Model must be a single interger number from 1 to 6")
+               "Model must be a single interger number from 1 to 4")
 
   # Testa para modelo fora do intervalo
   expect_error(fit_model(temperatures, model = 7),
-               "Model must be a single interger number from 1 to 6")
+               "Model must be a single interger number from 1 to 4")
 })
 
 test_that("fit_model handles NA values within 15-site data", {
@@ -62,6 +62,6 @@ test_that("fit_model returns NA parameters if even Lmoments fail", {
   result <- fit_model(temperatures, model = 1)
 
   # Todos os parâmetros dos 15 sites devem ser NA
-  expect_true(all(is.na(result[, 1:6])))
+  expect_true(all(is.na(result[, 1:5])))
   expect_equal(nrow(result), 15)
 })
