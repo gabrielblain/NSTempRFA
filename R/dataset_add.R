@@ -25,8 +25,8 @@ dataset_add <- function(dataset) {
   dataset.year <- dataset[, 2:n]
   add_data <- dataset.year
   n <- ncol(dataset.year)
-  if (n < 7) {
-    stop("The number of sites should be larger than 6.")
+  if (n < 3) {
+    stop("The number of sites should be larger than 2.")
   }
 
   min_sample_size <- min(colSums(!is.na(dataset.year)))
