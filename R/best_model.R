@@ -1,79 +1,73 @@
 #' Time-varying parameters of the best fitted GEV model.
 #'
+#' This function fits four time-varying GEV models (with different assumptions on
+#' non-stationarity in location and/or scale) to each temperature series, computes
+#' the AIC of each model, and selects the best one per the lowest total AIC.
+#'
 #' @param add_data
-#' A numeric matrix of air temperature data as that calculated by the dataset_add().
+#' A numeric matrix of air temperature data as that calculated by the `dataset_add()` function.
+#'
 #' @returns
-#' A `list` object with the following elements:
+#' A list with:
 #' \describe{
-#'   \item{best}{The best model among the six candidates.}
-#'   \item{atsite.models}{The time-varying parameters of the best model.}
-#'  }
-#' @export
-#' @importFrom extRemes fevd
-#' @importFrom spsUtil quiet
+#'   \item{best}{The model index (1 to 4) with the lowest total AIC across sites.}
+#'   \item{atsite.models}{A data frame of estimated time-varying parameters for the best model.}
+#' }
+#'
+#' @details
+#' Model fitting is done using `ismev::gev.fit()`.
+#'
+#' @importFrom ismev gev.fit
 #' @importFrom stats na.omit
+#' @export
+#'
 #' @examples
 #' add_data <- add_data
 #' best.parms <- best_model(add_data=add_data)
 best_model <- function(add_data) {
-  # Input checks
   if (!is.matrix(add_data) && !is.data.frame(add_data)) {
     stop("Input 'add_data' must be a matrix or data frame.")
   }
+
   add_data <- as.matrix(add_data)
   n.sites <- ncol(add_data)
   size <- matrix(NA, n.sites, 1)
-  at.site.model1 <- as.data.frame(matrix(NA, n.sites, 5))
-  at.site.model2 <- as.data.frame(matrix(NA, n.sites, 5))
-  at.site.model3 <- as.data.frame(matrix(NA, n.sites, 5))
-  at.site.model4 <- as.data.frame(matrix(NA, n.sites, 5))
-  #at.site.model5 <- as.data.frame(matrix(NA, n.sites, 6))
-  #at.site.model6 <- as.data.frame(matrix(NA, n.sites, 6))
+  at.site.model1 <- at.site.model2 <- at.site.model3 <- at.site.model4 <- as.data.frame(matrix(NA, n.sites, 5))
   at.site.AICs <- as.data.frame(matrix(NA, n.sites, 4))
   atsite.models <- as.data.frame(matrix(NA, n.sites, 6))
 
   for (i in 1:n.sites) {
     local <- na.omit(add_data[, i])
     size[i, 1] <- length(local)
+
     if (length(local) == 0) {
-      # If no data for this site, fill with NAs and Inf AIC to skip it
       at.site.AICs[i, ] <- rep(Inf, 4)
-      at.site.model1[i, ] <- rep(NA, 5)
-      at.site.model2[i, ] <- rep(NA, 5)
-      at.site.model3[i, ] <- rep(NA, 5)
-      at.site.model4[i, ] <- rep(NA, 5)
-     # at.site.model5[i, ] <- rep(NA, 6)
-    #  at.site.model6[i, ] <- rep(NA, 6)
+      at.site.model1[i, ] <- at.site.model2[i, ] <- at.site.model3[i, ] <- at.site.model4[i, ] <- rep(NA, 5)
       next
     }
 
-    scaled <- scale(1L:size[i, 1])
-    time <- scaled[, 1]
+    time <- as.matrix(1L:size[i, 1])
+    selecting <- quiet(fit.models(local, time))
 
-    selecting <- fit.models(local, time)
     at.site.AICs[i, ] <- selecting$at.site.AIC
     at.site.model1[i, ] <- selecting$models1
     at.site.model2[i, ] <- selecting$models2
     at.site.model3[i, ] <- selecting$models3
     at.site.model4[i, ] <- selecting$models4
-    #at.site.model5[i, ] <- selecting$models5
-    #at.site.model6[i, ] <- selecting$models6
   }
 
-  best <- which.min(colSums(at.site.AICs))
+  best <- which.min(colSums(at.site.AICs, na.rm = TRUE))
 
   atsite.models[, 1:5] <- switch(
     best,
     at.site.model1,
     at.site.model2,
     at.site.model3,
-    at.site.model4 #,
-    #at.site.model5,
-    #at.site.model6
+    at.site.model4
   )
   atsite.models[, 6] <- size
-  #colnames(atsite.models) <- c("mu0", "mu1", "mu2", "sigma0", "sigma1", "shape", "size")
   colnames(atsite.models) <- c("mu0", "mu1", "sigma0", "sigma1", "shape", "size")
+
   return(list(
     best = best,
     atsite.models = atsite.models
@@ -81,118 +75,103 @@ best_model <- function(add_data) {
 }
 
 
+#-------------------------------
+# Internal: fit models and compute AIC
+#-------------------------------
 fit.models <- function(local, time) {
-  # Return NA/Inf if no data
   if (length(local) == 0) {
     return(list(
       models1 = rep(NA, 5),
       models2 = rep(NA, 5),
       models3 = rep(NA, 5),
       models4 = rep(NA, 5),
-      models5 = rep(NA, 5),
-      models6 = rep(NA, 5),
       at.site.AIC = rep(Inf, 4)
     ))
   }
 
-  safe_fit <- function(expr) {
-    res <- try(expr, silent = TRUE)
-    if (inherits(res, "try-error")) {
-      return(NULL)
+  methods <- c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN", "Brent")
+
+  # Function to attempt one model across multiple optimizers
+  try_model <- function(model_id) {
+    for (method in methods) {
+      result <- try({
+        fit <- switch(
+          as.character(model_id),
+          "1" = ismev::gev.fit(local, ydat = as.matrix(time), mul = NULL, sigl = NULL, shl = NULL,
+                               mulink = identity, siglink = identity, shlink = identity,
+                               method = method, maxit = 10000, show = FALSE),
+          "2" = ismev::gev.fit(local, ydat = as.matrix(time), mul = 1, sigl = NULL, shl = NULL,
+                               mulink = identity, siglink = identity, shlink = identity,
+                               method = method, maxit = 10000, show = FALSE),
+          "3" = ismev::gev.fit(local, ydat = as.matrix(time), mul = NULL, sigl = 1, shl = NULL,
+                               mulink = identity, siglink = identity, shlink = identity,
+                               method = method, maxit = 10000, show = FALSE),
+          "4" = ismev::gev.fit(local, ydat = as.matrix(time), mul = 1, sigl = 1, shl = NULL,
+                               mulink = identity, siglink = identity, shlink = identity,
+                               method = method, maxit = 10000, show = FALSE)
+        )
+
+        if (is.null(fit) || is.null(fit$mle)) stop("Fit failed")
+
+        fit$method_used <- method
+        return(fit)
+      }, silent = TRUE)
+
+      if (!inherits(result, "try-error") && !is.null(result)) {
+        return(result)
+      }
     }
-    return(res)
+    return(NULL)
   }
 
-  safe_summary <- function(model) {
-    if (is.null(model)) return(NULL)
-    quiet(summary(model))
-  }
-
+  # Fit all 4 model types with method fallbacks
   models <- list(
-    safe_summary(safe_fit(fevd(local,
-                               location.fun = ~ 1,
-                               scale.fun = ~ 1,
-                               shape.fun = ~ 1,
-                               type = "GEV",
-                               method = "GMLE",
-                               use.phi = FALSE))),
-
-    safe_summary(safe_fit(fevd(local,
-                               location.fun = ~ time,
-                               scale.fun = ~ 1,
-                               shape.fun = ~ 1,
-                               type = "GEV",
-                               method = "GMLE",
-                               use.phi = FALSE))),
-
-    safe_summary(safe_fit(fevd(local,
-                               location.fun = ~ 1,
-                               scale.fun = ~ time,
-                               shape.fun = ~ 1,
-                               type = "GEV",
-                               method = "GMLE",
-                               use.phi = FALSE))),
-
-    safe_summary(safe_fit(fevd(local,
-                               location.fun = ~ time,
-                               scale.fun = ~ time,
-                               shape.fun = ~ 1,
-                               type = "GEV",
-                               method = "GMLE",
-                               use.phi = FALSE))) #,
-
-    #safe_summary(safe_fit(fevd(local,
-     #                          location.fun = ~ time + I(time^2),
-      #                         scale.fun = ~ 1,
-       #                        shape.fun = ~ 1,
-        #                       type = "GEV",
-         #                      method = "GMLE",
-          #                     use.phi = FALSE))),
-
-  #  safe_summary(safe_fit(fevd(local,
-   #                            location.fun = ~ time + I(time^2),
-    #                          scale.fun = ~ time,
-     #                          shape.fun = ~ 1,
-      #                         type = "GEV",
-       #                        method = "GMLE",
-        #                       use.phi = FALSE)))
+    try_model(1),
+    try_model(2),
+    try_model(3),
+    try_model(4)
   )
 
-  # Helper to safely extract parameters or NA vector
-  safe_par <- function(model, n) {
-    if (is.null(model) || is.null(model$par) || length(model$par) < n) {
-      return(rep(NA, n))
-    } else {
-      return(model$par[1:n])
-    }
+  # Extract parameter vectors
+  extract_pars <- function(model, model_id) {
+    if (is.null(model) || is.null(model$mle)) return(rep(NA, 5))
+    mle <- model$mle
+    switch(
+      as.character(model_id),
+      "1" = c(mle[1], 0, mle[2], 0, mle[3]),
+      "2" = c(mle[1], mle[2], mle[3], 0, mle[4]),
+      "3" = c(mle[1], 0, mle[2], mle[3], mle[4]),
+      "4" = c(mle[1], mle[2], mle[3], mle[4], mle[5])
+    )
   }
 
-  # Extract parameters for each model, filling zeros for missing ones to keep length 6
-  models1 <- c(safe_par(models[[1]], 3)[1], 0, safe_par(models[[1]], 3)[2], 0, safe_par(models[[1]], 3)[3])
-  models2 <- c(safe_par(models[[2]], 4)[1], safe_par(models[[2]], 4)[2], safe_par(models[[2]], 4)[3], 0, safe_par(models[[2]], 4)[4])
-  models3 <- c(safe_par(models[[3]], 4)[1], 0, safe_par(models[[3]], 4)[2], safe_par(models[[3]], 4)[3], safe_par(models[[3]], 4)[4])
-  models4 <- c(safe_par(models[[4]], 5)[1], safe_par(models[[4]], 5)[2], safe_par(models[[4]], 5)[3], safe_par(models[[4]], 5)[4], safe_par(models[[4]], 5)[5])
-  #models5 <- c(safe_par(models[[5]], 5)[1], safe_par(models[[5]], 5)[2], safe_par(models[[5]], 5)[3], safe_par(models[[5]], 5)[4], 0, safe_par(models[[5]], 5)[5])
-  #models6 <- c(safe_par(models[[6]], 6)[1], safe_par(models[[6]], 6)[2], safe_par(models[[6]], 6)[3], safe_par(models[[6]], 6)[4], safe_par(models[[6]], 6)[5], safe_par(models[[6]], 6)[6])
+  models1 <- extract_pars(models[[1]], 1)
+  models2 <- extract_pars(models[[2]], 2)
+  models3 <- extract_pars(models[[3]], 3)
+  models4 <- extract_pars(models[[4]], 4)
 
-  # Helper to safely extract AIC or Inf if missing
-  safe_AIC <- function(model) {
-    if (is.null(model) || is.null(model$AIC) || is.na(model$AIC)) {
+  # Define k for each model
+  k_values <- c(3, 4, 4, 5)
+  n <- length(local)
+
+  # Compute AICc
+  safe_AICc <- function(model, k, n) {
+    if (is.null(model) || is.null(model$nllh) || is.na(model$nllh) || n <= k + 1) {
       return(Inf)
-    } else {
-      return(model$AIC)
     }
+    AIC <- 2 * k + 2 * model$nllh
+    AICc <- AIC + (2 * k * (k + 1)) / (n - k - 1)
+    cat("Model with", k, "parameters, method =", model$method_used, ": AICc =", round(AICc, 3), "\n")
+    return(AICc)
   }
 
-  at.site.AIC <- sapply(models, safe_AIC)
+  at.site.AICc <- mapply(safe_AICc, models, k_values, MoreArgs = list(n = n))
 
   return(list(
     models1 = models1,
     models2 = models2,
     models3 = models3,
     models4 = models4,
-    #models5 = models5,
-    #models6 = models6,
-    at.site.AIC = at.site.AIC
+    at.site.AIC = at.site.AICc
   ))
 }

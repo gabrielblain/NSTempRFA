@@ -5,19 +5,24 @@
 #' @param model
 #' A single integer number from 1 to 4 defining the GEV model.
 #' May be provided by `best_model()`.
-#' @returns
-#' A `data.frame` with the time-varying parameters of the given model.
-#' @export
+#' @returns A `data.frame` with the estimated parameters (`mu0`, `mu1`, `sigma0`, `sigma1`, `shape`, `size`).
+#' If fitting fails, `NA`s are returned for that site.
+#'
+#' @details The function first attempts to fit the model using `ismev::gev.fit`
+#' (a generalized maximum likelihood estimation). If that fails, it tries
+#' to `extRemes::fevd` with method = "MLE".
+#'
 #' @importFrom extRemes fevd
-#' @importFrom spsUtil quiet
+#' @importFrom ismev gev.fit
 #' @importFrom stats na.omit
+#' @export
 #' @examples
-#' temperatures <- dataset[,2:16]
+#' temperatures <- dataset[, 2:16]
 #' model <- 2
-#' fit_model(temperatures = temperatures, model = model)
+#' fit_model(temperatures, model)
 fit_model <- function(temperatures, model) {
   if (!is.numeric(model) || length(model) != 1 || model < 1 || model > 4) {
-    stop("Model must be a single interger number from 1 to 4 defining the GEV model.")
+    stop("Model must be a single integer number from 1 to 4 defining the GEV model.")
   }
 
   temperatures <- as.matrix(temperatures)
@@ -34,18 +39,15 @@ fit_model <- function(temperatures, model) {
       next
     }
 
-    scaled <- scale(1L:size[i, 1])
-    time <- scaled[, 1]
+    time <- 1L:size[i, 1]
 
-    at.site.par1 <- quiet(try(fit(local, time, model), silent = TRUE))
+    at.site.par1 <- try(fit(local, time, model), silent = TRUE)
 
-    # Se o ajuste por máxima verossimilhança falhar, tenta via Lmoments
     if (!is.numeric(at.site.par1)) {
-      at.site.par1 <- quiet(try(fitLmom(local, time), silent = TRUE))
-      message("GMLE did not converge. L-moments instead.")
+      #message("GMLE did not converge. Trying MLE instead.")
+      at.site.par1 <- try(fitMLE(local, time, model), silent = TRUE)
     }
 
-    # Se ainda assim falhar, preenche com NA
     if (!is.numeric(at.site.par1)) {
       at.site.par1 <- rep(NA, 5)
     }
@@ -59,53 +61,102 @@ fit_model <- function(temperatures, model) {
 }
 
 #-------------------------------
-# Função fit(): Ajuste principal
+# Internal: Main fit wrapper
 #-------------------------------
 fit <- function(local, time, model) {
-  result <- try(fevd_call(local, time, model), silent = TRUE)
-  if (inherits(result, "try-error") || is.null(result)) return(NA)
+  result <- quiet(fevd_call(local, time, model))
+  if (is.null(result) || !is.numeric(result)) return(NA)
   return(result)
 }
 
 #-------------------------------------------
-# Função fevd_call(): Chamada segura ao fevd
+# Internal: Safe call to ismev::gev.fit
 #-------------------------------------------
 fevd_call <- function(local, time, model) {
-  fit_result <- switch(as.character(model),
-                       "1" = fevd(local, location.fun = ~1, scale.fun = ~1, shape.fun = ~1,
-                                  type = "GEV", method = "GMLE", use.phi = FALSE),
-                       "2" = fevd(local, location.fun = ~time, scale.fun = ~1, shape.fun = ~1,
-                                  type = "GEV", method = "GMLE", use.phi = FALSE),
-                       "3" = fevd(local, location.fun = ~1, scale.fun = ~time, shape.fun = ~1,
-                                  type = "GEV", method = "GMLE", use.phi = FALSE),
-                       "4" = fevd(local, location.fun = ~time, scale.fun = ~time, shape.fun = ~1,
-                                  type = "GEV", method = "GMLE", use.phi = FALSE)
+  time.matrix <- as.matrix(time)
+
+  fit_result <- try(
+    switch(as.character(model),
+           "1" = ismev::gev.fit(local, ydat = time.matrix, mul = NULL, sigl = NULL, shl = NULL,
+                                mulink = identity, siglink = identity, shlink = identity,
+                                muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
+                                method = "Nelder-Mead", maxit = 10000),
+           "2" = ismev::gev.fit(local, ydat = time.matrix, mul = 1, sigl = NULL, shl = NULL,
+                                mulink = identity, siglink = identity, shlink = identity,
+                                muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
+                                method = "Nelder-Mead", maxit = 10000),
+           "3" = ismev::gev.fit(local, ydat = time.matrix, mul = NULL, sigl = 1, shl = NULL,
+                                mulink = identity, siglink = identity, shlink = identity,
+                                muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
+                                method = "Nelder-Mead", maxit = 10000),
+           "4" = ismev::gev.fit(local, ydat = time.matrix, mul = 1, sigl = 1, shl = NULL,
+                                mulink = identity, siglink = identity, shlink = identity,
+                                muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
+                                method = "Nelder-Mead", maxit = 10000)
+    ),
+    silent = TRUE
   )
 
-  # Se o ajuste falhar, retorna NA
-  if (!inherits(fit_result, "fevd")) return(NA)
+  if (inherits(fit_result, "try-error") || is.null(fit_result)) return(NULL)
 
-  parms <- try(summary(fit_result)$par, silent = TRUE)
-  if (inherits(parms, "try-error") || is.null(parms)) return(NA)
+  parms <- try(fit_result$mle, silent = TRUE)
+  if (inherits(parms, "try-error") || is.null(parms)) return(NULL)
 
-  # Preenche o vetor de parâmetros conforme o modelo
+  # Assemble return vector depending on model
   if (model == 1) return(c(parms[1], 0, parms[2], 0, parms[3]))
   if (model == 2) return(c(parms[1], parms[2], parms[3], 0, parms[4]))
   if (model == 3) return(c(parms[1], 0, parms[2], parms[3], parms[4]))
   if (model == 4) return(c(parms[1], parms[2], parms[3], parms[4], parms[5]))
+
+  return(NULL)
 }
 
 #---------------------------------------
-# Função fitLmom(): Ajuste via L-Moments
+# Internal: Alternative fitting using multiple optimization methods
 #---------------------------------------
-fitLmom <- function(local, time) {
-  result <- try({
-    fit_result <- fevd(local, location.fun = ~1, scale.fun = ~1, shape.fun = ~1,
-                       type = "GEV", method = "Lmoments", use.phi = FALSE)
-    parms <- summary(fit_result)$par
-    c(parms[1], 0, parms[2], 0, parms[3])
-  }, silent = TRUE)
+fitMLE <- function(local, time, model) {
+  time.matrix <- as.matrix(time)
 
-  if (inherits(result, "try-error") || is.null(result)) return(NA)
-  return(result)
+  methods <- c("BFGS", "CG", "L-BFGS-B", "SANN", "Brent")
+
+  for (method in methods) {
+    result <- try({
+      fit_result <- switch(as.character(model),
+                           "1" = ismev::gev.fit(local, ydat = time.matrix, mul = NULL, sigl = NULL, shl = NULL,
+                                                mulink = identity, siglink = identity, shlink = identity,
+                                                muinit = NULL, siginit = NULL, shinit = NULL, show = FALSE,
+                                                method = method, maxit = 10000),
+                           "2" = ismev::gev.fit(local, ydat = time.matrix, mul = 1, sigl = NULL, shl = NULL,
+                                                mulink = identity, siglink = identity, shlink = identity,
+                                                muinit = NULL, siginit = NULL, shinit = NULL, show = FALSE,
+                                                method = method, maxit = 10000),
+                           "3" = ismev::gev.fit(local, ydat = time.matrix, mul = NULL, sigl = 1, shl = NULL,
+                                                mulink = identity, siglink = identity, shlink = identity,
+                                                muinit = NULL, siginit = NULL, shinit = NULL, show = FALSE,
+                                                method = method, maxit = 10000),
+                           "4" = ismev::gev.fit(local, ydat = time.matrix, mul = 1, sigl = 1, shl = NULL,
+                                                mulink = identity, siglink = identity, shlink = identity,
+                                                muinit = NULL, siginit = NULL, shinit = NULL, show = FALSE,
+                                                method = method, maxit = 10000)
+      )
+
+      if (is.null(fit_result) || is.null(fit_result$mle)) stop("fit failed")
+
+      parms <- fit_result$mle
+
+      if (model == 1) return(c(parms[1], 0, parms[2], 0, parms[3]))
+      if (model == 2) return(c(parms[1], parms[2], parms[3], 0, parms[4]))
+      if (model == 3) return(c(parms[1], 0, parms[2], parms[3], parms[4]))
+      if (model == 4) return(c(parms[1], parms[2], parms[3], parms[4], parms[5]))
+    }, silent = TRUE)
+
+    if (!inherits(result, "try-error") && is.numeric(result)) {
+      message("Model fitted successfully using method: ", method)
+      return(result)
+    }
+  }
+
+  # If none worked, return NA
+  message("All optimization methods failed.")
+  return(rep(NA, 5))
 }

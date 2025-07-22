@@ -7,17 +7,22 @@
 best_model(add_data)
 }
 \arguments{
-\item{add_data}{A numeric matrix of air temperature data as that calculated by the dataset_add().}
+\item{add_data}{A numeric matrix of air temperature data as that calculated by the \code{dataset_add()} function.}
 }
 \value{
-A \code{list} object with the following elements:
+A list with:
 \describe{
-\item{best}{The best model among the six candidates.}
-\item{atsite.models}{The time-varying parameters of the best model.}
+\item{best}{The model index (1 to 4) with the lowest total AIC across sites.}
+\item{atsite.models}{A data frame of estimated time-varying parameters for the best model.}
 }
 }
 \description{
-Time-varying parameters of the best fitted GEV model.
+This function fits four time-varying GEV models (with different assumptions on
+non-stationarity in location and/or scale) to each temperature series, computes
+the AIC of each model, and selects the best one per the lowest total AIC.
+}
+\details{
+Model fitting is done using \code{ismev::gev.fit()}.
 }
 \examples{
 add_data <- add_data
