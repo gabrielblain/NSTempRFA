@@ -19,6 +19,7 @@ Imports:
     lmom,
     MASS,
     stats,
+    ismev,
     extRemes,
     spsUtil,
     dplyr,
