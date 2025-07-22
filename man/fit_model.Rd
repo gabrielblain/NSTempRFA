@@ -13,13 +13,19 @@ fit_model(temperatures, model)
 May be provided by \code{best_model()}.}
 }
 \value{
-A \code{data.frame} with the time-varying parameters of the given model.
+A \code{data.frame} with the estimated parameters (\code{mu0}, \code{mu1}, \code{sigma0}, \code{sigma1}, \code{shape}, \code{size}).
+If fitting fails, \code{NA}s are returned for that site.
 }
 \description{
 Time-varying parameters of a given GEV model.
 }
+\details{
+The function first attempts to fit the model using \code{ismev::gev.fit}
+(a generalized maximum likelihood estimation). If that fails, it tries
+to \code{extRemes::fevd} with method = "MLE".
+}
 \examples{
-temperatures <- dataset[,2:16]
+temperatures <- dataset[, 2:16]
 model <- 2
-fit_model(temperatures = temperatures, model = model)
+fit_model(temperatures, model)
 }

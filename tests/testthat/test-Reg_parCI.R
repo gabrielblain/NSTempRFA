@@ -26,8 +26,8 @@ test_that("Reg_parCI throws error if n.boots < 100", {
   )
 })
 
-test_that("Reg_parCI throws error when number of sites < 7", {
-  add_data <- matrix(rnorm(30 * 6), 30, 6)  # Only 6 sites
+test_that("Reg_parCI throws error when number of sites < 3", {
+  add_data <- matrix(rnorm(30 * 2), 30, 2)  # Only 2 sites
   reg_par_valid <- data.frame(
     mu0 = 0.1, mu1 = 0.2,
     sigma0 = 1, sigma1 = 0.1, shape = 0.2
@@ -35,7 +35,7 @@ test_that("Reg_parCI throws error when number of sites < 7", {
 
   expect_error(
     Reg_parCI(add_data, model = 1, reg_par = reg_par_valid, n.boots = 110),
-    "number of sites should be larger than 6"
+    "number of sites should be larger than 2."
   )
 })
 

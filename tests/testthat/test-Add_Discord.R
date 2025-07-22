@@ -23,10 +23,10 @@ test_that("Add_Discord throws error when Years column has NAs", {
 
 test_that("Add_Discord throws error when less than 7 sites", {
   years <- 1980:2020
-  temp_data <- matrix(rnorm(length(years) * 6, mean = 30, sd = 5), ncol = 6)
+  temp_data <- matrix(rnorm(length(years) * 6, mean = 30, sd = 5), ncol = 2)
   dataset <- cbind(Years = years, temp_data)
 
-  expect_error(Add_Discord(dataset), "The number of sites should be at least 7")
+  expect_error(Add_Discord(dataset), "The number of sites should be at least 3")
 })
 
 test_that("Add_Discord throws error when any site has fewer than 10 observations", {

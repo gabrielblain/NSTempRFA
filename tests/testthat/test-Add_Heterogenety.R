@@ -8,9 +8,9 @@ test_that("Add_Heterogenety returns a numeric H value", {
 })
 
 test_that("Add_Heterogenety throws error when number of sites is too low", {
-  dataset.add <- matrix(rnorm(300), ncol = 5)
+  dataset.add <- matrix(rnorm(300), ncol = 2)
   expect_error(Add_Heterogenety(dataset.add, rho = 0.5, Ns = 100),
-               "The number of sites should be larger than 6")
+               "The number of sites should be equal to or larger than 3.")
 })
 
 test_that("Add_Heterogenety throws error for sites with less than 10 years", {

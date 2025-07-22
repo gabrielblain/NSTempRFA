@@ -33,9 +33,9 @@ test_that("dataset_add throws error when Years column contains NA", {
   expect_error(dataset_add(dataset_with_na), "Column 'Years' cannot have missing data.")
 })
 
-test_that("dataset_add throws error when fewer than 7 sites are provided", {
-  dataset_few_sites <- matrix(1:40, ncol = 5) # Only 4 sites + 1 year column = 5 columns
-  expect_error(dataset_add(dataset_few_sites), "The number of sites should be larger than 6.")
+test_that("dataset_add throws error when fewer than 3 sites are provided", {
+  dataset_few_sites <- matrix(1:30, ncol = 3) # Only 4 sites + 1 year column = 5 columns
+  expect_error(dataset_add(dataset_few_sites), "The number of sites should be larger than 2.")
 })
 
 test_that("dataset_add throws error when any site has fewer than 10 non-NA records", {
