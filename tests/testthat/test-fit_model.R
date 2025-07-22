@@ -21,11 +21,11 @@ test_that("fit_model handles invalid model input", {
 
   # Testa para modelo não numérico
   expect_error(fit_model(temperatures, model = "two"),
-               "Model must be a single interger number from 1 to 4")
+               "Model must be a single integer number from 1 to 4 defining the GEV model.")
 
   # Testa para modelo fora do intervalo
   expect_error(fit_model(temperatures, model = 7),
-               "Model must be a single interger number from 1 to 4")
+               "Model must be a single integer number from 1 to 4 defining the GEV model.")
 })
 
 test_that("fit_model handles NA values within 15-site data", {
