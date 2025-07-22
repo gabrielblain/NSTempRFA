@@ -52,8 +52,10 @@ Add_RegQuant <- function(prob,
   # === Core computation ===
   max_time <- length(site_temp)
   site_mean <- mean(site_temp, na.rm = TRUE)
-  time_scaled <- scale(1L:max_time)[, 1]  # standardize time for trend modeling
-  selected_time <- time_scaled[n.year]
+  #scaled <- scale(1L:size[i, 1])
+  #time <- scaled[, 1]
+  time <- 1L:max_time # standardize time for trend modeling
+  selected_time <- time[n.year]
 
   loc <- regional_pars[1] + regional_pars[2] * selected_time
   scale_val <- regional_pars[3] + regional_pars[4] * selected_time

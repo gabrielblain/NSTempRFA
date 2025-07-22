@@ -34,8 +34,7 @@ Add_RegProb <- function(quantiles, regional_pars, site_temp, n.year) {
 
   max_time <- length(site_temp)
   site_mean <- mean(site_temp, na.rm = TRUE)
-  scaled <- scale(1L:max_time)
-  time <- scaled[, 1]
+  time <- 1L:max_time
   selected.time <- time[n.year]
   add.quantiles <- quantiles - site_mean
 
