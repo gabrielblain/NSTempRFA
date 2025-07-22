@@ -37,8 +37,8 @@ Add_Discord <- function(dataset) {
   n <- ncol(dataset)
   dataset.year <- dataset[, 2:n]
   n <- ncol(dataset.year)
-  if (n < 7) {
-    stop("The number of sites should be at least 7.")
+  if (n < 3) {
+    stop("The number of sites should be at least 3.")
   }
 
   min_sample_size <- min(colSums(!is.na(dataset.year)))

@@ -24,7 +24,7 @@
 #' Add_Heterogenety(dataset.add=dataset.add,rho = rho,Ns = Ns)
 Add_Heterogenety <- function(dataset.add,rho,Ns){
   n.sites <- ncol(dataset.add)
-  if (n.sites < 7) stop("The number of sites should be larger than 6.")
+  if (n.sites < 3) stop("The number of sites should be equal to or larger than 3.")
 
   min_sample_size <- min(colSums(!is.na(dataset.add)))
   if (min_sample_size < 10)
