@@ -7,8 +7,8 @@ test_that("Add_Discord returns expected structure", {
   result <- Add_Discord(dataset)
 
   expect_s3_class(result, "data.frame")
-  expect_equal(ncol(result), 9)
-  expect_named(result, c("Local", "SampleSize", "l_1", "l_2", "t_3", "t_4", "t_5", "discord", "Rdiscord"))
+  expect_equal(ncol(result), 8)
+  expect_named(result, c("Local", "SampleSize", "l_1", "l_2", "t_3", "t_4", "t_5", "discord"))
   expect_equal(nrow(result), 8)
 })
 

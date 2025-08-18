@@ -13,10 +13,9 @@
 #' @export
 #' @examples
 #'
-#' dataset <- dataset
-#' dataset.add <- dataset_add(dataset)
+#' Dataset_add(TmaxCPC_SP)
 #'
-dataset_add <- function(dataset) {
+Dataset_add <- function(dataset) {
 
   if (anyNA(dataset[, 1])) {
     stop("Column 'Years' cannot have missing data.")

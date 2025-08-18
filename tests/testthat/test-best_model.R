@@ -1,10 +1,10 @@
-test_that("best_model returns correct structure", {
+test_that("Best_model returns correct structure", {
   # Generate a small fake dataset (10 years, 3 sites)
   set.seed(123)
   fake_data <- matrix(rnorm(30), ncol = 3)
 
   # Run the function
-  result <- best_model(fake_data)
+  result <- Best_model(fake_data)
 
   # Check that result is a list with 2 elements
   expect_type(result, "list")
@@ -24,12 +24,12 @@ test_that("best_model returns correct structure", {
   expect_equal(nrow(result$atsite.models), ncol(fake_data))
 })
 
-test_that("best_model handles NA rows (sites with all missing data)", {
+test_that("Best_model handles NA rows (sites with all missing data)", {
   set.seed(123)
   data_with_na <- matrix(rnorm(30), ncol = 3)
   data_with_na[,1] <- NA  # First site entirely NA
 
-  result <- best_model(data_with_na)
+  result <- Best_model(data_with_na)
 
   # The size column for site 1 should be 0
   expect_equal(result$atsite.models$size[1], 0)
@@ -38,6 +38,6 @@ test_that("best_model handles NA rows (sites with all missing data)", {
   expect_true(all(result$atsite.models$size[-1] > 0))
 })
 
-test_that("best_model throws error with non-numeric input", {
-  expect_error(best_model("not a matrix"), "must be a matrix or data frame")
+test_that("Best_model throws error with non-numeric input", {
+  expect_error(Best_model("not a matrix"), "must be a matrix or data frame")
 })

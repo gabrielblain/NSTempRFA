@@ -17,10 +17,10 @@
 #' @importFrom stats na.omit
 #' @export
 #' @examples
-#' temperatures <- dataset[, 2:16]
-#' model <- 2
-#' fit_model(temperatures, model)
-fit_model <- function(temperatures, model) {
+#' temperatures <- TmaxCPC_SP$Pixel_1
+#' model <- 4
+#' Fit_model(temperatures, model)
+Fit_model <- function(temperatures, model) {
   if (!is.numeric(model) || length(model) != 1 || model < 1 || model > 4) {
     stop("Model must be a single integer number from 1 to 4 defining the GEV model.")
   }

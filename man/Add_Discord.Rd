@@ -12,7 +12,7 @@ The first column must contain the years, and the remaining columns contain
 temperature data from each site.}
 }
 \value{
-A \code{data.frame} with 9 columns:
+A \code{data.frame} with 8 columns:
 \describe{
 \item{Local}{Site identifier.}
 \item{SampleSize}{Number of observations for each site.}
@@ -22,7 +22,6 @@ A \code{data.frame} with 9 columns:
 \item{t_4}{L-moment ratio (L-kurtosis).}
 \item{t_5}{L-moment ratio (higher-order L-moment).}
 \item{discord}{Original discordance statistic indicating potential outlier status.}
-\item{Rdiscord}{Robust discordance statistic indicating potential outlier status.}
 }
 }
 \description{
@@ -35,5 +34,5 @@ The discordance measures identify sites that are potentially discordant
 within a regional frequency analysis framework for extreme air temperature series.
 }
 \examples{
-# d <- Add_Discord(dataset)
+# Add_Discord(TmaxCPC_SP)
 }

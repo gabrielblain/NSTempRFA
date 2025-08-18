@@ -23,8 +23,8 @@ as proposed in Martins et al. (2022) \url{doi:10.1590/1678-4499.20220061}.
 Add_Heterogenety
 }
 \examples{
-rho <- 0.5
-Ns <- 100
-dataset.add <- add_data
-Add_Heterogenety(dataset.add=dataset.add,rho = rho,Ns = Ns)
+rho <- 0.51
+Ns <- 500
+add.data <- Dataset_add(TmaxCPC_SP)
+Add_Heterogenety(dataset.add=add.data$add_data,rho = rho,Ns = Ns)
 }

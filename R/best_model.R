@@ -4,7 +4,7 @@
 #' non-stationarity in location and/or scale) to each temperature series, computes
 #' the AIC of each model, and selects the best one per the lowest total AIC.
 #'
-#' @param add_data
+#' @param add.data
 #' A numeric matrix of air temperature data as that calculated by the `dataset_add()` function.
 #'
 #' @returns
@@ -19,25 +19,26 @@
 #'
 #' @importFrom ismev gev.fit
 #' @importFrom stats na.omit
+#' @importFrom spsUtil quiet
 #' @export
 #'
 #' @examples
-#' add_data <- add_data
-#' best.parms <- best_model(add_data=add_data)
-best_model <- function(add_data) {
-  if (!is.matrix(add_data) && !is.data.frame(add_data)) {
-    stop("Input 'add_data' must be a matrix or data frame.")
+#' add.data <- Dataset_add(TmaxCPC_SP)
+#' best.parms <- Best_model(add.data=add.data$add_data)
+Best_model <- function(add.data) {
+  if (!is.matrix(add.data) && !is.data.frame(add.data)) {
+    stop("Input 'add.data' must be a matrix or data frame.")
   }
 
-  add_data <- as.matrix(add_data)
-  n.sites <- ncol(add_data)
+  add.data <- as.matrix(add.data)
+  n.sites <- ncol(add.data)
   size <- matrix(NA, n.sites, 1)
   at.site.model1 <- at.site.model2 <- at.site.model3 <- at.site.model4 <- as.data.frame(matrix(NA, n.sites, 5))
   at.site.AICs <- as.data.frame(matrix(NA, n.sites, 4))
   atsite.models <- as.data.frame(matrix(NA, n.sites, 6))
 
   for (i in 1:n.sites) {
-    local <- na.omit(add_data[, i])
+    local <- na.omit(add.data[, i])
     size[i, 1] <- length(local)
 
     if (length(local) == 0) {
@@ -57,7 +58,6 @@ best_model <- function(add_data) {
   }
 
   best <- which.min(colSums(at.site.AICs, na.rm = TRUE))
-
   atsite.models[, 1:5] <- switch(
     best,
     at.site.model1,

@@ -1,4 +1,4 @@
-test_that("dataset_add returns correct output structure and values", {
+test_that("Dataset_add returns correct output structure and values", {
   # Create a small example dataset
   years <- 1991:2000
   site_data <- matrix(c(
@@ -14,7 +14,7 @@ test_that("dataset_add returns correct output structure and values", {
   dataset <- cbind(years, site_data)
 
   # Run the function
-  result <- dataset_add(dataset)
+  result <- Dataset_add(dataset)
 
   # Check structure
   expect_type(result, "list")
@@ -27,22 +27,22 @@ test_that("dataset_add returns correct output structure and values", {
   expect_true(all(abs(site_means) < 1e-10))
 })
 
-test_that("dataset_add throws error when Years column contains NA", {
+test_that("Dataset_add throws error when Years column contains NA", {
   dataset_with_na <- matrix(1:80, ncol = 8)
   dataset_with_na[1, 1] <- NA
-  expect_error(dataset_add(dataset_with_na), "Column 'Years' cannot have missing data.")
+  expect_error(Dataset_add(dataset_with_na), "Column 'Years' cannot have missing data.")
 })
 
-test_that("dataset_add throws error when fewer than 3 sites are provided", {
+test_that("Dataset_add throws error when fewer than 3 sites are provided", {
   dataset_few_sites <- matrix(1:30, ncol = 3) # Only 4 sites + 1 year column = 5 columns
-  expect_error(dataset_add(dataset_few_sites), "The number of sites should be larger than 2.")
+  expect_error(Dataset_add(dataset_few_sites), "The number of sites should be larger than 2.")
 })
 
-test_that("dataset_add throws error when any site has fewer than 10 non-NA records", {
+test_that("Dataset_add throws error when any site has fewer than 10 non-NA records", {
   years <- 1991:2000
   site_data <- matrix(NA, ncol = 7, nrow = 10)
   site_data[, 1:6] <- 30 # Enough data for 6 sites
   site_data[1:9, 7] <- 30 # Only 9 valid years for site 7 (should trigger error)
   dataset <- cbind(years, site_data)
-  expect_error(dataset_add(dataset), "at least 10 years of records")
+  expect_error(Dataset_add(dataset), "at least 10 years of records")
 })

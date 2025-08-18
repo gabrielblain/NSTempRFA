@@ -34,9 +34,13 @@ of the time-varying parameter estimates.
 Site_parCI
 }
 \examples{
-atsite_temp <- add_data[,1]
-model <- 2
-site_par <- best_sites[1,1:5]
-n.boots <- 100
-Site_parCI(atsite_temp,model, site_par, n.boots)
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+temperatures <- TmaxCPC_SP$Pixel_1
+model <- 4
+site_par <- Fit_model(temperatures, model)
+Site_parCI(atsite_temp=temperatures,
+           model=model,
+           site_par=site_par[1:5],
+           n.boots=100)
+\dontshow{\}) # examplesIf}
 }
