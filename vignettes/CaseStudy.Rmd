@@ -1,0 +1,171 @@
+---
+title: "CaseStudy"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{CaseStudy}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+The NSTempRFA package implements the Non-Stationary Additional Regional Frequency Analysis (NS-Add-RFA) method, designed to assess extreme temperature trends in a regional context. This vignette demonstrates the package's application using 13 annual maximum temperature (Tmax) series (1991-2024) from São Paulo, Brazil. The data, sourced from NOAA's Physical Sciences Laboratory <https://downloads.psl.noaa.gov/Datasets/cpc_global_temp/>, were derived using the block maxima approach (one block per calendar year).
+
+# Getting Started
+Install the package from GitHub <https://github.com/gabrielblain/NSTempRFA> (see README) and load it into your R session:
+
+```{r setup}
+library(NSTempRFA)
+```
+
+## Data
+**Table 1** presents the longitude (lon) and latitude (lat), in decimal degrees of the 13 Tmax series.
+```{r Table 1}
+Table1 <- lonlat_Tmax
+Table1
+```
+
+**Table 2** displays the Tmax data, in Celsius degrees.
+```{r Table 2}
+TmaxCPC_SP[,2:14] <- round(TmaxCPC_SP[,2:14],1)
+Table2 <- TmaxCPC_SP
+Table2
+```
+
+## Data Screening
+
+Before analysis, ensure data quality by checking for inconsistencies or outliers. The `Add_Discord()` function (demonstrated below) can help identify problematic series.
+
+```{r Add_Discord}
+Add_Discord(TmaxCPC_SP)
+```
+
+## Do the 13 Tmax series form an “acceptably homogeneous” group?
+
+We develped the `Add_Heterogenety()` function to verify if a group of extreme maximum or minimum air temperature series can be deemed as “acceptably homogeneous”. This function calculates the additional heterogeneity  measure (Add_H) as proposed by Martins et al. (2022) <doi:10.1590/1678-4499.20220061>. To calculate Add_H we first need to subtract from each data its sample mean. This can be accomplished by applying the `Dataset_add()` function.
+
+```{r Preparing the data}
+add.data <- Dataset_add(TmaxCPC_SP)
+add.data$add_data
+add.data$reg_mean
+```
+
+**Then, the `Add_Heterogenety()` function can be applied as follows:**
+```{r Add_H}
+set.seed(123)
+rho <- 0.51 # The average spatial correlation among the series
+Ns <- 500   # Number of Simulation required for calculating 
+Add_H <- Add_Heterogenety(dataset.add=add.data$add_data,rho = rho,Ns = Ns)
+Add_H
+```
+
+**Add_H values equal to or lower than 2 allows us to accept that the group of series can be regarded as acceptably homogeneous.** Therefore, the Add_H value obtained in this example (~0.76) allowed us to accept such a assumption. In case we had obtained Add_H values larger than 2, we probably could verified which Tmax series were preventing the group to be deemed as acceptably homogeneous. This sort of verification can be performed using the `Add_Discord()` function, which calculates the discordance measure under the additional approach (Add_d). 
+
+```{r Add_d}
+Add_Discord(TmaxCPC_SP)
+```
+
+The column discord presents the Add_d values for each series. In case of Add_H larger than 2, the series with the largest Add_d values may be removed from the group and the Add_H measure may be re-calculated. It is also worth mentioning that this discordance measure may also be used at the onset of the analysis - before pre-defining the groups - to detect series with gross errors.
+
+## Selecting the best GEV-model
+
+In its current version, the NS-Add-RFA method offers four nonstationary models to describe the whether and how the probabilistic structure of the air temperature series, which forms the homogeneous group, are changing across time. These models are based on the Generalized Extreme Value distribution and are described as follows:
+
+- Model 1 (stationary): The three parameters of the GEV are constant over time.
+- Model 2 (homoscedastic): Only the location is allowed to vary over time linearly.
+- Model 3: Only the scale parameter is allowed to vary over time linearly.
+- Model 4: Both location and scale parameters are allowed to vary over time linearly.
+
+The `Best_model()` function selects the best model among these four candidates using the second-order Akaike Information Criterion.
+
+```{r Best_model}
+best.parms <- Best_model(add.data=add.data$add_data)
+# The best model is:
+as.numeric(best.parms$best) #Model 4
+# The at-site parameters are:
+best.parms$atsite.models
+```
+
+Having defined the best GEV model, the `Reg_par()` function can be applied to defined the parameters of the regional distribution, which is valid for all 13 series.
+
+```{r Reg_par}
+regional.parms <- Reg_par(best_model=best.parms$atsite.models)
+regional.parms
+```
+
+The analysis of the parameters of the regional distribution indicates that the frequency distribution of the Tmax data in the region is experiencing changes in both location and scale parameters. In other words, the distribution is experiencing a change in its central tendency (location) and variance (scale). More specifically, the *weighted_mu1* and *weighted_sigma1* indicate, respectively, that the average and dispersion of the Tmax values  increased from 1991 to 2024. 
+
+Additionally, we may also calculate the confidence intervals for the parameters of this regional distribution. This can be accomplished by applying the `Reg_parCI()` as follows:
+
+```{r Reg_parCI}
+set.seed(123)
+Reg_parCI(add_data=add.data$add_data,
+model=best.parms$best,
+reg_par=regional.parms,
+n.boots=100)
+```
+
+Because the Regional Frequency Analysis uses all series within a homogeneous region to fit the regional distribution, it is expect to reduce parameter estimation uncertainties in respect to those an at-site approach. To verify such assumption, we will calculate the confidence interval, through the at-site approach, for the Tmax series of Pixel_1 (see Table 2).
+
+```{r Site_parCI}
+set.seed(123)
+temperatures <- TmaxCPC_SP$Pixel_1
+model <- 4
+site_par <- Fit_model(temperatures, model)
+Site_parCI(atsite_temp=temperatures,
+            model=model,
+            site_par=site_par[1:5],
+            n.boots=100)
+```
+The differences between the upper and lower 95% confidence intervals (CI) of the regional estimates are lower than those of the at-site approach for all GEV parameter. Additionally,  both upper and lower limits for weighted_mu1 - regional approach (~ 0.071 and ~0.015, respectively) - indicate changes toward warmer conditions. On the other hand, while the lower limit for mu1 - at-site approach (~ -0.031) - indicates a change toward cooler conditions, the upper limit (~0.043) indicates a change towards warmer conditions.
+
+The narrower CI of the parameters of the regional distribution are consistent with the assumption that the NS-Add-RFA reduced the parameter estimation uncertainties in respect to the at-site approach. Therefore, may use its statistics to calculate the quantile estimates associated with distinct cumulative probabilities. Additionally, since the best model (model 4) is a non-stationary model, we can also calculate how these quantile estimates changed from the first year (1991) to the last year (2024) of the series. This assessment can be carried out using `Add_RegQuant()` function.
+
+```{r Add_RegQuant}
+prob <- c(0.8, 0.85, 0.90, 0.92, 0.93, 0.94, 0.95, 0.97, 0.99)
+add.data <- Dataset_add(TmaxCPC_SP)
+best.parms <- Best_model(add.data=add.data$add_data)
+regional_pars <- Reg_par(best_model = best.parms$atsite.models)
+Quantiles_1991 <- Add_RegQuant(
+   prob = prob,
+   regional_pars = regional_pars,
+   site_temp = TmaxCPC_SP$Pixel_1,
+   n.year = 1)
+Quantiles_2024 <- Add_RegQuant(
+   prob = prob,
+   regional_pars = regional_pars,
+   site_temp = TmaxCPC_SP$Pixel_1,
+   n.year = 34)
+Quantiles_1991
+Quantiles_2024
+```
+
+The analysis of the quantile estimates for 1991 and 2024 highlights the changes towards warmer conditions that this region in the State of Sao Paulo, formed by 13 weather stations, has experienced over the last 24 years. For example, the quantil estimates associated with a cumulative probability equal to 0.8 raised from ~35.84°C in 1991 to 39.02°C in 2024.
+
+This package also allows an analogous analysis to that of the `Add_RegQuant()`that indicates whether and how the cumulative probabilities of a given quantile changed over time. This assessment can be carried out using `Add_RegProb()` function.
+
+```{r Add_RegProb}
+ quantiles <- c(35.20824, 35.36493, 35.55990, 35.65665, 35.71144,
+                35.77203, 35.84027, 36.01384, 36.31544)
+ add.data <- Dataset_add(TmaxCPC_SP)
+ best.parms <- Best_model(add.data=add.data$add_data)
+ regional_pars <- Reg_par(best_model = best.parms$atsite.models)
+ Probs_1991 <- Add_RegProb(quantiles=quantiles,
+                   regional_pars=regional_pars,
+                   site_temp=TmaxCPC_SP$Pixel_1,
+                   n.year=1)
+ Probs_2024 <- Add_RegProb(quantiles=quantiles,
+                   regional_pars=regional_pars,
+                   site_temp=TmaxCPC_SP$Pixel_1,
+                   n.year=34)
+ Probs_1991
+ Probs_2024
+```
+ 
+
