@@ -26,12 +26,14 @@
 #' @importFrom spsUtil quiet
 #' @importFrom extRemes fevd
 #' @importFrom utils setTxtProgressBar txtProgressBar
-#' @examples
-#' atsite_temp <- add_data[,1]
-#' model <- 2
-#' site_par <- best_sites[1,1:5]
-#' n.boots <- 100
-#' Site_parCI(atsite_temp,model, site_par, n.boots)
+#' @examplesIf interactive()
+#' temperatures <- TmaxCPC_SP$Pixel_1
+#' model <- 4
+#' site_par <- Fit_model(temperatures, model)
+#' Site_parCI(atsite_temp=temperatures,
+#'            model=model,
+#'            site_par=site_par[1:5],
+#'            n.boots=100)
 Site_parCI <- function(atsite_temp,model,site_par,n.boots){
   data_site <- as.matrix(atsite_temp)
   if (ncol(data_site) != 1) {stop("data_site must be a vector or single column matrix.")}
@@ -77,7 +79,7 @@ Site_parCI <- function(atsite_temp,model,site_par,n.boots){
     back.orig <- par.temporal[, 1] +
       (par.temporal[, 2] / par.temporal[, 3]) *
       (exp(IDD.series.boot[rows] * par.temporal[, 3]) - 1)
-    parameters <- fit_model(temperatures=back.orig,model=model)
+    parameters <- Fit_model(temperatures=back.orig,model=model)
     site_par.overall.boot[r,] <- as.matrix(parameters[1:5])
     setTxtProgressBar(pb, r)
   }

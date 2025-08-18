@@ -24,11 +24,14 @@
 #' @export
 #' @importFrom stats quantile
 #' @examplesIf interactive()
-#' add_data <- add_data
-#' model <- 2
-#' reg_par <- regional_pars
-#' n.boots <- 100
-#' Reg_parCI(add_data, model, reg_par, n.boots)
+#' add.data <- Dataset_add(TmaxCPC_SP)
+#' best.parms <- Best_model(add.data=add.data$add_data)
+#' regional.parms <- Reg_par(best_model=best.parms$atsite.models)
+#' model <- 4
+#' Reg_parCI(add_data=add.data$add_data,
+#' model=4,
+#' reg_par=regional.parms,
+#' n.boots=100)
 Reg_parCI <- function(add_data,model,reg_par,n.boots){
   if (is.null(n.boots)) {
     n.boots <- 999
@@ -54,14 +57,13 @@ Reg_parCI <- function(add_data,model,reg_par,n.boots){
   reg_par <- as.numeric(reg_par)
   max_time <- nrow(add_data)
   par.temporal <- matrix(NA,max_time,3)
-  #scaled <- scale(1L:max_time)
   time <- (1L:max_time)
   IDD.series <- add_data
   for (site in 1:n.sites){
     par.temporal[,1] <- reg_par[1] + reg_par[2] * time
     par.temporal[,2] <- reg_par[3] + reg_par[4] * time
     par.temporal[,3] <-  rep(reg_par[5],max_time)
-    IDD.series[,site] <- 1/par.temporal[,3] * log( 1+ par.temporal[,3] * ((add_data[,site]-par.temporal[,1])/par.temporal[,2]))
+    IDD.series[,site] <- suppressWarnings(1/par.temporal[,3] * log( 1+ par.temporal[,3] * ((add_data[,site]-par.temporal[,1])/par.temporal[,2])))
   }
   ##################
   all.lines <- n.boots * max_time
@@ -83,11 +85,11 @@ Reg_parCI <- function(add_data,model,reg_par,n.boots){
   pb <- txtProgressBar(min = 0, max = n.boots, style = 3)
   for (r in seq_len(n.boots)) {
     rows <- ((r - 1) * max_time + 1):(r * max_time)
-    back.orig <- par.temporal[, 1] +
+    back.orig <- suppressWarnings(par.temporal[, 1] +
       (par.temporal[, 2] / par.temporal[, 3]) *
-      (exp(IDD.series.boot[rows, ] * par.temporal[, 3]) - 1)
-    find.best.boot <- fit_model(temperatures=back.orig,model=model)
-    reg_par.overall.boot[r, ] <- as.matrix(reg_par(best_model=find.best.boot))
+      (exp(IDD.series.boot[rows, ] * par.temporal[, 3]) - 1))
+    find.best.boot <- suppressWarnings(Fit_model(temperatures=back.orig,model=model))
+    reg_par.overall.boot[r, ] <- as.matrix(Reg_par(best_model=find.best.boot))
     setTxtProgressBar(pb, r)
   }
   close(pb)

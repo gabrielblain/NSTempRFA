@@ -18,10 +18,10 @@
 #' @importFrom stats pnorm sd
 #' @importFrom Matrix nearPD
 #' @examples
-#' rho <- 0.5
-#' Ns <- 100
-#' dataset.add <- add_data
-#' Add_Heterogenety(dataset.add=dataset.add,rho = rho,Ns = Ns)
+#' rho <- 0.51
+#' Ns <- 500
+#' add.data <- Dataset_add(TmaxCPC_SP)
+#' Add_Heterogenety(dataset.add=add.data$add_data,rho = rho,Ns = Ns)
 Add_Heterogenety <- function(dataset.add,rho,Ns){
   n.sites <- ncol(dataset.add)
   if (n.sites < 3) stop("The number of sites should be equal to or larger than 3.")

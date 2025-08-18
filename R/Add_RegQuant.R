@@ -17,13 +17,14 @@
 #'
 #' @examples
 #' prob <- c(0.8, 0.85, 0.90, 0.92, 0.93, 0.94, 0.95, 0.97, 0.99)
-#' best_model <- best_sites
-#' regional_pars <- reg_par(best_model = best_model)
-#' RegQuant <- Add_RegQuant(
+#' add.data <- Dataset_add(TmaxCPC_SP)
+#' best.parms <- Best_model(add.data=add.data$add_data)
+#' regional_pars <- Reg_par(best_model = best.parms$atsite.models)
+#' Add_RegQuant(
 #'   prob = prob,
 #'   regional_pars = regional_pars,
-#'   site_temp = dataset$station1,
-#'   n.year = 30
+#'   site_temp = TmaxCPC_SP$Pixel_1,
+#'   n.year = 34
 #' )
 Add_RegQuant <- function(prob,
                          regional_pars,

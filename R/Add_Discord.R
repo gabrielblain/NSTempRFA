@@ -8,7 +8,7 @@
 #'   The first column must contain the years, and the remaining columns contain
 #'   temperature data from each site.
 #'
-#' @returns A `data.frame` with 9 columns:
+#' @returns A `data.frame` with 8 columns:
 #' \describe{
 #'     \item{Local}{Site identifier.}
 #'     \item{SampleSize}{Number of observations for each site.}
@@ -18,7 +18,6 @@
 #'     \item{t_4}{L-moment ratio (L-kurtosis).}
 #'     \item{t_5}{L-moment ratio (higher-order L-moment).}
 #'     \item{discord}{Original discordance statistic indicating potential outlier status.}
-#'     \item{Rdiscord}{Robust discordance statistic indicating potential outlier status.}
 #' }
 #'
 #' @details The discordance measures identify sites that are potentially discordant
@@ -26,10 +25,10 @@
 #'
 #' @export
 #' @importFrom lmomRFA regsamlmu
-#' @importFrom rrcov getDistance Cov CovMcd
+#' @importFrom rrcov getDistance Cov
 #'
 #' @examples
-#' # d <- Add_Discord(dataset)
+#' # Add_Discord(TmaxCPC_SP)
 Add_Discord <- function(dataset) {
   if (anyNA(dataset[, 1])) {
     stop("Column 'Years' cannot have missing data.")
@@ -47,10 +46,9 @@ Add_Discord <- function(dataset) {
     stop("All sites must have at least 10 years of records. So sorry, we cannot proceed.")
   }
 
-  d <- as.data.frame(matrix(NA, n, 9))
+  d <- as.data.frame(matrix(NA, n, 8))
   d[, 1:7] <- regsamlmu(dataset.year, lcv = FALSE)
   d[, 8] <- sqrt(getDistance(Cov(d[, 4:6])))
-  d[, 9] <- sqrt(getDistance(CovMcd(d[, 4:6])))
-  colnames(d) <- c("Local", "SampleSize", "l_1", "l_2", "t_3", "t_4", "t_5", "discord", "Rdiscord")
+  colnames(d) <- c("Local", "SampleSize", "l_1", "l_2", "t_3", "t_4", "t_5", "discord")
   return(d)
 }
