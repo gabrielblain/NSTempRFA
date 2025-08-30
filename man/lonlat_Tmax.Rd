@@ -7,7 +7,7 @@
 \format{
 \subsection{\code{lonlat_Tmax}}{
 
-A data.frame with 2 columns and 13 rows.
+A data.frame with 2 columns and 10 rows.
 
 \describe{
 \item{lon}{Longitude in decinal degrees}

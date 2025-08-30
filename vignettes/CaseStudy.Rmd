@@ -33,7 +33,7 @@ Table1
 
 **Table 2** displays the Tmax data, in Celsius degrees.
 ```{r Table 2}
-TmaxCPC_SP[,2:14] <- round(TmaxCPC_SP[,2:14],1)
+TmaxCPC_SP[,2:11] <- round(TmaxCPC_SP[,2:11],1)
 Table2 <- TmaxCPC_SP
 Table2
 ```
@@ -46,7 +46,7 @@ Before analysis, ensure data quality by checking for inconsistencies or outliers
 Add_Discord(TmaxCPC_SP)
 ```
 
-## Do the 13 Tmax series form an “acceptably homogeneous” group?
+## Do the 10 Tmax series form an “acceptably homogeneous” group?
 
 We develped the `Add_Heterogenety()` function to verify if a group of extreme maximum or minimum air temperature series can be deemed as “acceptably homogeneous”. This function calculates the additional heterogeneity  measure (Add_H) as proposed by Martins et al. (2022) <doi:10.1590/1678-4499.20220061>. To calculate Add_H we first need to subtract from each data its sample mean. This can be accomplished by applying the `Dataset_add()` function.
 

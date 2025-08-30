@@ -7,11 +7,11 @@
 \format{
 \subsection{\code{TmaxCPC_SP}}{
 
-A data.frame with 14 columns and 34 rows.
+A data.frame with 11 columns and 34 rows.
 
 \describe{
 \item{Year}{Year}
-\item{Pixel_1 to Pixel_13}{daily extremes for air temperature}
+\item{Pixel_1 to Pixel_10}{daily extremes for air temperature}
 }
 }
 }
