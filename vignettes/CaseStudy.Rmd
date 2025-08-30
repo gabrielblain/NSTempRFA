@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 ```
 
 # Introduction
-The NSTempRFA package implements the Non-Stationary Additional Regional Frequency Analysis (NS-Add-RFA) method, designed to assess extreme temperature trends in a regional context. This vignette demonstrates the package's application using 13 annual maximum temperature (Tmax) series (1991-2024) from São Paulo, Brazil. The data, sourced from NOAA's Physical Sciences Laboratory <https://downloads.psl.noaa.gov/Datasets/cpc_global_temp/>, were derived using the block maxima approach (one block per calendar year).
+The NSTempRFA package implements the Non-Stationary Additional Regional Frequency Analysis (NS-Add-RFA) method, designed to assess extreme temperature trends in a regional context. This vignette demonstrates the package's application using 10 annual maximum temperature (Tmax) series (1991-2024) from São Paulo, Brazil. The data, sourced from NOAA's Physical Sciences Laboratory <https://downloads.psl.noaa.gov/Datasets/cpc_global_temp/>, were derived using the block maxima approach (one block per calendar year).
 
 # Getting Started
 Install the package from GitHub <https://github.com/gabrielblain/NSTempRFA> (see README) and load it into your R session:
