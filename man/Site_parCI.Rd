@@ -36,7 +36,7 @@ Site_parCI
 \examples{
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 temperatures <- TmaxCPC_SP$Pixel_1
-model <- 4
+model <- 2
 site_par <- Fit_model(temperatures, model)
 Site_parCI(atsite_temp=temperatures,
            model=model,

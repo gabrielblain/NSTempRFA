@@ -7,7 +7,7 @@
 #' @export
 #' @importFrom extRemes pevd
 #' @examples
-#' quantiles <- c(39.5,39.8,40.1,40.3,40.4,40.5,40.6,41.0,41.7)
+#' quantiles <- c(37.2, 37.5, 37.8, 37.9, 38.0, 38.1, 38.2, 38.5, 39.0)
 #' add.data <- Dataset_add(TmaxCPC_SP)
 #' best.parms <- Best_model(add.data=add.data$add_data)
 #' regional_pars <- Reg_par(best_model = best.parms$atsite.models)

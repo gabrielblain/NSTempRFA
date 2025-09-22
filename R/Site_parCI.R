@@ -28,7 +28,7 @@
 #' @importFrom utils setTxtProgressBar txtProgressBar
 #' @examplesIf interactive()
 #' temperatures <- TmaxCPC_SP$Pixel_1
-#' model <- 4
+#' model <- 2
 #' site_par <- Fit_model(temperatures, model)
 #' Site_parCI(atsite_temp=temperatures,
 #'            model=model,

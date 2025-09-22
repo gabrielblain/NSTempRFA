@@ -27,9 +27,8 @@
 #' add.data <- Dataset_add(TmaxCPC_SP)
 #' best.parms <- Best_model(add.data=add.data$add_data)
 #' regional.parms <- Reg_par(best_model=best.parms$atsite.models)
-#' model <- 4
 #' Reg_parCI(add_data=add.data$add_data,
-#' model=4,
+#' model=2,
 #' reg_par=regional.parms,
 #' n.boots=100)
 Reg_parCI <- function(add_data,model,reg_par,n.boots){
