@@ -16,7 +16,7 @@
 #' @importFrom extRemes qevd
 #'
 #' @examples
-#' prob <- c(0.8, 0.85, 0.90, 0.92, 0.93, 0.94, 0.95, 0.97, 0.99)
+#' prob <- c(0.90, 0.92, 0.93, 0.94, 0.95, 0.97, 0.99)
 #' add.data <- Dataset_add(TmaxCPC_SP)
 #' best.parms <- Best_model(add.data=add.data$add_data)
 #' regional_pars <- Reg_par(best_model = best.parms$atsite.models)

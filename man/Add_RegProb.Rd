@@ -19,7 +19,7 @@ Add_RegProb(quantiles, regional_pars, site_temp, n.year)
 Add_RegProb
 }
 \examples{
-quantiles <- c(37.2, 37.5, 37.8, 37.9, 38.0, 38.1, 38.2, 38.5, 39.0)
+quantiles <- c(37.8, 37.9, 38.0, 38.1, 38.2, 38.5, 39.0)
 add.data <- Dataset_add(TmaxCPC_SP)
 best.parms <- Best_model(add.data=add.data$add_data)
 regional_pars <- Reg_par(best_model = best.parms$atsite.models)
