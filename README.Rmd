@@ -319,8 +319,7 @@ Add_RegQuant(prob, reg_par, site_mean, max_time)
 **site_mean**: A single number with site’s average value for the air temperature data\
 **max_time**: A single number describing the number of the year that the time-varying parameters
 should be calculated. For example, if the users need to calculated the
-parameters for the first year max_time is set to 1 and the 30th year max_time is
-set to 30.
+parameters for the first year max_time is set to 1 and the 30th year max_time is set to 30.
 
 ### Value
 Quantile estimates of extreme air temperature data calculated from
