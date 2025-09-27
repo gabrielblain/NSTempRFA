@@ -50,9 +50,7 @@ library(NSTempRFA)
 ### Function `Add_Discord()`
 
 ### Description
-This function calculates the Hosking and Wallis’ discordance measure (discord) and the robust
-discordance measure (Neykov et al. 2007) doi:10.1029/2006WR005322 using the additive approach
-proposed in Martins et al. (2022) doi:10.1590/1678-4499.20220061.
+This function calculates the Hosking and Wallis’ discordance measure (discord) using the additive approach proposed in Martins et al. (2022) doi:10.1590/1678-4499.20220061.
 
 ### Usage
 Add_Discord(dataset)
@@ -66,7 +64,7 @@ data from each site.
 The discordance measures identify sites that are potentially discordant within a regional frequency analysis framework for extreme air temperature series.
 
 ### Value
-A data.frame with 8 columns:\
+A data.frame with seven columns:\
 - Local Site identifier.\
 - SampleSize Number of observations for each site.\
 - l_1 L-moment ratio (mean).\
@@ -127,10 +125,10 @@ sites. It must be larger than -1.0 and lower than 1.0.\
 
 ### Example
 ```{r example 3}
-rho <- 0.5
-Ns <- 100
-dataset.add <- TmaxCPC_SP
-Add_Heterogenety(dataset.add=dataset.add,rho = rho,Ns = Ns)
+rho <- 0.51
+Ns <- 500
+add.data <- Dataset_add(TmaxCPC_SP)
+Add_Heterogenety(dataset.add=add.data$add_data,rho = rho,Ns = Ns)
 ```
 
 ### Function `Best_model()`
@@ -346,7 +344,7 @@ the Additional nonstationary RFA approach.
 
 # Methodological Details
 
-From a statistical perspective, ongoing climate change has altered the frequency and intensity of extreme weather events, leading to a nonstationary environment (O’Brien et al., 2014). As a result, the original RFA technique must be extended to account for nonstationarities in the data. To the best of our knowledge, O’Brien et al. (2014) was the first study to propose such an extension. This package adapted this extension to the additive approach (equation 1):
+From a statistical perspective, ongoing climate change has altered the frequency and intensity of extreme weather events, leading to a nonstationary environment (O’Brien and Burn, 2014). As a result, the original RFA technique must be extended to account for nonstationarities in the data. To the best of our knowledge, O’Brien and Burn (2014) was the first study to propose such an extension. This package adapted this extension to the additive approach (equation 1):
 
 $$
 Q_{i,t}(F) = mu_t + q_t(F), \quad i = 1, \dots, N \quad \text{and} \quad 0 < F < 1
@@ -379,3 +377,19 @@ Martins. Maintainer: Gabriel Constantino Blain,
 
 
 ## References
+
+O’Brien, N.L., Burn,H.D. A nonstationary index-flood technique for estimating extreme quantiles for annual maximum streamflow, Journal of Hydrology, v.519, Part B, 2014, https://doi.org/10.1016/j.jhydrol.2014.09.041.
+
+Burn, D.H., 2003. The use of resampling for estimating confidence intervals for single site and pooled frequency analysis. Hydrol. Sci. J. 48 (1), 25–38. https://doi.org/10.1623/hysj.48.1.25.43485.
+
+O’Brien, N.L., Burn,H.D. A nonstationary index-flood technique for estimating extreme quantiles for annual maximum streamflow, Journal of Hydrology, v.519, Part B, 2014, https://doi.org/10.1016/j.jhydrol.2014.09.041.
+
+Dalrymple, T. (1960). Flood frequency analysis. Geological Survive Water Supply Paper, 1543-A, 11-51. https://doi.org/10.3133/wsp1543A
+
+[IPCC] Intergovernmental Panel on Climate Change (2021). Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report of the Intergovernmental Panel on Climate Change. Cambridge University Press. Available at: https://www.ipcc.ch/report/ar6/wg1/ Accessed on: Jan. 1, 2025.
+
+Martins, L. L., Souza, J. C., Sobierajski, G. R. and Blain, G. C. (2022). Is it possible to apply the regional frequency analysis to daily extreme air temperature data? Bragantia, 81, 1-22. https://doi.org/10.1590/1678-4499.20220061
+
+Smith, A., Sampson, C., & Bates, P. D. (2015). Regional flood frequency analysis at the global scale. Water Resources Research, 51(1), 539–553. https://doi.org/10.1002/2014WR015814
+
+Hosking JRM, Wallis JR (1997) Regional frequency analysis: an approach based on L-moments. Cambridge University Press. https://doi.org/10.1017/cbo9780511529443
