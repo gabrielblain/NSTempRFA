@@ -340,24 +340,6 @@ the Additional nonstationary RFA approach.
  )
 ```
 
-## Data files included in the package
-
-# Methodological Details
-
-From a statistical perspective, ongoing climate change has altered the frequency and intensity of extreme weather events, leading to a nonstationary environment (O’Brien and Burn, 2014). As a result, the original RFA technique must be extended to account for nonstationarities in the data. To the best of our knowledge, O’Brien and Burn (2014) was the first study to propose such an extension. This package adapted this extension to the additive approach (equation 1):
-
-$$
-Q_{i,t}(F) = mu_t + q_t(F), \quad i = 1, \dots, N \quad \text{and} \quad 0 < F < 1
-$$
-
-Where:
-- \( Q_{i,t}(F) \) is the quantile function at site *i* and time *t*,
-- \( q_t(F) \) is the time-varying regional quantile function (growth curve),
-- \( mu_t \) is the time-dependent index value (regional location parameter),
-- and *N* is the number of sites in the homogeneous region.
-
-Add more information
-
 ## BugReports:
 
 <https://github.com/gabrielblain/NSTempRFA/issues>
@@ -378,18 +360,16 @@ Martins. Maintainer: Gabriel Constantino Blain,
 
 ## References
 
-O’Brien, N.L., Burn,H.D. A nonstationary index-flood technique for estimating extreme quantiles for annual maximum streamflow, Journal of Hydrology, v.519, Part B, 2014, https://doi.org/10.1016/j.jhydrol.2014.09.041.
+Burn, D.H., 2003. The use of resampling for estimating confidence intervals for single site and pooled frequency analysis. Hydrol. Sci. J. 48 (1), 25–38. DOI: 10.1623/hysj.48.1.25.43485.
 
-Burn, D.H., 2003. The use of resampling for estimating confidence intervals for single site and pooled frequency analysis. Hydrol. Sci. J. 48 (1), 25–38. https://doi.org/10.1623/hysj.48.1.25.43485.
+O’Brien, N.L., Burn,H.D. A nonstationary index-flood technique for estimating extreme quantiles for annual maximum streamflow, Journal of Hydrology, v.519, 2014, DOI: 10.1016/j.jhydrol.2014.09.041.
 
-O’Brien, N.L., Burn,H.D. A nonstationary index-flood technique for estimating extreme quantiles for annual maximum streamflow, Journal of Hydrology, v.519, Part B, 2014, https://doi.org/10.1016/j.jhydrol.2014.09.041.
-
-Dalrymple, T. (1960). Flood frequency analysis. Geological Survive Water Supply Paper, 1543-A, 11-51. https://doi.org/10.3133/wsp1543A
+Dalrymple, T. (1960). Flood frequency analysis. Geological Survive Water Supply Paper, 1543-A, 11-51. DOI: 10.3133/wsp1543A
 
 [IPCC] Intergovernmental Panel on Climate Change (2021). Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report of the Intergovernmental Panel on Climate Change. Cambridge University Press. Available at: https://www.ipcc.ch/report/ar6/wg1/ Accessed on: Jan. 1, 2025.
 
-Martins, L. L., Souza, J. C., Sobierajski, G. R. and Blain, G. C. (2022). Is it possible to apply the regional frequency analysis to daily extreme air temperature data? Bragantia, 81, 1-22. https://doi.org/10.1590/1678-4499.20220061
+Martins, L. L., Souza, J. C., Sobierajski, G. R. and Blain, G. C. (2022). Is it possible to apply the regional frequency analysis to daily extreme air temperature data? Bragantia, 81, 1-22. DOI: 10.1590/1678-4499.20220061
 
-Smith, A., Sampson, C., & Bates, P. D. (2015). Regional flood frequency analysis at the global scale. Water Resources Research, 51(1), 539–553. https://doi.org/10.1002/2014WR015814
+Smith, A., Sampson, C., & Bates, P. D. (2015). Regional flood frequency analysis at the global scale. Water Resources Research, 51(1), 539–553. DOI: 10.1002/2014WR015814
 
-Hosking JRM, Wallis JR (1997) Regional frequency analysis: an approach based on L-moments. Cambridge University Press. https://doi.org/10.1017/cbo9780511529443
+Hosking JRM, Wallis JR (1997) Regional frequency analysis: an approach based on L-moments. Cambridge University Press. DOI: 10.1017/cbo9780511529443
