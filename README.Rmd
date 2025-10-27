@@ -15,6 +15,8 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 <!-- Example badges you can add after uploading to GitHub: [![R-CMD-check](https://github.com/yourusername/NSTempRFA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/yourusername/NSTempRFA/actions) [![CRAN status](https://www.r-pkg.org/badges/version/NSTempRFA)](https://CRAN.R-project.org/package=NSTempRFA) [![License: GPL-3](https://img.shields.io/badge/license-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) --> 
+[![R-CMD-check](https://github.com/gabrielblain/NSTempRFA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gabrielblain/NSTempRFA/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/gabrielblain/NSTempRFA/graph/badge.svg)](https://app.codecov.io/gh/gabrielblain/NSTempRFA)
 <!-- badges: end -->
 
 A package designed to apply the RFA technique to air temperature data under climate change conditions
