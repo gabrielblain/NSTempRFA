@@ -34,7 +34,7 @@ of the time-varying parameter estimates.
 Site_parCI
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 temperatures <- TmaxCPC_SP$Pixel_1
 model <- 2
 site_par <- Fit_model(temperatures, model)

@@ -34,7 +34,7 @@ of the time-varying parameter estimates. The spatial dependence between sites is
 Reg_parCI
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 add.data <- Dataset_add(TmaxCPC_SP)
 best.parms <- Best_model(add.data=add.data$add_data)
 regional.parms <- Reg_par(best_model=best.parms$atsite.models)
