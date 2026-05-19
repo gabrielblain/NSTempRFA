@@ -31,13 +31,13 @@ pak::pak("gabrielblain/NSTempRFA")
 
 The Regional Frequency Analysis (RFA; Dalrymple, 1960) technique has been widely used to improve the probabilistic assessment of extreme rainfall and flood events worldwide. The fundamental concept behind RFA is to evaluate whether a group of time series from distinct sites can be considered “acceptably homogeneous” (Hosking and Wallis, 1997). If this condition is met, data from all sites can be pooled together, effectively trading space for time, and thus extending the effective data length (Smith et al. 2015).
 
-In its original version, the RFA is valid only when the variable of interest assumes strictly positive values. However, Martins et al. (2022) verified that this technique can can be effectively applied to extreme maximum (Tmax) and minimum (Tmin) air temperature series, which may assume both positive and negative values, by adopting the so-called additive approach.
+In its original version, the RFA is valid only when the variable of interest assumes strictly positive values. However, Martins et al. (2022) verified that this technique can be effectively applied to extreme maximum (Tmax) and minimum (Tmin) air temperature series, which may assume both positive and negative values, by adopting the so-called additive approach. 
 
 This additional approach is consistent with the physical characteristics of temperature data. Since the fundamental temperature scale is the Kelvin scale, where 0 K equals -273.15°C (or -459.67°F), both Tmax and Tmin values fall within a relatively narrow range compared to their distance from absolute zero. As a result, the variability in Tmax and Tmin distributions can be treated as largely independent of their sample mean (Martins et al. 2022). Moreover, when expressed in Celsius or Fahrenheit, Tmin values may be negative, further justifying the use of the additive approach.
 
 Although the study by Martins et al. (2022) showed promising results, it did not address the influence of long-term warming trends, which have been documented in nearly all regions of the world (IPCC, 2021). This calls for an extension of the RFA framework to incorporate time-dependent, nonstationary statistical properties. 
 
-This package proposes a new methodology for applying the RFA to extreme Tmax and Tmin data under nonstationary climate conditions.
+To overcome this limitation, Blain et al. (2026) propose the Non-stationary Additive Regional Frequency Analysis, an extension of the additive RFA that integrates nonstationary probabilistic models to represent temporal changes in air temperature frequency distributions at the regional scale. This package was designed to facilitate the application of this new method to extreme Tmax and Tmin data under nonstationary climate conditions.
 
 ## Basic Instructions
 
@@ -50,7 +50,7 @@ library(NSTempRFA)
 ### Function `Add_Discord()`
 
 ### Description
-This function calculates the Hosking and Wallis’ discordance measure (discord) using the additive approach proposed in Martins et al. (2022) doi:10.1590/1678-4499.20220061.
+This function calculates the Hosking and Wallis’ discordance measure (discord) using the additive approach as described in Martins et al. (2022) and Blain et al (2026).
 
 ### Usage
 Add_Discord(dataset)
@@ -91,8 +91,9 @@ Subtract the sample mean of each column from their corresponding data.
 dataset_add(dataset)
 
 ### Arguments
-**dataset:** A numeric matrix with extreme air temperature data from multiple sites. The first column must contain the years, and the remaining columns contain temperature
-data from each site.
+**dataset:** A numeric matrix with extreme air temperature data from multiple sites.
+The first column must contain the years.
+The remaining columns contain temperature data from each site.
 
 ### Value
 A list object with the following elements:\
@@ -110,8 +111,8 @@ Dataset_add(dataset)
 
 ### Description
 
-Calculates Hosking and Wallis' heterogeneity measure
-using the additive approach proposed in MARTINS et al. (2022).
+Calculates Hosking and Wallis' heterogeneity measure using the additive approach
+as described in Martins et al. (2022) and Blain et al (2026).
 
 ### Usage
 Add_Heterogenety(dataset.add, rho, Ns)
@@ -277,6 +278,7 @@ Add_RegProb(quantiles, reg_par, site_mean, max_time)
 - 4th is the sigma0 parameter\
 - 5th is the sigma1 parameter\
 - 6th is the shape parameter\
+
 **site_mean**: A single number with site’s average value for the air temperature data\
 **max_time**: A single number describing the number of the year that the time-varying parameters
 should be calculated. For example, if the users need to calculated the
@@ -316,6 +318,7 @@ Add_RegQuant(prob, reg_par, site_mean, max_time)
 - 4th is the sigma0 parameter\
 - 5th is the sigma1 parameter\
 - 6th is the shape parameter\
+
 **site_mean**: A single number with site’s average value for the air temperature data\
 **max_time**: A single number describing the number of the year that the time-varying parameters
 should be calculated. For example, if the users need to calculated the
@@ -359,16 +362,18 @@ Martins. Maintainer: Gabriel Constantino Blain,
 
 ## References
 
+Blain, G. C., Sobierajski, G. R. and Martins, L. L. (2026). The non-stationary additive regional frequency analysis method. Theoretical and Applied Climatology, 157, 157-219. DOI: 10.1007/s00704-026-06148-4.
+
 Burn, D.H., 2003. The use of resampling for estimating confidence intervals for single site and pooled frequency analysis. Hydrol. Sci. J. 48 (1), 25–38. DOI: 10.1623/hysj.48.1.25.43485.
 
-O’Brien, N.L., Burn,H.D. A nonstationary index-flood technique for estimating extreme quantiles for annual maximum streamflow, Journal of Hydrology, v.519, 2014, DOI: 10.1016/j.jhydrol.2014.09.041.
+O’Brien, N.L., Burn,H.D. A nonstationary index-flood technique for estimating extreme quantiles for annual maximum streamflow, Journal of Hydrology, v.519, 2014. DOI: 10.1016/j.jhydrol.2014.09.041.
 
-Dalrymple, T. (1960). Flood frequency analysis. Geological Survive Water Supply Paper, 1543-A, 11-51. DOI: 10.3133/wsp1543A
+Dalrymple, T. (1960). Flood frequency analysis. Geological Survive Water Supply Paper, 1543-A, 11-51. DOI: 10.3133/wsp1543A.
 
 [IPCC] Intergovernmental Panel on Climate Change (2021). Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report of the Intergovernmental Panel on Climate Change. Cambridge University Press. Available at: https://www.ipcc.ch/report/ar6/wg1/ Accessed on: Jan. 1, 2025.
 
-Martins, L. L., Souza, J. C., Sobierajski, G. R. and Blain, G. C. (2022). Is it possible to apply the regional frequency analysis to daily extreme air temperature data? Bragantia, 81, 1-22. DOI: 10.1590/1678-4499.20220061
+Martins, L. L., Souza, J. C., Sobierajski, G. R. and Blain, G. C. (2022). Is it possible to apply the regional frequency analysis to daily extreme air temperature data? Bragantia, 81, 1-22. DOI: 10.1590/1678-4499.20220061.
 
-Smith, A., Sampson, C., & Bates, P. D. (2015). Regional flood frequency analysis at the global scale. Water Resources Research, 51(1), 539–553. DOI: 10.1002/2014WR015814
+Smith, A., Sampson, C., & Bates, P. D. (2015). Regional flood frequency analysis at the global scale. Water Resources Research, 51(1), 539–553. DOI: 10.1002/2014WR015814.
 
-Hosking JRM, Wallis JR (1997) Regional frequency analysis: an approach based on L-moments. Cambridge University Press. DOI: 10.1017/cbo9780511529443
+Hosking JRM, Wallis JR (1997) Regional frequency analysis: an approach based on L-moments. Cambridge University Press. DOI: 10.1017/cbo9780511529443.
