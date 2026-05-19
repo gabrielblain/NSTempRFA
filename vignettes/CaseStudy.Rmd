@@ -5,6 +5,7 @@ vignette: >
   %\VignetteIndexEntry{CaseStudy}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+bibliography: bibliography.bib
 ---
 
 ```{r, include = FALSE}
@@ -15,7 +16,15 @@ knitr::opts_chunk$set(
 ```
 
 # Introduction
-The NSTempRFA package implements the Non-Stationary Additional Regional Frequency Analysis (NS-Add-RFA) method, designed to assess extreme temperature trends in a regional context. This vignette demonstrates the package's application using 10 annual maximum temperature (Tmax) series (1991-2024) from São Paulo, Brazil. The data, sourced from NOAA's Physical Sciences Laboratory <https://downloads.psl.noaa.gov/Datasets/cpc_global_temp/>, were derived using the block maxima approach (one block per calendar year).
+The fundamental concept behind Regional Frequency Analysis (RFA) is to evaluate whether a group of time series from distinct sites can be considered “acceptably homogeneous” [@hosking1997]. 
+
+In its original version, the RFA is valid only when the variable of interest assumes strictly positive values. However, [@martins2022] verified that this technique can be effectively applied to extreme maximum (Tmax) and minimum (Tmin) air temperature series, which may assume both positive and negative values, by adopting the so-called additive approach. 
+
+Although the study by [@martins2022] showed promising results, it did not address the influence of long-term warming trends. This calls for an extension of the RFA framework to incorporate time-dependent, nonstationary statistical properties. 
+
+To overcome this limitation, [@blain2026] proposed the Non-stationary Additive Regional Frequency Analysis, an extension of the additive RFA that integrates nonstationary probabilistic models to represent temporal changes in air temperature frequency distributions at the regional scale. This package was designed to facilitate the application of this new method to extreme Tmax and Tmin data under nonstationary climate conditions.
+
+The NSTempRFA package implements the Non-Stationary Additional Regional Frequency Analysis (NS-Add-RFA) method, designed to assess extreme temperature trends in a regional context. This vignette demonstrates the package's application using 13 annual maximum temperature (Tmax) series (1991-2024) from São Paulo, Brazil. The data were sourced from NOAA's Physical Sciences Laboratory [@noaa_psl], were derived using the block maxima approach (one block per calendar year).
 
 # Getting Started
 Install the package from GitHub <https://github.com/gabrielblain/NSTempRFA> (see README) and load it into your R session:
@@ -46,9 +55,9 @@ Before analysis, ensure data quality by checking for inconsistencies or outliers
 Add_Discord(TmaxCPC_SP)
 ```
 
-## Do the 10 Tmax series form an “acceptably homogeneous” group?
+## Do the 13 Tmax series form an “acceptably homogeneous” group?
 
-We develped the `Add_Heterogenety()` function to verify if a group of extreme maximum or minimum air temperature series can be deemed as “acceptably homogeneous”. This function calculates the additional heterogeneity  measure (Add_H) as proposed by Martins et al. (2022) <doi:10.1590/1678-4499.20220061>. To calculate Add_H we first need to subtract from each data its sample mean. This can be accomplished by applying the `Dataset_add()` function.
+We develped the `Add_Heterogenety()` function to verify if a group of extreme maximum or minimum air temperature series can be deemed as “acceptably homogeneous”. This function calculates the additional heterogeneity  measure (Add_H) as proposed by [@martins2022]. To calculate Add_H we first need to subtract from each data its sample mean. This can be accomplished by applying the `Dataset_add()` function.
 
 ```{r Preparing the data}
 add.data <- Dataset_add(TmaxCPC_SP)
@@ -92,7 +101,7 @@ as.numeric(best.parms$best) #Model 2
 best.parms$atsite.models
 ```
 
-Having defined the best GEV model, the `Reg_par()` function can be applied to specify the parameters of the regional distribution, which is valid for all 10 series.
+Having defined the best GEV model, the `Reg_par()` function can be applied to specify the parameters of the regional distribution, which is valid for all 13 series.
 
 ```{r Reg_par}
 regional.parms <- Reg_par(best_model=best.parms$atsite.models)
@@ -169,4 +178,4 @@ This package also allows an equivalent analysis to that of the `Add_RegQuant()`t
  Probs_2024
 ```
  
-
+# References
