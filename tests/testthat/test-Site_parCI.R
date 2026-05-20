@@ -18,7 +18,7 @@ test_that("Site_parCI throws error with non-vector or multi-column input", {
 
   expect_error(
     Site_parCI(invalid_data, 1, site_par, 110),
-    "data_site must be a vector or single column matrix"
+    "atsite_temp must be a vector or single-column matrix."
   )
 })
 
@@ -48,7 +48,7 @@ test_that("Site_parCI throws error for non-numeric site_par", {
 
   expect_error(
     Site_parCI(atsite_temp, 1, site_par_non_numeric, 110),
-    "Input 'reg_par' must be a numeric data frame or matrix with 5 columns."
+    "Input 'site_par' must be numeric."
   )
 })
 

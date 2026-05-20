@@ -35,7 +35,7 @@ test_that("Reg_parCI throws error when number of sites < 3", {
 
   expect_error(
     Reg_parCI(add_data, model = 1, reg_par = reg_par_valid, n.boots = 110),
-    "number of sites should be larger than 2."
+    "The number of sites must be larger than 2."
   )
 })
 
@@ -63,7 +63,7 @@ test_that("Reg_parCI throws error when reg_par is non-numeric", {
 
   expect_error(
     Reg_parCI(add_data, model = 1, reg_par = reg_par_non_numeric, n.boots = 110),
-    "Input 'reg_par' must be a numeric data frame or matrix with 5 columns."
+    "Input 'reg_par' must be numeric."
   )
 })
 
