@@ -15,6 +15,10 @@ Add_RegProb(quantiles, regional_pars, site_temp, n.year)
 
 \item{n.year}{A single number describing the number of the year for which parameters are calculated.}
 }
+\value{
+A numeric matrix containing the cumulative probabilities associated
+with the input quantiles, obtained from the regional GEV distribution.
+}
 \description{
 Add_RegProb
 }
