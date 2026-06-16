@@ -16,11 +16,11 @@ A \code{data.frame} with 8 columns:
 \describe{
 \item{Local}{Site identifier.}
 \item{SampleSize}{Number of observations for each site.}
-\item{l_1}{L-moment ratio (mean).}
-\item{l_2}{L-moment ratio (L-scale).}
-\item{t_3}{L-moment ratio (L-skewness).}
-\item{t_4}{L-moment ratio (L-kurtosis).}
-\item{t_5}{L-moment ratio (higher-order L-moment).}
+\item{l_1}{First L-moment (mean).}
+\item{l_2}{Second L-moment (L-scale).}
+\item{t_3}{L-skewness ratio.}
+\item{t_4}{L-kurtosis ratio.}
+\item{t_5}{Fifth-order L-moment ratio.}
 \item{discord}{Original discordance statistic indicating potential outlier status.}
 }
 }

@@ -107,7 +107,7 @@ dataset <- TmaxCPC_SP
 Dataset_add(dataset)
 ```
 
-### Function `Add_Heterogenety()`
+### Function `Add_Heterogeneity()`
 
 ### Description
 
@@ -115,7 +115,7 @@ Calculates Hosking and Wallis' heterogeneity measure using the additive approach
 as described in Martins et al. (2022) and Blain et al (2026).
 
 ### Usage
-Add_Heterogenety(dataset.add, rho, Ns)
+Add_Heterogeneity(dataset.add, rho, Ns)
 
 ##Arguments
 **dataset.add**: A matrix of temperature values subtracted by their sample mean, as
@@ -129,7 +129,7 @@ sites. It must be larger than -1.0 and lower than 1.0.\
 rho <- 0.51
 Ns <- 500
 add.data <- Dataset_add(TmaxCPC_SP)
-Add_Heterogenety(dataset.add=add.data$add_data,rho = rho,Ns = Ns)
+Add_Heterogeneity(dataset.add=add.data$add_data,rho = rho,Ns = Ns)
 ```
 
 ### Function `Best_model()`

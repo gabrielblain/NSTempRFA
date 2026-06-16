@@ -18,15 +18,15 @@ test_that("Add_Discord throws error when Years column has NAs", {
   temp_data <- matrix(rnorm(length(years) * 8, mean = 30, sd = 5), ncol = 8)
   dataset <- cbind(Years = years, temp_data)
 
-  expect_error(Add_Discord(dataset), "Column 'Years' cannot have missing data")
+  expect_error(Add_Discord(dataset), "Column 'Years' cannot have missing data.")
 })
 
-test_that("Add_Discord throws error when less than 7 sites", {
+test_that("Add_Discord throws error when less than 3 sites", {
   years <- 1980:2020
   temp_data <- matrix(rnorm(length(years) * 6, mean = 30, sd = 5), ncol = 2)
   dataset <- cbind(Years = years, temp_data)
 
-  expect_error(Add_Discord(dataset), "The number of sites should be at least 3")
+  expect_error(Add_Discord(dataset), "The number of sites should be at least 3.")
 })
 
 test_that("Add_Discord throws error when any site has fewer than 10 observations", {
@@ -35,7 +35,7 @@ test_that("Add_Discord throws error when any site has fewer than 10 observations
   temp_data[1:32, 3] <- NA  # 41 - 32 = 9 valid values in site 3
   dataset <- cbind(Years = years, temp_data)
 
-  expect_error(Add_Discord(dataset), "All sites must have at least 10 years of records")
+  expect_error(Add_Discord(dataset), "All sites must have at least 10 years of records.")
 })
 
 test_that("Discord measures are non-negative", {
@@ -44,6 +44,17 @@ test_that("Discord measures are non-negative", {
   dataset <- cbind(Years = years, temp_data)
 
   result <- Add_Discord(dataset)
+
+  expect_true(all(is.finite(result$discord)))
   expect_true(all(result$discord >= 0))
-  expect_true(all(result$Rdiscord >= 0))
+})
+
+test_that("Add_Discord returns an error when dataset has fewer than two columns", {
+  years <- 1980:2020
+  dataset <- matrix(years, ncol = 1)
+
+  expect_error(
+    Add_Discord(dataset),
+    "The dataset must contain a year column and at least one site."
+  )
 })

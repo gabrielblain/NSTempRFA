@@ -1,4 +1,4 @@
-#' Add_Heterogenety
+#' Add_Heterogeneity
 #'
 #' @param dataset.add
 #' A numeric matrix of air temperature data as that calculated by the dataset_add().
@@ -21,8 +21,8 @@
 #' rho <- 0.51
 #' Ns <- 500
 #' add.data <- Dataset_add(TmaxCPC_SP)
-#' Add_Heterogenety(dataset.add=add.data$add_data,rho = rho,Ns = Ns)
-Add_Heterogenety <- function(dataset.add,rho,Ns){
+#' Add_Heterogeneity(dataset.add=add.data$add_data,rho = rho,Ns = Ns)
+Add_Heterogeneity <- function(dataset.add,rho,Ns){
   n.sites <- ncol(dataset.add)
   if (n.sites < 3) stop("The number of sites should be equal to or larger than 3.")
 
@@ -32,7 +32,7 @@ Add_Heterogenety <- function(dataset.add,rho,Ns){
 
   if (Ns < 100) stop("Ns should be larger than 99.")
   if (!is.numeric(rho) || length(rho) != 1 || rho >= 1 || rho <= -1)
-    stop("`rho` must be a single smaller (larger) than -1 (1).")
+    stop("'rho' must be a single numeric value strictly between -1 and 1.")
 
   V.sim <- numeric(Ns)
   vetor.numerador <- numeric(n.sites)

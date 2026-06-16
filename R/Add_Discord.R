@@ -12,11 +12,11 @@
 #' \describe{
 #'     \item{Local}{Site identifier.}
 #'     \item{SampleSize}{Number of observations for each site.}
-#'     \item{l_1}{L-moment ratio (mean).}
-#'     \item{l_2}{L-moment ratio (L-scale).}
-#'     \item{t_3}{L-moment ratio (L-skewness).}
-#'     \item{t_4}{L-moment ratio (L-kurtosis).}
-#'     \item{t_5}{L-moment ratio (higher-order L-moment).}
+#'     \item{l_1}{First L-moment (mean).}
+#'     \item{l_2}{Second L-moment (L-scale).}
+#'     \item{t_3}{L-skewness ratio.}
+#'     \item{t_4}{L-kurtosis ratio.}
+#'     \item{t_5}{Fifth-order L-moment ratio.}
 #'     \item{discord}{Original discordance statistic indicating potential outlier status.}
 #' }
 #'
@@ -30,25 +30,41 @@
 #' @examples
 #' # Add_Discord(TmaxCPC_SP)
 Add_Discord <- function(dataset) {
+
+  if (ncol(dataset) < 2) {
+    stop("The dataset must contain a year column and at least one site.")
+  }
+
   if (anyNA(dataset[, 1])) {
     stop("Column 'Years' cannot have missing data.")
   }
-  n <- ncol(dataset)
-  dataset.year <- dataset[, 2:n]
-  n <- ncol(dataset.year)
-  if (n < 3) {
+
+  n_total <- ncol(dataset)
+
+  dataset.year <- dataset[, 2:n_total, drop = FALSE]
+
+  n_sites <- ncol(dataset.year)
+
+  if (n_sites < 3) {
     stop("The number of sites should be at least 3.")
   }
 
   min_sample_size <- min(colSums(!is.na(dataset.year)))
 
   if (min_sample_size < 10) {
-    stop("All sites must have at least 10 years of records. So sorry, we cannot proceed.")
+    stop("All sites must have at least 10 years of records.")
   }
 
-  d <- as.data.frame(matrix(NA, n, 8))
+  d <- as.data.frame(matrix(NA_real_, n_sites, 8))
+
   d[, 1:7] <- regsamlmu(dataset.year, lcv = FALSE)
   d[, 8] <- sqrt(getDistance(Cov(d[, 4:6])))
-  colnames(d) <- c("Local", "SampleSize", "l_1", "l_2", "t_3", "t_4", "t_5", "discord")
+
+  colnames(d) <- c(
+    "Local", "SampleSize",
+    "l_1", "l_2", "t_3", "t_4", "t_5",
+    "discord"
+  )
+
   return(d)
 }
