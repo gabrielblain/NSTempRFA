@@ -174,3 +174,194 @@ test_that("Fit_model stores correct sample sizes", {
   expect_equal(result$size[2], 80)
   expect_equal(result$size[3], 100)
 })
+
+test_that("Fit_model works with a single-column matrix", {
+
+  set.seed(123)
+
+  temperatures <- matrix(rnorm(100), ncol = 1)
+
+  result <- Fit_model(temperatures, model = 1)
+
+  expect_s3_class(result, "data.frame")
+  expect_equal(nrow(result), 1)
+  expect_equal(result$size, 100)
+})
+
+test_that("Fit_model correctly handles different sample sizes across sites", {
+
+  set.seed(123)
+
+  temperatures <- matrix(rnorm(500), ncol = 5)
+
+  temperatures[1:5,1] <- NA
+  temperatures[1:10,2] <- NA
+  temperatures[1:20,3] <- NA
+
+  result <- Fit_model(temperatures, model = 2)
+
+  expect_equal(result$size, c(95,90,80,100,100))
+})
+
+test_that("Fit_model works with one site", {
+
+  set.seed(123)
+
+  temperatures <- matrix(rnorm(100), ncol = 1)
+
+  result <- Fit_model(temperatures, model = 4)
+
+  expect_equal(nrow(result), 1)
+  expect_equal(result$size, 100)
+})
+
+test_that("fit_gev_ismev works for model 1", {
+
+  set.seed(123)
+
+  local <- rnorm(100)
+  time <- seq_along(local)
+
+  result <- NSTempRFA:::fit_gev_ismev(local, time, 1)
+
+  expect_true(is.numeric(result) || is.null(result))
+
+  if (!is.null(result)) {
+    expect_length(result, 5)
+    expect_equal(result[2], 0)
+    expect_equal(result[4], 0)
+  }
+})
+
+
+test_that("fit_gev_ismev works for model 2", {
+
+  set.seed(123)
+
+  local <- rnorm(100)
+  time <- seq_along(local)
+
+  result <- NSTempRFA:::fit_gev_ismev(local, time, 2)
+
+  expect_true(is.numeric(result) || is.null(result))
+
+  if (!is.null(result)) {
+    expect_length(result, 5)
+    expect_equal(result[4], 0)
+  }
+})
+
+
+test_that("fit_gev_ismev works for model 3", {
+
+  set.seed(123)
+
+  local <- rnorm(100)
+  time <- seq_along(local)
+
+  result <- NSTempRFA:::fit_gev_ismev(local, time, 3)
+
+  expect_true(is.numeric(result) || is.null(result))
+
+  if (!is.null(result)) {
+    expect_length(result, 5)
+    expect_equal(result[2], 0)
+  }
+})
+
+
+test_that("fit_gev_ismev works for model 4", {
+
+  set.seed(123)
+
+  local <- rnorm(100)
+  time <- seq_along(local)
+
+  result <- NSTempRFA:::fit_gev_ismev(local, time, 4)
+
+  expect_true(is.numeric(result) || is.null(result))
+
+  if (!is.null(result)) {
+    expect_length(result, 5)
+  }
+})
+
+test_that("fit_gev returns a numeric vector", {
+
+  set.seed(123)
+
+  local <- rnorm(100)
+  time <- seq_along(local)
+
+  result <- NSTempRFA:::fit_gev(local, time, 1)
+
+  expect_type(result, "double")
+  expect_length(result, 5)
+})
+
+test_that("fit_gev_ismev returns NULL when fitting fails", {
+
+  local <- 1
+  time <- 1
+
+  result <- NSTempRFA:::fit_gev_ismev(local, time, 1)
+
+  expect_null(result)
+})
+
+test_that("fit_gev_alt returns a numeric vector", {
+
+  set.seed(123)
+
+  local <- rnorm(100)
+  time <- seq_along(local)
+
+  result <- NSTempRFA:::fit_gev_alt(local, time, 1)
+
+  expect_type(result, "double")
+  expect_length(result, 5)
+})
+
+test_that("fit_gev_alt returns NA vector when all methods fail", {
+
+  local <- 1
+  time <- 1
+
+  result <- NSTempRFA:::fit_gev_alt(local, time, 1)
+
+  expect_true(all(is.na(result)))
+})
+
+test_that("fit_gev_alt handles all model types", {
+
+  set.seed(123)
+
+  local <- rnorm(100)
+  time <- seq_along(local)
+
+  for (m in 1:4) {
+
+    result <- NSTempRFA:::fit_gev_alt(local, time, m)
+
+    expect_length(result, 5)
+  }
+})
+
+test_that("fit_gev preserves zero coefficients correctly", {
+
+  set.seed(123)
+
+  local <- rnorm(100)
+  time <- seq_along(local)
+
+  r1 <- NSTempRFA:::fit_gev(local, time, 1)
+  r2 <- NSTempRFA:::fit_gev(local, time, 2)
+  r3 <- NSTempRFA:::fit_gev(local, time, 3)
+
+  expect_equal(r1[2], 0)
+  expect_equal(r1[4], 0)
+
+  expect_equal(r2[4], 0)
+
+  expect_equal(r3[2], 0)
+})

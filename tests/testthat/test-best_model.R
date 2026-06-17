@@ -167,3 +167,77 @@ test_that("Best_model returns a valid best model index", {
   )
 
 })
+
+test_that("Best_model accepts a data.frame input", {
+
+  set.seed(123)
+
+  fake_data <- as.data.frame(
+    matrix(rnorm(90), ncol = 3)
+  )
+
+  result <- Best_model(fake_data)
+
+  expect_type(result, "list")
+
+  expect_equal(
+    nrow(result$atsite.models),
+    3
+  )
+})
+
+test_that("Best_model stores sample sizes correctly with missing values", {
+
+  set.seed(123)
+
+  fake_data <- matrix(rnorm(90), ncol = 3)
+
+  fake_data[1:5, 1] <- NA
+  fake_data[1:10, 2] <- NA
+
+  result <- Best_model(fake_data)
+
+  expect_equal(result$atsite.models$size[1], 25)
+  expect_equal(result$atsite.models$size[2], 20)
+  expect_equal(result$atsite.models$size[3], 30)
+})
+
+test_that("Best_model works with a single site", {
+
+  set.seed(123)
+
+  fake_data <- matrix(rnorm(50), ncol = 1)
+
+  result <- Best_model(fake_data)
+
+  expect_equal(
+    nrow(result$atsite.models),
+    1
+  )
+
+  expect_true(
+    result$best %in% 1:4
+  )
+})
+
+test_that("Best_model returns an integer model index", {
+
+  set.seed(123)
+
+  fake_data <- matrix(rnorm(120), ncol = 4)
+
+  result <- Best_model(fake_data)
+
+  expect_true(
+    is.numeric(result$best)
+  )
+
+  expect_equal(
+    length(result$best),
+    1
+  )
+
+  expect_true(
+    result$best %in% 1:4
+  )
+})
