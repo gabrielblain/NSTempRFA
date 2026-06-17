@@ -1,72 +1,206 @@
-test_that("Site_parCI works with minimal valid input", {
-  set.seed(123)
-  atsite_temp <- matrix(rnorm(30), ncol = 1)  # 30 years for 1 site
-  model <- 2
-  site_par <- data.frame(mu0 = 0, mu1 = 0.1,  sigma0 = 1, sigma1 = 0, shape = 0.1)
+test_that("Site_parCI returns a matrix with the correct dimensions", {
 
-  result <- Site_parCI(atsite_temp, model, site_par, n.boots = 100)
+  set.seed(123)
+
+  atsite_temp <- rnorm(50)
+  site_par <- matrix(c(0, 0.02, 1, 0.001, 0.1), nrow = 1)
+
+  result <- Site_parCI(
+    atsite_temp = atsite_temp,
+    model = 2,
+    site_par = site_par,
+    n.boots = 100
+  )
 
   expect_true(is.matrix(result))
   expect_equal(dim(result), c(2, 5))
-  expect_equal(rownames(result), c("Lower 95% CI", "Upper 95% CI"))
+
+  expect_equal(
+    rownames(result),
+    c("Lower 95% CI", "Upper 95% CI")
+  )
+
+  expect_equal(
+    colnames(result),
+    c("mu0", "mu1", "sigma0", "sigma1", "shape")
+  )
+
+  expect_true(all(is.finite(result)))
 })
 
-test_that("Site_parCI throws error with non-vector or multi-column input", {
-  invalid_data <- matrix(rnorm(30 * 2), ncol = 2)  # Two columns
 
-  site_par <- data.frame(mu0 = 0, mu1 = 0.1, sigma0 = 1, sigma1 = 0, shape = 0.1)
+test_that("Site_parCI accepts a single-column matrix", {
+
+  set.seed(123)
+
+  atsite_temp <- matrix(rnorm(50), ncol = 1)
+  site_par <- matrix(c(0, 0.02, 1, 0.001, 0.1), nrow = 1)
+
+  result <- Site_parCI(
+    atsite_temp = atsite_temp,
+    model = 1,
+    site_par = site_par,
+    n.boots = 100
+  )
+
+  expect_true(is.matrix(result))
+})
+
+
+test_that("Site_parCI rejects invalid model values", {
+
+  temp <- rnorm(50)
+  pars <- matrix(c(0, 0, 1, 0, 0.1), nrow = 1)
 
   expect_error(
-    Site_parCI(invalid_data, 1, site_par, 110),
-    "atsite_temp must be a vector or single-column matrix."
+    Site_parCI(temp, 0, pars, 100),
+    "`model` must be a single integer"
+  )
+
+  expect_error(
+    Site_parCI(temp, 5, pars, 100),
+    "`model` must be a single integer"
+  )
+
+  expect_error(
+    Site_parCI(temp, "two", pars, 100),
+    "`model` must be a single integer"
   )
 })
 
-test_that("Site_parCI throws error if site has less than 10 years", {
-  atsite_temp <- matrix(rnorm(9), ncol = 1)  # Less than 10 years
-  site_par <- data.frame(mu0 = 0, mu1 = 0.1, sigma0 = 1, sigma1 = 0, shape = 0.1)
+
+test_that("Site_parCI rejects invalid n.boots", {
+
+  temp <- rnorm(50)
+  pars <- matrix(c(0, 0, 1, 0, 0.1), nrow = 1)
 
   expect_error(
-    Site_parCI(atsite_temp, 1, site_par, 100),
-    "Site must have at least 10 years of records"
+    Site_parCI(temp, 1, pars, 50),
+    "`n.boots`"
+  )
+
+  expect_error(
+    Site_parCI(temp, 1, pars, 99.5),
+    "`n.boots`"
   )
 })
 
-test_that("Site_parCI throws error for n.boots less than 100", {
-  atsite_temp <- matrix(rnorm(30), ncol = 1)
-  site_par <- data.frame(mu0 = 0, mu1 = 0.1, mu2 = 0, sigma0 = 1, sigma1 = 0, shape = 0.1)
+
+test_that("Site_parCI rejects series shorter than 10 observations", {
+
+  temp <- rnorm(9)
+  pars <- matrix(c(0, 0, 1, 0, 0.1), nrow = 1)
 
   expect_error(
-    Site_parCI(atsite_temp, 1, site_par, 50),
-    "n.boots must be larger than 99"
+    Site_parCI(temp, 1, pars, 100),
+    "at least 10 years"
   )
 })
 
-test_that("Site_parCI throws error for non-numeric site_par", {
-  atsite_temp <- matrix(rnorm(30), ncol = 1)
-  site_par_non_numeric <- data.frame(mu0 = "a", mu1 = "b", sigma0 = "d", sigma1 = "e", shape = "f")
+
+test_that("Site_parCI rejects all missing values", {
+
+  temp <- rep(NA, 50)
+  pars <- matrix(c(0, 0, 1, 0, 0.1), nrow = 1)
 
   expect_error(
-    Site_parCI(atsite_temp, 1, site_par_non_numeric, 110),
-    "Input 'site_par' must be numeric."
+    Site_parCI(temp, 1, pars, 100),
+    "contains only missing values"
   )
 })
 
-test_that("Site_parCI throws error if site_par has wrong dimensions", {
-  atsite_temp <- matrix(rnorm(30), ncol = 1)
 
-  # Wrong number of columns
-  site_par_wrong_cols <- data.frame(a = 1, b = 2)
+test_that("Site_parCI rejects matrices with more than one column", {
+
+  temp <- matrix(rnorm(100), ncol = 2)
+  pars <- matrix(c(0, 0, 1, 0, 0.1), nrow = 1)
+
   expect_error(
-    Site_parCI(atsite_temp, 1, site_par_wrong_cols, 110),
-    "Input 'site_par' must have exactly 1 row and 5 columns."
+    Site_parCI(temp, 1, pars, 100),
+    "single-column matrix"
+  )
+})
+
+
+test_that("Site_parCI rejects non-numeric site_par", {
+
+  temp <- rnorm(50)
+
+  pars <- matrix(
+    c("a", "b", "c", "d", "e"),
+    nrow = 1
   )
 
-  # More than one row
-  site_par_two_rows <- data.frame(mu0 = c(0, 1), mu1 = c(0.1, 0.2),
-                                  sigma0 = c(1, 1), sigma1 = c(0, 0), shape = c(0.1, 0.1))
   expect_error(
-    Site_parCI(atsite_temp, 1, site_par_two_rows, 110),
-    "Input 'site_par' must have exactly 1 row and 5 columns."
+    Site_parCI(temp, 1, pars, 100),
+    "`site_par` must be numeric"
   )
+})
+
+
+test_that("Site_parCI rejects site_par with incorrect dimensions", {
+
+  temp <- rnorm(50)
+
+  pars <- matrix(1:10, nrow = 2)
+
+  expect_error(
+    Site_parCI(temp, 1, pars, 100),
+    "exactly 1 row and 5 columns"
+  )
+})
+
+
+test_that("Site_parCI rejects missing values in site_par", {
+
+  temp <- rnorm(50)
+
+  pars <- matrix(
+    c(0, 0, 1, NA, 0.1),
+    nrow = 1
+  )
+
+  expect_error(
+    Site_parCI(temp, 1, pars, 100),
+    "cannot contain missing or infinite values"
+  )
+})
+
+
+test_that("Site_parCI rejects non-positive scale parameters", {
+
+  temp <- rnorm(50)
+
+  pars <- matrix(
+    c(0, 0, -1, 0, 0.1),
+    nrow = 1
+  )
+
+  expect_error(
+    Site_parCI(temp, 1, pars, 100),
+    "scale parameter becomes non-positive"
+  )
+})
+
+
+test_that("Site_parCI works when shape parameter equals zero", {
+
+  set.seed(123)
+
+  temp <- rnorm(50)
+
+  pars <- matrix(
+    c(0, 0.01, 1, 0.001, 0),
+    nrow = 1
+  )
+
+  result <- Site_parCI(
+    temp,
+    model = 2,
+    site_par = pars,
+    n.boots = 100
+  )
+
+  expect_true(is.matrix(result))
+  expect_equal(dim(result), c(2, 5))
 })

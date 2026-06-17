@@ -13,40 +13,54 @@
 #' time-varying generalized extreme value distribution
 #' @export
 #' @importFrom dplyr summarise %>%
+#' @importFrom stats weighted.mean
 #' @examples
 #' add.data <- Dataset_add(TmaxCPC_SP)
 #' best.parms <- Best_model(add.data=add.data$add_data)
 #' Reg_par(best_model=best.parms$atsite.models)
 Reg_par <- function(best_model) {
+
   # Check: Must be a data.frame
   if (!is.data.frame(best_model)) {
     stop("Input 'best_model' must be a data frame.")
   }
 
-  # Check: Must have exactly 6 required columns
+  # Check: Must contain required columns
   required_cols <- c("mu0", "mu1", "sigma0", "sigma1", "shape", "size")
-  if (!all(required_cols %in% colnames(best_model))) {
-    stop("Input 'best_model' must contain the columns: mu0, mu1, sigma0, sigma1, shape, size.")
+
+  if (!all(required_cols %in% names(best_model))) {
+    stop(
+      "Input 'best_model' must contain the columns: ",
+      paste(required_cols, collapse = ", "), "."
+    )
   }
 
   # Check: All columns must be numeric
-  if (!all(sapply(best_model[, required_cols], is.numeric))) {
+  if (!all(vapply(best_model[required_cols], is.numeric, logical(1)))) {
     stop("All columns in 'best_model' must be numeric.")
   }
 
-  # Check: No NA or zero total size
-  if (any(is.na(best_model$size)) || sum(best_model$size) == 0) {
-    stop("Invalid or missing values in 'size' column.")
+  # Check: size column
+  if (any(!is.finite(best_model$size)) || any(best_model$size < 0)) {
+    stop("The 'size' column must contain finite non-negative values.")
   }
 
-  # Weighted means calculation
+  if (sum(best_model$size) == 0) {
+    stop("The sum of the 'size' column must be greater than zero.")
+  }
+
+  if (any(!is.finite(as.matrix(best_model[, required_cols])))) {
+    stop("All values in 'best_model' must be finite.")
+  }
+
+  # Weighted means
   weighted_means <- best_model %>%
     summarise(
-      weighted_mu0 = sum(mu0 * size) / sum(size),
-      weighted_mu1 = sum(mu1 * size) / sum(size),
-      weighted_sigma0 = sum(sigma0 * size) / sum(size),
-      weighted_sigma1 = sum(sigma1 * size) / sum(size),
-      weighted_shape = sum(shape * size) / sum(size)
+      weighted_mu0    = weighted.mean(mu0, size, na.rm = TRUE),
+      weighted_mu1    = weighted.mean(mu1, size, na.rm = TRUE),
+      weighted_sigma0 = weighted.mean(sigma0, size, na.rm = TRUE),
+      weighted_sigma1 = weighted.mean(sigma1, size, na.rm = TRUE),
+      weighted_shape  = weighted.mean(shape, size, na.rm = TRUE)
     )
 
   return(weighted_means)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/Reg_parCI.R
 \name{Reg_parCI}
 \alias{Reg_parCI}
-\title{Reg_parCI}
+\title{Confidence intervals for regional GEV parameters}
 \usage{
 Reg_parCI(add_data, model, reg_par, n.boots = 999)
 }
@@ -18,7 +18,7 @@ May be provided by Best_model().}
 \item 2nd is the mu1 parameter,
 \item 3rd is the sigma0 parameter,
 \item 4th is the sigma1 parameter,
-\item 5th is the shape parameter
+\item 5th is the shape parameter.
 }}
 
 \item{n.boots}{A single number describing the number of bootstrap replicates.
@@ -32,7 +32,7 @@ of the time-varying parameter estimates. The spatial dependence between sites
 is preserved.
 }
 \description{
-Reg_parCI
+Confidence intervals for regional GEV parameters
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}

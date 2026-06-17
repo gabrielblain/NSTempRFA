@@ -14,7 +14,7 @@ temperature data from each site.}
 \value{
 A \code{list} object with the following elements:
 \describe{
-\item{scaled_data}{A matrix of centered temperature values for each site.}
+\item{add_data}{A matrix of centered temperature values for each site.}
 \item{reg_mean}{Mean temperature values for each site.}
 }
 }
@@ -22,7 +22,6 @@ A \code{list} object with the following elements:
 dataset_add
 }
 \examples{
-
 Dataset_add(TmaxCPC_SP)
 
 }

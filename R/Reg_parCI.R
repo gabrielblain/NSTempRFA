@@ -1,4 +1,4 @@
-#' Reg_parCI
+#' Confidence intervals for regional GEV parameters
 #'
 #' @name Reg_parCI
 #' @param add_data
@@ -12,7 +12,7 @@
 #' * 2nd is the mu1 parameter,
 #' * 3rd is the sigma0 parameter,
 #' * 4th is the sigma1 parameter,
-#' * 5th is the shape parameter
+#' * 5th is the shape parameter.
 #' @param n.boots
 #' A single number describing the number of bootstrap replicates.
 #' Whenever possible, n.boots should be set to 999 (default),
@@ -39,10 +39,38 @@
 #'   reg_par = regional.parms,
 #'   n.boots = 100
 #' )
-Reg_parCI <- function(add_data, model, reg_par, n.boots = 999) {
+Reg_parCI <- function(add_data,
+                      model,
+                      reg_par,
+                      n.boots = 999) {
 
-  if (n.boots < 100) {
-    stop("n.boots must be larger than 99 and, if possible, equal to 999.")
+  # ============================================================
+  # Input checks
+  # ============================================================
+
+  if (!is.numeric(add_data)) {
+    stop("`add_data` must be numeric.")
+  }
+
+  add_data <- as.matrix(add_data)
+
+  if (length(add_data) == 0) {
+    stop("`add_data` cannot be empty.")
+  }
+
+  if (!is.numeric(model) ||
+      length(model) != 1 ||
+      model != as.integer(model) ||
+      model < 1 ||
+      model > 4) {
+    stop("`model` must be a single integer between 1 and 4.")
+  }
+
+  if (!is.numeric(n.boots) ||
+      length(n.boots) != 1 ||
+      n.boots != as.integer(n.boots) ||
+      n.boots < 100) {
+    stop("`n.boots` must be a single integer larger than or equal to 100.")
   }
 
   n.sites <- ncol(add_data)
@@ -59,30 +87,51 @@ Reg_parCI <- function(add_data, model, reg_par, n.boots = 999) {
 
   reg_par <- as.matrix(reg_par)
 
-  if (!is.numeric(reg_par)) {
-    stop("Input 'reg_par' must be numeric.")
+  if (!is.numeric(reg_par) ||
+      any(!is.finite(reg_par))) {
+    stop("`reg_par` must contain finite numeric values.")
   }
 
-  if (ncol(reg_par) != 5 || nrow(reg_par) != 1) {
-    stop("Input 'reg_par' must have exactly 1 row and 5 columns.")
+  if (nrow(reg_par) != 1 || ncol(reg_par) != 5) {
+    stop("`reg_par` must have exactly 1 row and 5 columns.")
   }
 
   reg_par <- as.numeric(reg_par)
 
   max_time <- nrow(add_data)
+
+  if (max_time < 10) {
+    stop("`add_data` must contain at least 10 observations.")
+  }
+
+  # ============================================================
+  # Construct temporal parameters
+  # ============================================================
+
   time <- seq_len(max_time)
 
   par.temporal <- matrix(NA_real_, max_time, 3)
-  IDD.series <- add_data
 
   par.temporal[, 1] <- reg_par[1] + reg_par[2] * time
   par.temporal[, 2] <- reg_par[3] + reg_par[4] * time
-  par.temporal[, 3] <- rep(reg_par[5], max_time)
+  par.temporal[, 3] <- reg_par[5]
+
+  # Scale parameter must remain positive
+  if (any(par.temporal[, 2] <= 0)) {
+    stop("Time-varying scale parameter became non-positive.")
+  }
+
+  # ============================================================
+  # Transform to Gumbel space
+  # ============================================================
+
+  IDD.series <- add_data
 
   for (site in seq_len(n.sites)) {
 
     z <- 1 + par.temporal[, 3] *
-      ((add_data[, site] - par.temporal[, 1]) / par.temporal[, 2])
+      ((add_data[, site] - par.temporal[, 1]) /
+         par.temporal[, 2])
 
     if (any(z <= 0, na.rm = TRUE)) {
       stop("Invalid transformed values encountered.")
@@ -92,12 +141,15 @@ Reg_parCI <- function(add_data, model, reg_par, n.boots = 999) {
       (1 / par.temporal[, 3]) * log(z)
   }
 
+  # ============================================================
+  # Bootstrap resampling
+  # ============================================================
+
   all.lines <- n.boots * max_time
-  resample.vector <- seq_len(max_time)
 
   resampled_indices <- replicate(
     n.boots,
-    sample(resample.vector, replace = TRUE)
+    sample(seq_len(max_time), replace = TRUE)
   )
 
   IDD.series.boot <-
@@ -116,6 +168,10 @@ Reg_parCI <- function(add_data, model, reg_par, n.boots = 999) {
     pb <- txtProgressBar(min = 0, max = n.boots, style = 3)
   }
 
+  # ============================================================
+  # Bootstrap loop
+  # ============================================================
+
   for (r in seq_len(n.boots)) {
 
     rows <- ((r - 1) * max_time + 1):(r * max_time)
@@ -126,10 +182,17 @@ Reg_parCI <- function(add_data, model, reg_par, n.boots = 999) {
       (exp(IDD.series.boot[rows, ] * par.temporal[, 3]) - 1)
 
     find.best.boot <-
-      Fit_model(temperatures = back.orig, model = model)
+      Fit_model(
+        temperatures = back.orig,
+        model = model
+      )
 
     reg_par.overall.boot[r, ] <-
-      as.numeric(Reg_par(best_model = find.best.boot))
+      as.numeric(
+        Reg_par(
+          best_model = find.best.boot
+        )
+      )
 
     if (show_pb) {
       setTxtProgressBar(pb, r)
@@ -139,6 +202,10 @@ Reg_parCI <- function(add_data, model, reg_par, n.boots = 999) {
   if (show_pb) {
     close(pb)
   }
+
+  # ============================================================
+  # Confidence intervals
+  # ============================================================
 
   CI_lower <- apply(
     reg_par.overall.boot,
@@ -158,7 +225,10 @@ Reg_parCI <- function(add_data, model, reg_par, n.boots = 999) {
 
   CI_matrix <- rbind(CI_lower, CI_upper)
 
-  rownames(CI_matrix) <- c("Lower 95% CI", "Upper 95% CI")
+  rownames(CI_matrix) <- c(
+    "Lower 95% CI",
+    "Upper 95% CI"
+  )
 
   colnames(CI_matrix) <- c(
     "weighted_mu0",

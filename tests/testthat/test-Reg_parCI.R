@@ -1,93 +1,261 @@
-test_that("Reg_parCI works for valid input", {
+test_that("Reg_parCI returns the correct structure", {
+
   set.seed(123)
-  add_data <- matrix(rnorm(30 * 7), 30, 7)
-  reg_par_valid <- data.frame(
-    mu0 = 0.1, mu1 = 0.2,
-    sigma0 = 1, sigma1 = 0.1, shape = 0.2
+
+  add_data <- matrix(rnorm(40 * 4), ncol = 4)
+
+  reg_par <- matrix(
+    c(0, 0.01, 1, 0.001, 0.1),
+    nrow = 1
   )
 
-  result <- Reg_parCI(add_data, model = 1, reg_par = reg_par_valid, n.boots = 100)
+  result <- Reg_parCI(
+    add_data = add_data,
+    model = 1,
+    reg_par = reg_par,
+    n.boots = 100
+  )
 
-  expect_true(is.matrix(result))
+  expect_type(result, "double")
   expect_equal(dim(result), c(2, 5))
-  expect_true(all(c("Lower 95% CI", "Upper 95% CI") %in% rownames(result)))
+
+  expect_equal(
+    rownames(result),
+    c("Lower 95% CI", "Upper 95% CI")
+  )
+
+  expect_equal(
+    colnames(result),
+    c(
+      "weighted_mu0",
+      "weighted_mu1",
+      "weighted_sigma0",
+      "weighted_sigma1",
+      "weighted_shape"
+    )
+  )
+
+  expect_false(any(is.na(result)))
 })
 
-test_that("Reg_parCI throws error if n.boots < 100", {
-  add_data <- matrix(rnorm(30 * 7), 30, 7)
-  reg_par_valid <- data.frame(
-    mu0 = 0.1, mu1 = 0.2,
-    sigma0 = 1, sigma1 = 0.1, shape = 0.2
+
+
+test_that("Reg_parCI rejects invalid model values", {
+
+  add_data <- matrix(rnorm(40 * 4), ncol = 4)
+
+  reg_par <- matrix(
+    c(0, 0.01, 1, 0.001, 0.1),
+    nrow = 1
   )
 
   expect_error(
-    Reg_parCI(add_data, model = 1, reg_par = reg_par_valid, n.boots = 50),
-    "n.boots must be larger than 99"
-  )
-})
-
-test_that("Reg_parCI throws error when number of sites < 3", {
-  add_data <- matrix(rnorm(30 * 2), 30, 2)  # Only 2 sites
-  reg_par_valid <- data.frame(
-    mu0 = 0.1, mu1 = 0.2,
-    sigma0 = 1, sigma1 = 0.1, shape = 0.2
+    Reg_parCI(add_data, model = 5, reg_par, n.boots = 100),
+    "`model` must be a single integer between 1 and 4"
   )
 
   expect_error(
-    Reg_parCI(add_data, model = 1, reg_par = reg_par_valid, n.boots = 110),
-    "The number of sites must be larger than 2."
+    Reg_parCI(add_data, model = "two", reg_par, n.boots = 100),
+    "`model` must be a single integer between 1 and 4"
   )
 })
 
-test_that("Reg_parCI throws error if any site has < 10 years of data", {
-  add_data <- matrix(rnorm(30 * 7), 30, 7)
-  add_data[1:25, 1] <- NA  # Make site 1 have only 5 non-NA values
-  reg_par_valid <- data.frame(
-    mu0 = 0.1, mu1 = 0.2,
-    sigma0 = 1, sigma1 = 0.1, shape = 0.2
+
+
+test_that("Reg_parCI rejects invalid n.boots", {
+
+  add_data <- matrix(rnorm(40 * 4), ncol = 4)
+
+  reg_par <- matrix(
+    c(0, 0.01, 1, 0.001, 0.1),
+    nrow = 1
   )
 
   expect_error(
-    Reg_parCI(add_data, model = 1, reg_par = reg_par_valid, n.boots = 110),
-    "at least 10 years of records"
+    Reg_parCI(add_data, model = 1, reg_par, n.boots = 50),
+    "`n.boots` must be a single integer"
+  )
+
+  expect_error(
+    Reg_parCI(add_data, model = 1, reg_par, n.boots = 99.5),
+    "`n.boots` must be a single integer"
   )
 })
 
-test_that("Reg_parCI throws error when reg_par is non-numeric", {
-  add_data <- matrix(rnorm(30 * 7), 30, 7)
 
-  reg_par_non_numeric <- data.frame(
-    mu0 = "a", mu1 = "b",
-    sigma0 = "d", sigma1 = "e", shape = "f"
+
+test_that("Reg_parCI rejects non-numeric add_data", {
+
+  reg_par <- matrix(
+    c(0, 0.01, 1, 0.001, 0.1),
+    nrow = 1
   )
 
   expect_error(
-    Reg_parCI(add_data, model = 1, reg_par = reg_par_non_numeric, n.boots = 110),
-    "Input 'reg_par' must be numeric."
+    Reg_parCI(
+      add_data = "not numeric",
+      model = 1,
+      reg_par = reg_par,
+      n.boots = 100
+    ),
+    "`add_data` must be numeric"
   )
 })
 
-test_that("Reg_parCI throws error when reg_par has wrong number of columns", {
-  add_data <- matrix(rnorm(30 * 7), 30, 7)
 
-  reg_par_wrong_cols <- data.frame(mu0 = 1, mu1 = 2, sigma0 = 3)  # Only 3 columns
+
+test_that("Reg_parCI rejects empty add_data", {
+
+  reg_par <- matrix(
+    c(0, 0.01, 1, 0.001, 0.1),
+    nrow = 1
+  )
 
   expect_error(
-    Reg_parCI(add_data, model = 1, reg_par = reg_par_wrong_cols, n.boots = 110),
-    "Input 'reg_par' must have exactly 1 row and 5 columns."
+    Reg_parCI(
+      add_data = matrix(numeric(0), nrow = 0),
+      model = 1,
+      reg_par = reg_par,
+      n.boots = 100
+    ),
+    "`add_data` cannot be empty"
   )
 })
 
-test_that("Reg_parCI throws error when reg_par has more than 1 row", {
-  add_data <- matrix(rnorm(30 * 7), 30, 7)
 
-  reg_par_multi_row <- data.frame(
-    mu0 = c(1, 2), mu1 = c(3, 4),
-    sigma0 = c(7, 8), sigma1 = c(9, 10), shape = c(11, 12)
+
+test_that("Reg_parCI rejects fewer than three sites", {
+
+  add_data <- matrix(rnorm(40 * 2), ncol = 2)
+
+  reg_par <- matrix(
+    c(0, 0.01, 1, 0.001, 0.1),
+    nrow = 1
   )
 
   expect_error(
-    Reg_parCI(add_data, model = 1, reg_par = reg_par_multi_row, n.boots = 110),
-    "Input 'reg_par' must have exactly 1 row and 5 columns."
+    Reg_parCI(add_data, model = 1, reg_par, n.boots = 100),
+    "The number of sites must be larger than 2"
+  )
+})
+
+
+
+test_that("Reg_parCI rejects sites with fewer than ten observations", {
+
+  add_data <- matrix(rnorm(40 * 4), ncol = 4)
+
+  add_data[1:35, 1] <- NA
+
+  reg_par <- matrix(
+    c(0, 0.01, 1, 0.001, 0.1),
+    nrow = 1
+  )
+
+  expect_error(
+    Reg_parCI(add_data, model = 1, reg_par, n.boots = 100),
+    "All sites must have at least 10 years of records"
+  )
+})
+
+
+
+test_that("Reg_parCI rejects invalid reg_par dimensions", {
+
+  add_data <- matrix(rnorm(40 * 4), ncol = 4)
+
+  reg_par <- matrix(1:4, nrow = 1)
+
+  expect_error(
+    Reg_parCI(add_data, model = 1, reg_par, n.boots = 100),
+    "`reg_par` must have exactly 1 row and 5 columns"
+  )
+})
+
+
+
+test_that("Reg_parCI rejects non-finite reg_par values", {
+
+  add_data <- matrix(rnorm(40 * 4), ncol = 4)
+
+  reg_par <- matrix(
+    c(0, 0.01, 1, Inf, 0.1),
+    nrow = 1
+  )
+
+  expect_error(
+    Reg_parCI(add_data, model = 1, reg_par, n.boots = 100),
+    "`reg_par` must contain finite numeric values"
+  )
+})
+
+
+
+test_that("Reg_parCI rejects non-positive time-varying scale parameter", {
+
+  add_data <- matrix(rnorm(40 * 4), ncol = 4)
+
+  reg_par <- matrix(
+    c(
+      0,
+      0,
+      1,
+      -0.05,
+      0.1
+    ),
+    nrow = 1
+  )
+
+  expect_error(
+    Reg_parCI(add_data, model = 1, reg_par, n.boots = 100),
+    "Time-varying scale parameter became non-positive"
+  )
+})
+
+
+
+test_that("Reg_parCI rejects invalid transformed values", {
+
+  add_data <- matrix(1000, nrow = 40, ncol = 4)
+
+  reg_par <- matrix(
+    c(
+      0,
+      0,
+      1,
+      0,
+      -0.2
+    ),
+    nrow = 1
+  )
+
+  expect_error(
+    Reg_parCI(add_data, model = 1, reg_par, n.boots = 100),
+    "Invalid transformed values encountered"
+  )
+})
+
+
+
+test_that("Lower confidence limits are smaller than upper confidence limits", {
+
+  set.seed(123)
+
+  add_data <- matrix(rnorm(40 * 4), ncol = 4)
+
+  reg_par <- matrix(
+    c(0, 0.01, 1, 0.001, 0.1),
+    nrow = 1
+  )
+
+  result <- Reg_parCI(
+    add_data = add_data,
+    model = 1,
+    reg_par = reg_par,
+    n.boots = 100
+  )
+
+  expect_true(
+    all(result[1, ] <= result[2, ])
   )
 })

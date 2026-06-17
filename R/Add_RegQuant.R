@@ -32,7 +32,10 @@ Add_RegQuant <- function(prob,
                          n.year) {
 
   # === Input checks ===
-  if (!is.numeric(prob) || any(is.na(prob)) || any(prob <= 0) || any(prob >= 1)) {
+  if (!is.numeric(prob) ||
+      any(!is.finite(prob)) ||
+      any(prob <= 0) ||
+      any(prob >= 1)) {
     stop("`prob` must be a numeric vector with values strictly between 0 and 1 and no missing data.")
   }
 
@@ -42,25 +45,29 @@ Add_RegQuant <- function(prob,
   }
 
   site_temp <- as.numeric(site_temp)
-  if (!is.numeric(site_temp) || length(site_temp) == 0 || any(is.na(site_temp))) {
+
+  if (length(site_temp) == 0 || any(!is.finite(site_temp))) {
     stop("`site_temp` must be a numeric vector or 1-column matrix with no missing values.")
   }
 
-  if (!is.numeric(n.year) || length(n.year) != 1 || n.year < 1 || n.year > length(site_temp)) {
+  if (!is.numeric(n.year) ||
+      length(n.year) != 1 ||
+      n.year != as.integer(n.year) ||
+      n.year < 1 ||
+      n.year > length(site_temp)) {
     stop("`n.year` must be a single integer between 1 and the length of `site_temp`.")
   }
 
   # === Core computation ===
-  max_time <- length(site_temp)
   site_mean <- mean(site_temp, na.rm = TRUE)
-  #scaled <- scale(1L:size[i, 1])
-  #time <- scaled[, 1]
-  time <- 1L:max_time # standardize time for trend modeling
-  selected_time <- time[n.year]
-
+  selected_time <- n.year
   loc <- regional_pars[1] + regional_pars[2] * selected_time
   scale_val <- regional_pars[3] + regional_pars[4] * selected_time
   shape <- regional_pars[5]
+
+  if (scale_val <= 0) {
+    stop("Calculated scale parameter must be positive.")
+  }
 
   Qt <- extRemes::qevd(prob, loc = loc, scale = scale_val, shape = shape, type = "GEV")
   Qt_adj <- Qt + site_mean

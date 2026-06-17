@@ -7,22 +7,23 @@
 Fit_model(temperatures, model)
 }
 \arguments{
-\item{temperatures}{A vector or single column matrix of air temperature data subtracted (or not) by its sample mean.}
+\item{temperatures}{A vector or single-column matrix of air temperature data, either original or
+centered by subtracting the sample mean.}
 
-\item{model}{A single integer number from 1 to 4 defining the GEV model.
-May be provided by \code{best_model()}.}
+\item{model}{A single integer between 1 and 4 defining the GEV model.
+It may be provided by \code{Best_model()}.}
 }
 \value{
-A \code{data.frame} with the estimated parameters (\code{mu0}, \code{mu1}, \code{sigma0}, \code{sigma1}, \code{shape}, \code{size}).
+A \code{data.frame} containing the estimated parameters
+(\code{mu0}, \code{mu1}, \code{sigma0}, \code{sigma1}, \code{shape}, \code{size}).
 If fitting fails, \code{NA}s are returned for that site.
 }
 \description{
 Time-varying parameters of a given GEV model.
 }
 \details{
-The function first attempts to fit the model using \code{ismev::gev.fit}
-(a generalized maximum likelihood estimation). If that fails, it tries
-to \code{extRemes::fevd} with method = "MLE".
+The function first attempts to fit the model using \code{ismev::gev.fit()}.
+If this approach fails, several alternative optimization methods are tried.
 }
 \examples{
 temperatures <- TmaxCPC_SP$Pixel_1
