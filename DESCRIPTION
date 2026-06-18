@@ -7,7 +7,9 @@ Authors@R: c(
     person("Graciela R.", "Sobierajski", role = "aut",
            comment = c(ORCID = "0000-0002-7211-9268")),
     person("Leticia L.", "Martins", role = "aut",
-           comment = c(ORCID = "0000-0002-0299-3005"))
+           comment = c(ORCID = "0000-0002-0299-3005")),
+    person("Adam H.", "Sparks", , "adamhsparks@gmail.com", role = "aut",
+           comment = c(ORCID = "0000-0002-0061-8359"))
            )
 Description: Adapts the index-flood technique to extreme air temperature data. The package uses 
     the additive approach proposed in Martins et al. (2022) <doi:10.1590/1678-4499.20220061> 
