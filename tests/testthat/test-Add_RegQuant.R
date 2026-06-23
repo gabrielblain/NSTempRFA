@@ -9,7 +9,7 @@ test_that("Add_RegQuant works with valid inputs", {
   expect_type(result, "double")
   expect_length(result, length(prob))
   expect_named(result)
-  expect_false(any(is.na(result)))
+  expect_false(anyNA(result))
   expect_true(all(is.finite(result)))
 })
 

@@ -35,7 +35,7 @@ test_that("Reg_parCI returns the correct structure", {
     )
   )
 
-  expect_false(any(is.na(result)))
+  expect_false(anyNA(result))
 })
 
 
