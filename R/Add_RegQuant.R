@@ -26,36 +26,52 @@
 #'   site_temp = TmaxCPC_SP$Pixel_1,
 #'   n.year = 34
 #' )
-Add_RegQuant <- function(prob,
-                         regional_pars,
-                         site_temp,
-                         n.year) {
-
+Add_RegQuant <- function(prob, regional_pars, site_temp, n.year) {
   # === Input checks ===
-  if (!is.numeric(prob) ||
-      any(!is.finite(prob)) ||
+  if (
+    !is.numeric(prob) ||
+      !all(is.finite(prob)) ||
       any(prob <= 0) ||
-      any(prob >= 1)) {
-    stop("`prob` must be a numeric vector with values strictly between 0 and 1 and no missing data.")
+      any(prob >= 1)
+  ) {
+    stop(
+      "`prob` must be a numeric vector with values strictly between 0 and 1 and no missing data.",
+      call. = FALSE
+    )
   }
 
   regional_pars <- as.matrix(regional_pars)
-  if (!is.numeric(regional_pars) || ncol(regional_pars) != 5 || nrow(regional_pars) != 1) {
-    stop("`regional_pars` must be a numeric matrix or data frame with 5 columns and 1 row.")
+  if (
+    !is.numeric(regional_pars) ||
+      ncol(regional_pars) != 5 ||
+      nrow(regional_pars) != 1
+  ) {
+    stop(
+      "`regional_pars` must be a numeric matrix or data frame with 5 columns and 1 row.",
+      call. = FALSE
+    )
   }
 
   site_temp <- as.numeric(site_temp)
 
-  if (length(site_temp) == 0 || any(!is.finite(site_temp))) {
-    stop("`site_temp` must be a numeric vector or 1-column matrix with no missing values.")
+  if (length(site_temp) == 0 || !all(is.finite(site_temp))) {
+    stop(
+      "`site_temp` must be a numeric vector or 1-column matrix with no missing values.",
+      call. = FALSE
+    )
   }
 
-  if (!is.numeric(n.year) ||
+  if (
+    !is.numeric(n.year) ||
       length(n.year) != 1 ||
       n.year != as.integer(n.year) ||
       n.year < 1 ||
-      n.year > length(site_temp)) {
-    stop("`n.year` must be a single integer between 1 and the length of `site_temp`.")
+      n.year > length(site_temp)
+  ) {
+    stop(
+      "`n.year` must be a single integer between 1 and the length of `site_temp`.",
+      call. = FALSE
+    )
   }
 
   # === Core computation ===
@@ -66,10 +82,16 @@ Add_RegQuant <- function(prob,
   shape <- regional_pars[5]
 
   if (scale_val <= 0) {
-    stop("Calculated scale parameter must be positive.")
+    stop("Calculated scale parameter must be positive.", call. = FALSE)
   }
 
-  Qt <- extRemes::qevd(prob, loc = loc, scale = scale_val, shape = shape, type = "GEV")
+  Qt <- extRemes::qevd(
+    prob,
+    loc = loc,
+    scale = scale_val,
+    shape = shape,
+    type = "GEV"
+  )
   Qt_adj <- Qt + site_mean
   names(Qt_adj) <- paste0("Q", prob * 100)
 

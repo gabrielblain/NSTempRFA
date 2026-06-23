@@ -30,13 +30,15 @@
 #' @examples
 #' # Add_Discord(TmaxCPC_SP)
 Add_Discord <- function(dataset) {
-
   if (ncol(dataset) < 2) {
-    stop("The dataset must contain a year column and at least one site.")
+    stop(
+      "The dataset must contain a year column and at least one site.",
+      call. = FALSE
+    )
   }
 
   if (anyNA(dataset[, 1])) {
-    stop("Column 'Years' cannot have missing data.")
+    stop("Column 'Years' cannot have missing data.", call. = FALSE)
   }
 
   n_total <- ncol(dataset)
@@ -46,13 +48,13 @@ Add_Discord <- function(dataset) {
   n_sites <- ncol(dataset.year)
 
   if (n_sites < 3) {
-    stop("The number of sites should be at least 3.")
+    stop("The number of sites should be at least 3.", call. = FALSE)
   }
 
   min_sample_size <- min(colSums(!is.na(dataset.year)))
 
   if (min_sample_size < 10) {
-    stop("All sites must have at least 10 years of records.")
+    stop("All sites must have at least 10 years of records.", call. = FALSE)
   }
 
   d <- as.data.frame(matrix(NA_real_, n_sites, 8))
@@ -61,8 +63,13 @@ Add_Discord <- function(dataset) {
   d[, 8] <- sqrt(getDistance(Cov(d[, 4:6])))
 
   colnames(d) <- c(
-    "Local", "SampleSize",
-    "l_1", "l_2", "t_3", "t_4", "t_5",
+    "Local",
+    "SampleSize",
+    "l_1",
+    "l_2",
+    "t_3",
+    "t_4",
+    "t_5",
     "discord"
   )
 

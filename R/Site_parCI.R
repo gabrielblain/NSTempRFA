@@ -27,46 +27,52 @@
 #'   site_par = site_par[1:5],
 #'   n.boots = 100
 #' )
-Site_parCI <- function(atsite_temp,
-                       model,
-                       site_par,
-                       n.boots = 999) {
-
+Site_parCI <- function(atsite_temp, model, site_par, n.boots = 999) {
   #----------------------------------------------------------
   # Input checks
   #----------------------------------------------------------
-  if (!is.numeric(model) ||
+  if (
+    !is.numeric(model) ||
       length(model) != 1 ||
       model != as.integer(model) ||
-      !(model %in% 1:4)) {
-    stop("`model` must be a single integer between 1 and 4.")
+      !(model %in% 1:4)
+  ) {
+    stop("`model` must be a single integer between 1 and 4.", call. = FALSE)
   }
 
-  if (!is.numeric(n.boots) ||
+  if (
+    !is.numeric(n.boots) ||
       length(n.boots) != 1 ||
       n.boots != as.integer(n.boots) ||
-      n.boots < 100) {
-    stop("`n.boots` must be an integer larger than or equal to 100.")
+      n.boots < 100
+  ) {
+    stop(
+      "`n.boots` must be an integer larger than or equal to 100.",
+      call. = FALSE
+    )
   }
 
   data_site <- as.matrix(atsite_temp)
 
   if (all(is.na(data_site))) {
-    stop("`atsite_temp` contains only missing values.")
+    stop("`atsite_temp` contains only missing values.", call. = FALSE)
   }
 
   if (ncol(data_site) != 1) {
-    stop("`atsite_temp` must be a vector or single-column matrix.")
+    stop(
+      "`atsite_temp` must be a vector or single-column matrix.",
+      call. = FALSE
+    )
   }
 
   if (!is.numeric(data_site)) {
-    stop("`atsite_temp` must be numeric.")
+    stop("`atsite_temp` must be numeric.", call. = FALSE)
   }
 
   max_time <- sum(!is.na(data_site))
 
   if (max_time < 10) {
-    stop("Site must have at least 10 years of records.")
+    stop("Site must have at least 10 years of records.", call. = FALSE)
   }
 
   data_site <- na.omit(as.numeric(data_site))
@@ -74,15 +80,15 @@ Site_parCI <- function(atsite_temp,
   site_par <- as.matrix(site_par)
 
   if (!is.numeric(site_par)) {
-    stop("`site_par` must be numeric.")
+    stop("`site_par` must be numeric.", call. = FALSE)
   }
 
   if (nrow(site_par) != 1 || ncol(site_par) != 5) {
-    stop("`site_par` must have exactly 1 row and 5 columns.")
+    stop("`site_par` must have exactly 1 row and 5 columns.", call. = FALSE)
   }
 
-  if (any(!is.finite(site_par))) {
-    stop("`site_par` cannot contain missing or infinite values.")
+  if (!all(is.finite(site_par))) {
+    stop("`site_par` cannot contain missing or infinite values.", call. = FALSE)
   }
 
   site_par <- as.numeric(site_par)
@@ -99,27 +105,24 @@ Site_parCI <- function(atsite_temp,
   par.temporal[, 3] <- site_par[5]
 
   if (any(par.temporal[, 2] <= 0)) {
-    stop("The scale parameter becomes non-positive over time.")
+    stop("The scale parameter becomes non-positive over time.", call. = FALSE)
   }
 
   #----------------------------------------------------------
   # Transform observations to Gumbel space
   #----------------------------------------------------------
   if (abs(site_par[5]) < sqrt(.Machine$double.eps)) {
-
     IDD.series <-
       (data_site - par.temporal[, 1]) /
       par.temporal[, 2]
-
   } else {
-
     z <-
       1 +
       par.temporal[, 3] *
-      ((data_site - par.temporal[, 1]) / par.temporal[, 2])
+        ((data_site - par.temporal[, 1]) / par.temporal[, 2])
 
     if (any(z <= 0, na.rm = TRUE)) {
-      stop("Invalid transformed values encountered.")
+      stop("Invalid transformed values encountered.", call. = FALSE)
     }
 
     IDD.series <- (1 / par.temporal[, 3]) * log(z)
@@ -153,21 +156,17 @@ Site_parCI <- function(atsite_temp,
   # Bootstrap loop
   #----------------------------------------------------------
   for (r in seq_len(n.boots)) {
-
     rows <- ((r - 1) * max_time + 1):(r * max_time)
 
     if (abs(site_par[5]) < sqrt(.Machine$double.eps)) {
-
       back.orig <-
         par.temporal[, 1] +
         par.temporal[, 2] * IDD.series.boot[rows]
-
     } else {
-
       back.orig <-
         par.temporal[, 1] +
         (par.temporal[, 2] / par.temporal[, 3]) *
-        (exp(IDD.series.boot[rows] * par.temporal[, 3]) - 1)
+          (exp(IDD.series.boot[rows] * par.temporal[, 3]) - 1)
     }
 
     parameters <- Fit_model(

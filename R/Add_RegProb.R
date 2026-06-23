@@ -21,24 +21,46 @@
 
 Add_RegProb <- function(quantiles, regional_pars, site_temp, n.year) {
   # Input checks
-  if (!is.numeric(quantiles) || any(!is.finite(quantiles))) {
-    stop("`quantiles` must be a numeric vector with no missing values.")
+  if (!is.numeric(quantiles) || !all(is.finite(quantiles))) {
+    stop(
+      "`quantiles` must be a numeric vector with no missing values.",
+      call. = FALSE
+    )
   }
   regional_pars <- as.matrix(regional_pars)
-  if (!is.numeric(regional_pars) || ncol(regional_pars) != 5 || nrow(regional_pars) != 1) {
-    stop("'regional_pars' must be a numeric matrix or data frame with one row and five columns.")
+  if (
+    !is.numeric(regional_pars) ||
+      ncol(regional_pars) != 5 ||
+      nrow(regional_pars) != 1
+  ) {
+    stop(
+      "'regional_pars' must be a numeric matrix or data frame with one row and five columns.",
+      call. = FALSE
+    )
   }
 
-    if (!is.numeric(site_temp) || any(!is.finite(site_temp)) || length(site_temp) == 0) {
-    stop("`site_temp` must be a non-empty numeric vector or 1-column matrix.")
+  if (
+    !is.numeric(site_temp) ||
+      !all(is.finite(site_temp)) ||
+      length(site_temp) == 0
+  ) {
+    stop(
+      "`site_temp` must be a non-empty numeric vector or 1-column matrix.",
+      call. = FALSE
+    )
   }
 
-  if (!is.numeric(n.year) ||
+  if (
+    !is.numeric(n.year) ||
       length(n.year) != 1 ||
       n.year != as.integer(n.year) ||
       n.year < 1 ||
-      n.year > length(site_temp)) {
-    stop("`n.year` must be a single number between 1 and the length of `site_temp`.")
+      n.year > length(site_temp)
+  ) {
+    stop(
+      "`n.year` must be a single number between 1 and the length of `site_temp`.",
+      call. = FALSE
+    )
   }
 
   max_time <- length(site_temp)
@@ -53,13 +75,16 @@ Add_RegProb <- function(quantiles, regional_pars, site_temp, n.year) {
 
   # Check for non-positive scale (GEV scale parameter must be positive)
   if (scale <= 0) {
-    stop("Calculated scale parameter must be positive.")
+    stop("Calculated scale parameter must be positive.", call. = FALSE)
   }
 
-  RegProb <- as.matrix(extRemes::pevd(add.quantiles, loc = loc,
-                                      scale = scale,
-                                      shape = shape,
-                                      type = "GEV"))
+  RegProb <- as.matrix(extRemes::pevd(
+    add.quantiles,
+    loc = loc,
+    scale = scale,
+    shape = shape,
+    type = "GEV"
+  ))
   # Truncate probabilities
   RegProb[RegProb < 0.0001] <- 0.0001
   RegProb[RegProb > 0.9999] <- 0.9999

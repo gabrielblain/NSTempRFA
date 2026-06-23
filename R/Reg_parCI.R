@@ -39,61 +39,66 @@
 #'   reg_par = regional.parms,
 #'   n.boots = 100
 #' )
-Reg_parCI <- function(add_data,
-                      model,
-                      reg_par,
-                      n.boots = 999) {
-
+Reg_parCI <- function(add_data, model, reg_par, n.boots = 999) {
   # ============================================================
   # Input checks
   # ============================================================
 
   if (!is.numeric(add_data)) {
-    stop("`add_data` must be numeric.")
+    stop("`add_data` must be numeric.", call. = FALSE)
   }
 
   add_data <- as.matrix(add_data)
 
   if (length(add_data) == 0) {
-    stop("`add_data` cannot be empty.")
+    stop("`add_data` cannot be empty.", call. = FALSE)
   }
 
-  if (!is.numeric(model) ||
+  if (
+    !is.numeric(model) ||
       length(model) != 1 ||
       model != as.integer(model) ||
       model < 1 ||
-      model > 4) {
-    stop("`model` must be a single integer between 1 and 4.")
+      model > 4
+  ) {
+    stop("`model` must be a single integer between 1 and 4.", call. = FALSE)
   }
 
-  if (!is.numeric(n.boots) ||
+  if (
+    !is.numeric(n.boots) ||
       length(n.boots) != 1 ||
       n.boots != as.integer(n.boots) ||
-      n.boots < 100) {
-    stop("`n.boots` must be a single integer larger than or equal to 100.")
+      n.boots < 100
+  ) {
+    stop(
+      "`n.boots` must be a single integer larger than or equal to 100.",
+      call. = FALSE
+    )
   }
 
   n.sites <- ncol(add_data)
 
   if (n.sites < 3) {
-    stop("The number of sites must be larger than 2.")
+    stop("The number of sites must be larger than 2.", call. = FALSE)
   }
 
   min_sample_size <- min(colSums(!is.na(add_data)))
 
   if (min_sample_size < 10) {
-    stop("All sites must have at least 10 years of records.")
+    stop("All sites must have at least 10 years of records.", call. = FALSE)
   }
 
   reg_par <- as.matrix(reg_par)
 
-  if (!is.numeric(reg_par) ||
-      any(!is.finite(reg_par))) {
-    stop("`reg_par` must contain finite numeric values.")
+  if (
+    !is.numeric(reg_par) ||
+      !all(is.finite(reg_par))
+  ) {
+    stop("`reg_par` must contain finite numeric values.", call. = FALSE)
   }
 
   if (nrow(reg_par) != 1 || ncol(reg_par) != 5) {
-    stop("`reg_par` must have exactly 1 row and 5 columns.")
+    stop("`reg_par` must have exactly 1 row and 5 columns.", call. = FALSE)
   }
 
   reg_par <- as.numeric(reg_par)
@@ -101,7 +106,7 @@ Reg_parCI <- function(add_data,
   max_time <- nrow(add_data)
 
   if (max_time < 10) {
-    stop("`add_data` must contain at least 10 observations.")
+    stop("`add_data` must contain at least 10 observations.", call. = FALSE)
   }
 
   # ============================================================
@@ -118,7 +123,7 @@ Reg_parCI <- function(add_data,
 
   # Scale parameter must remain positive
   if (any(par.temporal[, 2] <= 0)) {
-    stop("Time-varying scale parameter became non-positive.")
+    stop("Time-varying scale parameter became non-positive.", call. = FALSE)
   }
 
   # ============================================================
@@ -128,13 +133,13 @@ Reg_parCI <- function(add_data,
   IDD.series <- add_data
 
   for (site in seq_len(n.sites)) {
-
-    z <- 1 + par.temporal[, 3] *
-      ((add_data[, site] - par.temporal[, 1]) /
-         par.temporal[, 2])
+    z <- 1 +
+      par.temporal[, 3] *
+        ((add_data[, site] - par.temporal[, 1]) /
+          par.temporal[, 2])
 
     if (any(z <= 0, na.rm = TRUE)) {
-      stop("Invalid transformed values encountered.")
+      stop("Invalid transformed values encountered.", call. = FALSE)
     }
 
     IDD.series[, site] <-
@@ -173,13 +178,12 @@ Reg_parCI <- function(add_data,
   # ============================================================
 
   for (r in seq_len(n.boots)) {
-
     rows <- ((r - 1) * max_time + 1):(r * max_time)
 
     back.orig <-
       par.temporal[, 1] +
       (par.temporal[, 2] / par.temporal[, 3]) *
-      (exp(IDD.series.boot[rows, ] * par.temporal[, 3]) - 1)
+        (exp(IDD.series.boot[rows, ] * par.temporal[, 3]) - 1)
 
     find.best.boot <-
       Fit_model(

@@ -22,17 +22,32 @@
 #' Ns <- 500
 #' add.data <- Dataset_add(TmaxCPC_SP)
 #' Add_Heterogeneity(dataset.add=add.data$add_data,rho = rho,Ns = Ns)
-Add_Heterogeneity <- function(dataset.add,rho,Ns){
+Add_Heterogeneity <- function(dataset.add, rho, Ns) {
   n.sites <- ncol(dataset.add)
-  if (n.sites < 3) stop("The number of sites should be equal to or larger than 3.")
+  if (n.sites < 3) {
+    stop(
+      "The number of sites should be equal to or larger than 3.",
+      call. = FALSE
+    )
+  }
 
   min_sample_size <- min(colSums(!is.na(dataset.add)))
-  if (min_sample_size < 10)
-    stop("All sites must have at least 10 years of records. So sorry, we cannot proceed.")
+  if (min_sample_size < 10) {
+    stop(
+      "All sites must have at least 10 years of records. So sorry, we cannot proceed.",
+      call. = FALSE
+    )
+  }
 
-  if (Ns < 100) stop("Ns should be larger than 99.")
-  if (!is.numeric(rho) || length(rho) != 1 || rho >= 1 || rho <= -1)
-    stop("'rho' must be a single numeric value strictly between -1 and 1.")
+  if (Ns < 100) {
+    stop("Ns should be larger than 99.", call. = FALSE)
+  }
+  if (!is.numeric(rho) || length(rho) != 1 || rho >= 1 || rho <= -1) {
+    stop(
+      "'rho' $ust be a single numeric value strictly between -1 and 1.",
+      call. = FALSE
+    )
+  }
 
   V.sim <- numeric(Ns)
   vetor.numerador <- numeric(n.sites)
@@ -51,13 +66,13 @@ Add_Heterogeneity <- function(dataset.add,rho,Ns){
   reg.par <- try(pelkap(rmom), silent = TRUE)
   is.kap <- length(reg.par)
 
-  if (is.kap == 1 || any(!is.finite(reg.par))) {
+  if (is.kap == 1 || !all(is.finite(reg.par))) {
     reg.par <- try(pelwak(rmom), silent = TRUE)
     is.kap <- length(reg.par)
   }
 
-  if (is.kap == 1 || any(!is.finite(reg.par))) {
-    warning("Failed to fit regional distribution. Returning NA.")
+  if (is.kap == 1 || !all(is.finite(reg.par))) {
+    warning("Failed to fit regional distribution. Returning NA.", call. = FALSE)
     return(NA)
   }
 
@@ -76,12 +91,21 @@ Add_Heterogeneity <- function(dataset.add,rho,Ns){
   }
 
   for (ns in 1:Ns) {
-    u.sim <- tryCatch({
-      pnorm(mvrnorm(n = max.n.years, mu = rep(0, n.sites), Sigma = sigma))
-    }, error = function(e) {
-      warning("mvrnorm failed (simulation ", ns, "): ", conditionMessage(e))
-      return(matrix(NA, max.n.years, n.sites))
-    })
+    u.sim <- tryCatch(
+      {
+        pnorm(mvrnorm(n = max.n.years, mu = rep(0, n.sites), Sigma = sigma))
+      },
+      error = function(e) {
+        warning(
+          "mvrnorm failed (simulation ",
+          ns,
+          "): ",
+          conditionMessage(e),
+          call. = FALSE
+        )
+        return(matrix(NA, max.n.years, n.sites))
+      }
+    )
 
     if (anyNA(u.sim)) {
       V.sim[ns] <- NA
@@ -92,9 +116,15 @@ Add_Heterogeneity <- function(dataset.add,rho,Ns){
     for (site in 1:n.sites) {
       site_years <- x1.atoutset[site, 2]
       if (is.kap == 5) {
-        data.sim[1:site_years, site] <- quawak(u.sim[1:site_years, site], reg.par)
+        data.sim[1:site_years, site] <- quawak(
+          u.sim[1:site_years, site],
+          reg.par
+        )
       } else {
-        data.sim[1:site_years, site] <- quakap(u.sim[1:site_years, site], reg.par)
+        data.sim[1:site_years, site] <- quakap(
+          u.sim[1:site_years, site],
+          reg.par
+        )
       }
     }
 
@@ -110,7 +140,10 @@ Add_Heterogeneity <- function(dataset.add,rho,Ns){
   if (all(is.finite(V.sim)) && sd(V.sim, na.rm = TRUE) > 0) {
     H <- (V - mean(V.sim, na.rm = TRUE)) / sd(V.sim, na.rm = TRUE)
   } else {
-    warning("V.sim contains invalid values or zero variance. Returning NA.")
+    warning(
+      "V.sim contains invalid values or zero variance. Returning NA.",
+      call. = FALSE
+    )
     H <- NA
   }
 
