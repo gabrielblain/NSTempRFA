@@ -41,7 +41,7 @@ Reg_par <- function(best_model) {
   }
 
   # Check: size column
-  if (any(!is.finite(best_model$size)) || any(best_model$size < 0)) {
+  if (!all(is.finite(best_model$size)) || any(best_model$size < 0)) {
     stop("The 'size' column must contain finite non-negative values.")
   }
 
@@ -49,7 +49,7 @@ Reg_par <- function(best_model) {
     stop("The sum of the 'size' column must be greater than zero.")
   }
 
-  if (any(!is.finite(as.matrix(best_model[, required_cols])))) {
+  if (!all(is.finite(as.matrix(best_model[, required_cols])))) {
     stop("All values in 'best_model' must be finite.")
   }
 
