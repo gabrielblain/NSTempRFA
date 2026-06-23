@@ -32,21 +32,20 @@
 #' best.parms <- Best_model(add.data = add.data$add_data)
 
 Best_model <- function(add.data) {
-
   if (!is.matrix(add.data) && !is.data.frame(add.data)) {
-    stop("Input 'add.data' must be a matrix or data frame.")
+    stop("Input 'add.data' must be a matrix or data frame.", call. = FALSE)
   }
 
   add.data <- as.matrix(add.data)
 
   if (ncol(add.data) < 1) {
-    stop("'add.data' must contain at least one site.")
+    stop("'add.data' must contain at least one site.", call. = FALSE)
   }
 
   min_sample_size <- min(colSums(!is.na(add.data)))
 
   if (min_sample_size < 10) {
-    stop("All sites must have at least 10 observations.")
+    stop("All sites must have at least 10 observations.", call. = FALSE)
   }
 
   n.sites <- ncol(add.data)
@@ -54,13 +53,12 @@ Best_model <- function(add.data) {
 
   at.site.model1 <- at.site.model2 <-
     at.site.model3 <- at.site.model4 <-
-    as.data.frame(matrix(NA, n.sites, 5))
+      as.data.frame(matrix(NA, n.sites, 5))
 
   at.site.AICs <- as.data.frame(matrix(NA, n.sites, 4))
   atsite.models <- as.data.frame(matrix(NA, n.sites, 6))
 
   for (i in seq_len(n.sites)) {
-
     local <- na.omit(add.data[, i])
     size[i, 1] <- length(local)
 
@@ -69,8 +67,8 @@ Best_model <- function(add.data) {
 
       at.site.model1[i, ] <-
         at.site.model2[i, ] <-
-        at.site.model3[i, ] <-
-        at.site.model4[i, ] <- rep(NA, 5)
+          at.site.model3[i, ] <-
+            at.site.model4[i, ] <- rep(NA, 5)
 
       next
     }
@@ -91,7 +89,7 @@ Best_model <- function(add.data) {
   total_AIC <- colSums(at.site.AICs, na.rm = TRUE)
 
   if (all(is.infinite(total_AIC))) {
-    stop("All model fits failed.")
+    stop("All model fits failed.", call. = FALSE)
   }
 
   best <- which.min(total_AIC)
@@ -122,7 +120,6 @@ Best_model <- function(add.data) {
 # Internal: fit models and compute AICc
 #--------------------------------------------------
 fit.models <- function(local, time) {
-
   if (length(local) == 0) {
     return(
       list(
@@ -144,80 +141,79 @@ fit.models <- function(local, time) {
   )
 
   try_model <- function(model_id) {
-
     for (method in methods) {
+      result <- try(
+        {
+          fit <- switch(
+            as.character(model_id),
 
-      result <- try({
+            "1" = ismev::gev.fit(
+              local,
+              ydat = as.matrix(time),
+              mul = NULL,
+              sigl = NULL,
+              shl = NULL,
+              mulink = identity,
+              siglink = identity,
+              shlink = identity,
+              method = method,
+              maxit = 10000,
+              show = FALSE
+            ),
 
-        fit <- switch(
-          as.character(model_id),
+            "2" = ismev::gev.fit(
+              local,
+              ydat = as.matrix(time),
+              mul = 1,
+              sigl = NULL,
+              shl = NULL,
+              mulink = identity,
+              siglink = identity,
+              shlink = identity,
+              method = method,
+              maxit = 10000,
+              show = FALSE
+            ),
 
-          "1" = ismev::gev.fit(
-            local,
-            ydat = as.matrix(time),
-            mul = NULL,
-            sigl = NULL,
-            shl = NULL,
-            mulink = identity,
-            siglink = identity,
-            shlink = identity,
-            method = method,
-            maxit = 10000,
-            show = FALSE
-          ),
+            "3" = ismev::gev.fit(
+              local,
+              ydat = as.matrix(time),
+              mul = NULL,
+              sigl = 1,
+              shl = NULL,
+              mulink = identity,
+              siglink = identity,
+              shlink = identity,
+              method = method,
+              maxit = 10000,
+              show = FALSE
+            ),
 
-          "2" = ismev::gev.fit(
-            local,
-            ydat = as.matrix(time),
-            mul = 1,
-            sigl = NULL,
-            shl = NULL,
-            mulink = identity,
-            siglink = identity,
-            shlink = identity,
-            method = method,
-            maxit = 10000,
-            show = FALSE
-          ),
-
-          "3" = ismev::gev.fit(
-            local,
-            ydat = as.matrix(time),
-            mul = NULL,
-            sigl = 1,
-            shl = NULL,
-            mulink = identity,
-            siglink = identity,
-            shlink = identity,
-            method = method,
-            maxit = 10000,
-            show = FALSE
-          ),
-
-          "4" = ismev::gev.fit(
-            local,
-            ydat = as.matrix(time),
-            mul = 1,
-            sigl = 1,
-            shl = NULL,
-            mulink = identity,
-            siglink = identity,
-            shlink = identity,
-            method = method,
-            maxit = 10000,
-            show = FALSE
+            "4" = ismev::gev.fit(
+              local,
+              ydat = as.matrix(time),
+              mul = 1,
+              sigl = 1,
+              shl = NULL,
+              mulink = identity,
+              siglink = identity,
+              shlink = identity,
+              method = method,
+              maxit = 10000,
+              show = FALSE
+            )
           )
-        )
 
-        if (is.null(fit) || is.null(fit$mle)) {
-          stop("Fit failed.")
-        }
+          if (is.null(fit) || is.null(fit$mle)) {
+            stop("Fit failed.")
+          }
 
-        fit$method_used <- method
+          fit$method_used <- method
 
-        return(fit)
-
-      }, silent = TRUE)
+          return(fit)
+        },
+        silent = TRUE
+      )
 
       if (!inherits(result, "try-error") && !is.null(result)) {
         return(result)
@@ -235,7 +231,6 @@ fit.models <- function(local, time) {
   )
 
   extract_pars <- function(model, model_id) {
-
     if (is.null(model) || is.null(model$mle)) {
       return(rep(NA, 5))
     }
@@ -261,12 +256,12 @@ fit.models <- function(local, time) {
   n <- length(local)
 
   safe_AICc <- function(model, k, n) {
-
-    if (is.null(model) ||
+    if (
+      is.null(model) ||
         is.null(model$nllh) ||
         is.na(model$nllh) ||
-        n <= k + 1) {
-
+        n <= k + 1
+    ) {
       return(Inf)
     }
 
@@ -274,7 +269,7 @@ fit.models <- function(local, time) {
 
     AICc <- AIC +
       (2 * k * (k + 1)) /
-      (n - k - 1)
+        (n - k - 1)
 
     return(AICc)
   }
