@@ -31,68 +31,12 @@ Site_parCI <- function(atsite_temp, model, site_par, n.boots = 999) {
   #----------------------------------------------------------
   # Input checks
   #----------------------------------------------------------
-  if (
-    !is.numeric(model) ||
-      length(model) != 1 ||
-      model != as.integer(model) ||
-      !(model %in% 1:4)
-  ) {
-    stop("`model` must be a single integer between 1 and 4.", call. = FALSE)
-  }
 
-  if (
-    !is.numeric(n.boots) ||
-      length(n.boots) != 1 ||
-      n.boots != as.integer(n.boots) ||
-      n.boots < 100
-  ) {
-    stop(
-      "`n.boots` must be an integer larger than or equal to 100.",
-      call. = FALSE
-    )
-  }
-
-  data_site <- as.matrix(atsite_temp)
-
-  if (all(is.na(data_site))) {
-    stop("`atsite_temp` contains only missing values.", call. = FALSE)
-  }
-
-  if (ncol(data_site) != 1) {
-    stop(
-      "`atsite_temp` must be a vector or single-column matrix.",
-      call. = FALSE
-    )
-  }
-
-  if (!is.numeric(data_site)) {
-    stop("`atsite_temp` must be numeric.", call. = FALSE)
-  }
-
-  max_time <- sum(!is.na(data_site))
-
-  if (max_time < 10) {
-    stop("Site must have at least 10 years of records.", call. = FALSE)
-  }
-
-  data_site <- na.omit(as.numeric(data_site))
-
-  site_par <- as.matrix(site_par)
-
-  if (!is.numeric(site_par)) {
-    stop("`site_par` must be numeric.", call. = FALSE)
-  }
-
-  if (nrow(site_par) != 1 || ncol(site_par) != 5) {
-    stop("`site_par` must have exactly 1 row and 5 columns.", call. = FALSE)
-  }
-
-  if (!all(is.finite(site_par))) {
-    stop("`site_par` cannot contain missing or infinite values.", call. = FALSE)
-  }
-
-  site_par <- as.numeric(site_par)
-
+  check_model(model)
+  check_n.boots(n.boots)
+  data_site <- check_atsite_temp(atsite_temp)
+  site_par <- check_site_par(site_par)
+  max_time <- length(data_site)
   #----------------------------------------------------------
   # Time-varying parameters
   #----------------------------------------------------------
