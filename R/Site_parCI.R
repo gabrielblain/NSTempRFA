@@ -37,13 +37,12 @@ Site_parCI <- function(atsite_temp, model, site_par, n.boots = 999) {
   data_site <- check_atsite_temp(atsite_temp)
   site_par <- check_site_par(site_par)
   max_time <- length(data_site)
+
   #----------------------------------------------------------
-  # Time-varying parameters
+  # Time-varying parameters (unchanged)
   #----------------------------------------------------------
   time <- seq_len(max_time)
-
   par.temporal <- matrix(NA_real_, max_time, 3)
-
   par.temporal[, 1] <- site_par[1] + site_par[2] * time
   par.temporal[, 2] <- site_par[3] + site_par[4] * time
   par.temporal[, 3] <- site_par[5]
@@ -53,77 +52,68 @@ Site_parCI <- function(atsite_temp, model, site_par, n.boots = 999) {
   }
 
   #----------------------------------------------------------
-  # Transform observations to Gumbel space
+  # Transform to Gumbel space (unchanged)
   #----------------------------------------------------------
   if (abs(site_par[5]) < sqrt(.Machine$double.eps)) {
-    IDD.series <-
-      (data_site - par.temporal[, 1]) /
-      par.temporal[, 2]
+    IDD.series <- (data_site - par.temporal[, 1]) / par.temporal[, 2]
   } else {
-    z <-
-      1 +
-      par.temporal[, 3] *
-        ((data_site - par.temporal[, 1]) / par.temporal[, 2])
-
+    z <- 1 +
+      par.temporal[, 3] * ((data_site - par.temporal[, 1]) / par.temporal[, 2])
     if (any(z <= 0, na.rm = TRUE)) {
       stop("Invalid transformed values encountered.", call. = FALSE)
     }
-
     IDD.series <- (1 / par.temporal[, 3]) * log(z)
   }
 
   #----------------------------------------------------------
-  # Bootstrap samples
+  # CHANGE 1: Pre-generate all bootstrap indices at once
+  # sample.int() is faster than sample() on a plain index vector,
+  # and doing it in one call avoids n.boots separate RNG invocations.
   #----------------------------------------------------------
-  IDD.series.boot <- as.vector(
-    replicate(
-      n.boots,
-      sample(IDD.series, replace = TRUE)
-    )
+  boot_indices <- matrix(
+    sample.int(max_time, size = max_time * n.boots, replace = TRUE),
+    nrow = max_time, # each column = one bootstrap replicate
+    ncol = n.boots
   )
 
-  site_par.overall.boot <- matrix(
-    NA_real_,
-    nrow = n.boots,
-    ncol = 5
-  )
+  #----------------------------------------------------------
+  # CHANGE 2: Pre-compute the back-transformation constants outside the loop.
+  # These vectors are the same every iteration — no need to recompute them.
+  #----------------------------------------------------------
+  use_gumbel <- abs(site_par[5]) < sqrt(.Machine$double.eps)
+  mu_vec <- par.temporal[, 1] # length max_time
+  sigma_vec <- par.temporal[, 2]
+  xi <- site_par[5]
+
+  site_par.overall.boot <- matrix(NA_real_, nrow = n.boots, ncol = 5)
 
   message("This calculation may take some time.")
-
   show_pb <- interactive()
-
   if (show_pb) {
     pb <- txtProgressBar(min = 0, max = n.boots, style = 3)
   }
 
   #----------------------------------------------------------
-  # Bootstrap loop
+  # Bootstrap loop — Fit_model() calls are irreducible, but
+  # everything else inside is now leaner.
   #----------------------------------------------------------
   for (r in seq_len(n.boots)) {
-    rows <- ((r - 1) * max_time + 1):(r * max_time)
+    # CHANGE 3: index directly from the pre-built matrix — no arithmetic,
+    # no large flat vector to subset
+    resampled_IDD <- IDD.series[boot_indices[, r]]
 
-    if (abs(site_par[5]) < sqrt(.Machine$double.eps)) {
-      back.orig <-
-        par.temporal[, 1] +
-        par.temporal[, 2] * IDD.series.boot[rows]
+    # CHANGE 4: back-transformation is the same vectorised ops as before,
+    # but now uses pre-extracted scalars/vectors (avoids repeated [,] indexing)
+    if (use_gumbel) {
+      back.orig <- mu_vec + sigma_vec * resampled_IDD
     } else {
-      back.orig <-
-        par.temporal[, 1] +
-        (par.temporal[, 2] / par.temporal[, 3]) *
-          (exp(IDD.series.boot[rows] * par.temporal[, 3]) - 1)
+      back.orig <- mu_vec + (sigma_vec / xi) * (exp(resampled_IDD * xi) - 1)
     }
 
-    parameters <- Fit_model(
-      temperatures = back.orig,
-      model = model
-    )
+    parameters <- Fit_model(temperatures = back.orig, model = model)
+    site_par.overall.boot[r, ] <- as.numeric(parameters[1, 1:5, drop = FALSE])
 
-    site_par.overall.boot[r, ] <-
-      as.numeric(parameters[1, 1:5, drop = FALSE])
-
-    if (show_pb) {
-      setTxtProgressBar(pb, r)
-    }
+    if (show_pb) setTxtProgressBar(pb, r)
   }
 
   if (show_pb) {
@@ -131,38 +121,37 @@ Site_parCI <- function(atsite_temp, model, site_par, n.boots = 999) {
   }
 
   #----------------------------------------------------------
-  # Confidence intervals
+  # CHANGE 5: matrixStats::colQuantiles() is significantly faster than
+  # two apply() calls for large n.boots — avoids repeated overhead.
+  # Falls back gracefully if the package isn't available.
   #----------------------------------------------------------
-  CI_lower <- apply(
-    site_par.overall.boot,
-    2,
-    quantile,
-    probs = 0.025,
-    na.rm = TRUE
-  )
-
-  CI_upper <- apply(
-    site_par.overall.boot,
-    2,
-    quantile,
-    probs = 0.975,
-    na.rm = TRUE
-  )
+  if (requireNamespace("matrixStats", quietly = TRUE)) {
+    qs <- matrixStats::colQuantiles(
+      site_par.overall.boot,
+      probs = c(0.025, 0.975),
+      na.rm = TRUE
+    )
+    CI_lower <- qs[1, ]
+    CI_upper <- qs[2, ]
+  } else {
+    CI_lower <- apply(
+      site_par.overall.boot,
+      2,
+      quantile,
+      probs = 0.025,
+      na.rm = TRUE
+    )
+    CI_upper <- apply(
+      site_par.overall.boot,
+      2,
+      quantile,
+      probs = 0.975,
+      na.rm = TRUE
+    )
+  }
 
   CI_matrix <- rbind(CI_lower, CI_upper)
-
-  rownames(CI_matrix) <- c(
-    "Lower 95% CI",
-    "Upper 95% CI"
-  )
-
-  colnames(CI_matrix) <- c(
-    "mu0",
-    "mu1",
-    "sigma0",
-    "sigma1",
-    "shape"
-  )
-
+  rownames(CI_matrix) <- c("Lower 95% CI", "Upper 95% CI")
+  colnames(CI_matrix) <- c("mu0", "mu1", "sigma0", "sigma1", "shape")
   return(CI_matrix)
 }

@@ -52,65 +52,66 @@ Reg_parCI <- function(add_data, model, reg_par, n.boots = 999) {
   n.sites <- ncol(add_data)
 
   # ============================================================
-  # Construct temporal parameters
+  # Construct temporal parameters (unchanged)
   # ============================================================
-
   time <- seq_len(max_time)
-
   par.temporal <- matrix(NA_real_, max_time, 3)
-
   par.temporal[, 1] <- reg_par[1] + reg_par[2] * time
   par.temporal[, 2] <- reg_par[3] + reg_par[4] * time
   par.temporal[, 3] <- reg_par[5]
 
-  # Scale parameter must remain positive
   if (any(par.temporal[, 2] <= 0)) {
     stop("Time-varying scale parameter became non-positive.", call. = FALSE)
   }
 
   # ============================================================
-  # Transform to Gumbel space
+  # CHANGE 1: Vectorised Gumbel transform — no site loop.
+  # Broadcast the length-max_time vectors across all columns at once
+  # using sweep() instead of a for-loop over sites.
   # ============================================================
+  mu_vec <- par.temporal[, 1] # pre-extracted for reuse below
+  sigma_vec <- par.temporal[, 2]
+  xi <- reg_par[5]
 
-  IDD.series <- add_data
+  z <- 1 +
+    xi *
+      sweep(
+        sweep(add_data, 1, mu_vec, "-"),
+        1,
+        sigma_vec,
+        "/"
+      )
 
-  for (site in seq_len(n.sites)) {
-    z <- 1 +
-      par.temporal[, 3] *
-        ((add_data[, site] - par.temporal[, 1]) /
-          par.temporal[, 2])
-
-    if (any(z <= 0, na.rm = TRUE)) {
-      stop("Invalid transformed values encountered.", call. = FALSE)
-    }
-
-    IDD.series[, site] <-
-      (1 / par.temporal[, 3]) * log(z)
+  if (any(z <= 0, na.rm = TRUE)) {
+    stop("Invalid transformed values encountered.", call. = FALSE)
   }
 
-  # ============================================================
-  # Bootstrap resampling
-  # ============================================================
+  IDD.series <- (1 / xi) * log(z) # max_time × n.sites matrix
 
-  all.lines <- n.boots * max_time
-
-  resampled_indices <- replicate(
-    n.boots,
-    sample(seq_len(max_time), replace = TRUE)
+  # ============================================================
+  # CHANGE 2: Pre-generate all bootstrap row indices at once,
+  # then apply a single global shuffle — same statistical result
+  # as the original two-step, but one fewer full-matrix allocation.
+  # ============================================================
+  boot_indices <- matrix(
+    sample.int(max_time, size = max_time * n.boots, replace = TRUE),
+    nrow = max_time,
+    ncol = n.boots
   )
+  # Each column is one replicate's row-draw; shuffle the column order
+  # to replicate the original between-replicate scramble.
+  boot_indices <- boot_indices[, sample.int(n.boots)]
 
-  IDD.series.boot <-
-    IDD.series[as.vector(resampled_indices), , drop = FALSE]
-
-  IDD.series.boot <-
-    IDD.series.boot[sample(seq_len(all.lines)), , drop = FALSE]
+  # ============================================================
+  # CHANGE 3: Pre-compute back-transformation constants.
+  # sigma_vec / xi is the same every iteration — compute once.
+  # ============================================================
+  sigma_over_xi <- sigma_vec / xi # length-max_time vector
 
   reg_par.overall.boot <- matrix(NA_real_, n.boots, 5)
 
   message("This calculation may take some time.")
-
   show_pb <- interactive()
-
   if (show_pb) {
     pb <- txtProgressBar(min = 0, max = n.boots, style = 3)
   }
@@ -118,31 +119,23 @@ Reg_parCI <- function(add_data, model, reg_par, n.boots = 999) {
   # ============================================================
   # Bootstrap loop
   # ============================================================
-
   for (r in seq_len(n.boots)) {
-    rows <- ((r - 1) * max_time + 1):(r * max_time)
+    # CHANGE 4: Index directly from the pre-built column — no row-range
+    # arithmetic, and the large flat IDD.series.boot matrix is never
+    # materialised; memory use is O(max_time × n.sites) per iteration.
+    resampled_IDD <- IDD.series[boot_indices[, r], , drop = FALSE]
 
-    back.orig <-
-      par.temporal[, 1] +
-      (par.temporal[, 2] / par.temporal[, 3]) *
-        (exp(IDD.series.boot[rows, ] * par.temporal[, 3]) - 1)
+    # Back-transform: vectorised over all sites simultaneously
+    back.orig <- mu_vec +
+      sigma_over_xi * (exp(resampled_IDD * xi) - 1)
 
-    find.best.boot <-
-      Fit_model(
-        temperatures = back.orig,
-        model = model
-      )
+    find.best.boot <- Fit_model(temperatures = back.orig, model = model)
 
-    reg_par.overall.boot[r, ] <-
-      as.numeric(
-        Reg_par(
-          best_model = find.best.boot
-        )
-      )
+    reg_par.overall.boot[r, ] <- as.numeric(Reg_par(
+      best_model = find.best.boot
+    ))
 
-    if (show_pb) {
-      setTxtProgressBar(pb, r)
-    }
+    if (show_pb) setTxtProgressBar(pb, r)
   }
 
   if (show_pb) {
@@ -150,32 +143,35 @@ Reg_parCI <- function(add_data, model, reg_par, n.boots = 999) {
   }
 
   # ============================================================
-  # Confidence intervals
+  # CHANGE 5: matrixStats::colQuantiles() — same as Site_parCI
   # ============================================================
-
-  CI_lower <- apply(
-    reg_par.overall.boot,
-    2,
-    quantile,
-    probs = 0.025,
-    na.rm = TRUE
-  )
-
-  CI_upper <- apply(
-    reg_par.overall.boot,
-    2,
-    quantile,
-    probs = 0.975,
-    na.rm = TRUE
-  )
+  if (requireNamespace("matrixStats", quietly = TRUE)) {
+    qs <- matrixStats::colQuantiles(
+      reg_par.overall.boot,
+      probs = c(0.025, 0.975),
+      na.rm = TRUE
+    )
+    CI_lower <- qs[1, ]
+    CI_upper <- qs[2, ]
+  } else {
+    CI_lower <- apply(
+      reg_par.overall.boot,
+      2,
+      quantile,
+      probs = 0.025,
+      na.rm = TRUE
+    )
+    CI_upper <- apply(
+      reg_par.overall.boot,
+      2,
+      quantile,
+      probs = 0.975,
+      na.rm = TRUE
+    )
+  }
 
   CI_matrix <- rbind(CI_lower, CI_upper)
-
-  rownames(CI_matrix) <- c(
-    "Lower 95% CI",
-    "Upper 95% CI"
-  )
-
+  rownames(CI_matrix) <- c("Lower 95% CI", "Upper 95% CI")
   colnames(CI_matrix) <- c(
     "weighted_mu0",
     "weighted_mu1",
@@ -183,6 +179,5 @@ Reg_parCI <- function(add_data, model, reg_par, n.boots = 999) {
     "weighted_sigma1",
     "weighted_shape"
   )
-
   return(CI_matrix)
 }
