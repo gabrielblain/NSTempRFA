@@ -27,21 +27,22 @@
 #' model <- 4
 #' Fit_model(temperatures, model)
 Fit_model <- function(temperatures, model) {
-
   if (length(temperatures) == 0) {
-    stop("`temperatures` cannot be empty.")
+    stop("`temperatures` cannot be empty.", call. = FALSE)
   }
 
   if (!is.numeric(temperatures)) {
-    stop("`temperatures` must be a numeric vector or matrix.")
+    stop("`temperatures` must be a numeric vector or matrix.", call. = FALSE)
   }
 
-  if (!is.numeric(model) ||
+  if (
+    !is.numeric(model) ||
       length(model) != 1 ||
       model != as.integer(model) ||
       model < 1 ||
-      model > 4) {
-    stop("`model` must be a single integer between 1 and 4.")
+      model > 4
+  ) {
+    stop("`model` must be a single integer between 1 and 4.", call. = FALSE)
   }
 
   temperatures <- as.matrix(temperatures)
@@ -53,7 +54,6 @@ Fit_model <- function(temperatures, model) {
   at.site.pars <- as.data.frame(matrix(NA, n.sites, 6))
 
   for (i in seq_len(n.sites)) {
-
     local <- na.omit(temperatures[, i, drop = TRUE])
 
     size[i] <- length(local)
@@ -91,7 +91,6 @@ Fit_model <- function(temperatures, model) {
 # Internal: Main fit wrapper
 #-------------------------------------
 fit_gev <- function(local, time, model) {
-
   result <- quiet(fit_gev_ismev(local, time, model))
 
   if (is.null(result) || !is.numeric(result)) {
@@ -106,7 +105,6 @@ fit_gev <- function(local, time, model) {
 # Internal: Safe call to ismev::gev.fit
 #-------------------------------------
 fit_gev_ismev <- function(local, time, model) {
-
   time.matrix <- as.matrix(time)
 
   fit_result <- try(
@@ -200,94 +198,93 @@ fit_gev_ismev <- function(local, time, model) {
 # Internal: Alternative optimization methods
 #-------------------------------------
 fit_gev_alt <- function(local, time, model) {
-
   time.matrix <- as.matrix(time)
 
   methods <- c("BFGS", "CG", "L-BFGS-B", "SANN")
 
   for (method in methods) {
+    result <- try(
+      {
+        fit_result <- switch(
+          as.character(model),
 
-    result <- try({
+          "1" = ismev::gev.fit(
+            local,
+            ydat = time.matrix,
+            mul = NULL,
+            sigl = NULL,
+            shl = NULL,
+            mulink = identity,
+            siglink = identity,
+            shlink = identity,
+            show = FALSE,
+            method = method,
+            maxit = 10000
+          ),
 
-      fit_result <- switch(
-        as.character(model),
+          "2" = ismev::gev.fit(
+            local,
+            ydat = time.matrix,
+            mul = 1,
+            sigl = NULL,
+            shl = NULL,
+            mulink = identity,
+            siglink = identity,
+            shlink = identity,
+            show = FALSE,
+            method = method,
+            maxit = 10000
+          ),
 
-        "1" = ismev::gev.fit(
-          local,
-          ydat = time.matrix,
-          mul = NULL,
-          sigl = NULL,
-          shl = NULL,
-          mulink = identity,
-          siglink = identity,
-          shlink = identity,
-          show = FALSE,
-          method = method,
-          maxit = 10000
-        ),
+          "3" = ismev::gev.fit(
+            local,
+            ydat = time.matrix,
+            mul = NULL,
+            sigl = 1,
+            shl = NULL,
+            mulink = identity,
+            siglink = identity,
+            shlink = identity,
+            show = FALSE,
+            method = method,
+            maxit = 10000
+          ),
 
-        "2" = ismev::gev.fit(
-          local,
-          ydat = time.matrix,
-          mul = 1,
-          sigl = NULL,
-          shl = NULL,
-          mulink = identity,
-          siglink = identity,
-          shlink = identity,
-          show = FALSE,
-          method = method,
-          maxit = 10000
-        ),
-
-        "3" = ismev::gev.fit(
-          local,
-          ydat = time.matrix,
-          mul = NULL,
-          sigl = 1,
-          shl = NULL,
-          mulink = identity,
-          siglink = identity,
-          shlink = identity,
-          show = FALSE,
-          method = method,
-          maxit = 10000
-        ),
-
-        "4" = ismev::gev.fit(
-          local,
-          ydat = time.matrix,
-          mul = 1,
-          sigl = 1,
-          shl = NULL,
-          mulink = identity,
-          siglink = identity,
-          shlink = identity,
-          show = FALSE,
-          method = method,
-          maxit = 10000
+          "4" = ismev::gev.fit(
+            local,
+            ydat = time.matrix,
+            mul = 1,
+            sigl = 1,
+            shl = NULL,
+            mulink = identity,
+            siglink = identity,
+            shlink = identity,
+            show = FALSE,
+            method = method,
+            maxit = 10000
+          )
         )
-      )
 
-      if (is.null(fit_result) || is.null(fit_result$mle)) {
-        stop("Fit failed")
-      }
+        if (is.null(fit_result) || is.null(fit_result$mle)) {
+          stop("Fit failed", call. = FALSE)
+        }
 
-      parms <- fit_result$mle
+        parms <- fit_result$mle
 
-      switch(
-        as.character(model),
+        switch(
+          as.character(model),
 
-        "1" = c(parms[1], 0, parms[2], 0, parms[3]),
+          "1" = c(parms[1], 0, parms[2], 0, parms[3]),
 
-        "2" = c(parms[1], parms[2], parms[3], 0, parms[4]),
+          "2" = c(parms[1], parms[2], parms[3], 0, parms[4]),
 
-        "3" = c(parms[1], 0, parms[2], parms[3], parms[4]),
+          "3" = c(parms[1], 0, parms[2], parms[3], parms[4]),
 
-        "4" = c(parms[1], parms[2], parms[3], parms[4], parms[5])
-      )
-
-    }, silent = TRUE)
+          "4" = c(parms[1], parms[2], parms[3], parms[4], parms[5])
+        )
+      },
+      silent = TRUE
+    )
 
     if (!inherits(result, "try-error") && is.numeric(result)) {
       return(result)

@@ -19,10 +19,9 @@
 #' best.parms <- Best_model(add.data=add.data$add_data)
 #' Reg_par(best_model=best.parms$atsite.models)
 Reg_par <- function(best_model) {
-
   # Check: Must be a data.frame
   if (!is.data.frame(best_model)) {
-    stop("Input 'best_model' must be a data frame.")
+    stop("Input 'best_model' must be a data frame.", call. = FALSE)
   }
 
   # Check: Must contain required columns
@@ -31,36 +30,44 @@ Reg_par <- function(best_model) {
   if (!all(required_cols %in% names(best_model))) {
     stop(
       "Input 'best_model' must contain the columns: ",
-      paste(required_cols, collapse = ", "), "."
+      toString(required_cols),
+      ".",
+      call. = FALSE
     )
   }
 
   # Check: All columns must be numeric
   if (!all(vapply(best_model[required_cols], is.numeric, logical(1)))) {
-    stop("All columns in 'best_model' must be numeric.")
+    stop("All columns in 'best_model' must be numeric.", call. = FALSE)
   }
 
   # Check: size column
   if (!all(is.finite(best_model$size)) || any(best_model$size < 0)) {
-    stop("The 'size' column must contain finite non-negative values.")
+    stop(
+      "The 'size' column must contain finite non-negative values.",
+      call. = FALSE
+    )
   }
 
   if (sum(best_model$size) == 0) {
-    stop("The sum of the 'size' column must be greater than zero.")
+    stop(
+      "The sum of the 'size' column must be greater than zero.",
+      call. = FALSE
+    )
   }
 
   if (!all(is.finite(as.matrix(best_model[, required_cols])))) {
-    stop("All values in 'best_model' must be finite.")
+    stop("All values in 'best_model' must be finite.", call. = FALSE)
   }
 
   # Weighted means
   weighted_means <- best_model %>%
     summarise(
-      weighted_mu0    = weighted.mean(mu0, size, na.rm = TRUE),
-      weighted_mu1    = weighted.mean(mu1, size, na.rm = TRUE),
+      weighted_mu0 = weighted.mean(mu0, size, na.rm = TRUE),
+      weighted_mu1 = weighted.mean(mu1, size, na.rm = TRUE),
       weighted_sigma0 = weighted.mean(sigma0, size, na.rm = TRUE),
       weighted_sigma1 = weighted.mean(sigma1, size, na.rm = TRUE),
-      weighted_shape  = weighted.mean(shape, size, na.rm = TRUE)
+      weighted_shape = weighted.mean(shape, size, na.rm = TRUE)
     )
 
   return(weighted_means)
