@@ -58,14 +58,14 @@ data from each site.
 The discordance measures identify sites that are potentially discordant within a regional frequency analysis framework for extreme air temperature series.
 
 ### Value
-A data.frame with seven columns:\
-- Local Site identifier.\
-- SampleSize Number of observations for each site.\
-- l_1 L-moment ratio (mean).\
-- l_2 L-moment ratio (L-scale).\
-- t_3 L-moment ratio (L-skewness).\
-- t_4 L-moment ratio (L-kurtosis).\
-- t_5 L-moment ratio (higher-order L-moment).\
+A data.frame with seven columns:
+- Local Site identifier.
+- SampleSize Number of observations for each site.
+- l_1 L-moment ratio (mean).
+- l_2 L-moment ratio (L-scale).
+- t_3 L-moment ratio (L-skewness).
+- t_4 L-moment ratio (L-kurtosis).
+- t_5 L-moment ratio (higher-order L-moment).
 - discord Original discordance statistic indicating potential outlier status.
 
 ### Example
@@ -216,7 +216,7 @@ rho <- 0.51
 Ns <- 500
 add.data <- Dataset_add(TmaxCPC_SP)
 Add_Heterogeneity(dataset.add = add.data$add_data, rho = rho, Ns = Ns)
-#> [1] 0.84933
+#> [1] 0.9412115
 ```
 
 ### Function `Best_model()`
