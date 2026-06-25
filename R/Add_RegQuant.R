@@ -1,84 +1,48 @@
 #' Regional Quantile Estimation for a Site Using Time-Varying GEV Parameters
 #'
 #' Computes quantiles for a given site based on regional GEV parameters and
-#' a time-varying location and scale model. The estimated quantiles are adjusted
+#' a time-varying location and scale model. Estimated quantiles are adjusted
 #' by the site's mean temperature.
 #'
-#' @param prob A numeric vector of probabilities (values strictly between 0 and 1) with no missing data.
-#' @param regional_pars A 1-row, 5-column matrix or data frame containing the regional GEV parameters:
-#' location intercept, location slope, scale intercept, scale slope, and shape.
-#' @param site_temp A numeric vector or 1-column matrix of site's air temperature time series.
-#' @param n.year A single integer indicating the year (index) for which quantiles should be calculated.
-#' Must be between 1 and the length of site_temp.
+#' @param prob
+#' A numeric vector of probabilities strictly between 0 and 1, with no
+#' missing values.
+#' @param regional_pars
+#' A 1-row, 5-column \code{matrix} or \code{data.frame} containing regional
+#' GEV parameters: location intercept, location slope, scale intercept,
+#' scale slope, and shape.
+#' @param site_temp
+#' A numeric vector or 1-column matrix of site air temperature data.
+#' @param n.year
+#' A single integer indicating the year index for which quantiles are
+#' calculated. Must be between 1 and \code{length(site_temp)}.
 #'
-#' @return A named numeric vector of adjusted regional quantiles for the specified year.
+#' @returns
+#' A named numeric vector of adjusted regional quantiles for the specified
+#' year. Names are of the form \code{"Q90"}, \code{"Q95"}, etc.
+#'
 #' @export
 #' @importFrom extRemes qevd
 #'
 #' @examples
 #' prob <- c(0.90, 0.92, 0.93, 0.94, 0.95, 0.97, 0.99)
 #' add.data <- Dataset_add(TmaxCPC_SP)
-#' best.parms <- Best_model(add.data=add.data$add_data)
+#' best.parms <- Best_model(add.data = add.data$add_data)
 #' regional_pars <- Reg_par(best_model = best.parms$atsite.models)
 #' Add_RegQuant(
-#'   prob = prob,
+#'   prob          = prob,
 #'   regional_pars = regional_pars,
-#'   site_temp = TmaxCPC_SP$Pixel_1,
-#'   n.year = 34
+#'   site_temp     = TmaxCPC_SP$Pixel_1,
+#'   n.year        = 34
 #' )
 Add_RegQuant <- function(prob, regional_pars, site_temp, n.year) {
-  # === Input checks ===
-  if (
-    !is.numeric(prob) ||
-      !all(is.finite(prob)) ||
-      any(prob <= 0) ||
-      any(prob >= 1)
-  ) {
-    stop(
-      "`prob` must be a numeric vector with values strictly between 0 and 1 and no missing data.",
-      call. = FALSE
-    )
-  }
+  check_prob(prob) # defined in input_checks.R
+  regional_pars <- check_reg_par(regional_pars) # reuses existing helper
+  check_site_temp(site_temp) # defined in input_checks.R
+  check_n.year(n.year, site_temp) # defined in input_checks.R
 
-  regional_pars <- as.matrix(regional_pars)
-  if (
-    !is.numeric(regional_pars) ||
-      ncol(regional_pars) != 5 ||
-      nrow(regional_pars) != 1
-  ) {
-    stop(
-      "`regional_pars` must be a numeric matrix or data frame with 5 columns and 1 row.",
-      call. = FALSE
-    )
-  }
-
-  site_temp <- as.numeric(site_temp)
-
-  if (length(site_temp) == 0 || !all(is.finite(site_temp))) {
-    stop(
-      "`site_temp` must be a numeric vector or 1-column matrix with no missing values.",
-      call. = FALSE
-    )
-  }
-
-  if (
-    !is.numeric(n.year) ||
-      length(n.year) != 1 ||
-      n.year != as.integer(n.year) ||
-      n.year < 1 ||
-      n.year > length(site_temp)
-  ) {
-    stop(
-      "`n.year` must be a single integer between 1 and the length of `site_temp`.",
-      call. = FALSE
-    )
-  }
-
-  # === Core computation ===
-  site_mean <- mean(site_temp, na.rm = TRUE)
-  selected_time <- n.year
-  loc <- regional_pars[1] + regional_pars[2] * selected_time
-  scale_val <- regional_pars[3] + regional_pars[4] * selected_time
+  loc <- regional_pars[1] + regional_pars[2] * n.year
+  scale_val <- regional_pars[3] + regional_pars[4] * n.year
   shape <- regional_pars[5]
 
   if (scale_val <= 0) {
@@ -91,9 +55,9 @@ Add_RegQuant <- function(prob, regional_pars, site_temp, n.year) {
     scale = scale_val,
     shape = shape,
     type = "GEV"
-  )
-  Qt_adj <- Qt + site_mean
-  names(Qt_adj) <- paste0("Q", prob * 100)
+  ) +
+    mean(site_temp, na.rm = TRUE)
 
-  return(Qt_adj)
+  names(Qt) <- paste0("Q", prob * 100)
+  Qt
 }

@@ -13,50 +13,13 @@
 #' }
 #'
 #' @export
-#'
+#' @autoglobal
 #' @examples
 #' Dataset_add(TmaxCPC_SP)
-#'
+
 Dataset_add <- function(dataset) {
-
-  # Input checks
-  if (!is.matrix(dataset) && !is.data.frame(dataset)) {
-    stop("Input 'dataset' must be a matrix or data frame.")
-  }
-
-  dataset <- as.matrix(dataset)
-
-  if (anyNA(dataset[, 1])) {
-    stop("Column 'Years' cannot have missing data.")
-  }
-
-  # Remove the year column
-  dataset.year <- dataset[, -1, drop = FALSE]
-
-  n <- ncol(dataset.year)
-
-  if (n < 3) {
-    stop("The number of sites should be larger than 2.")
-  }
-
-  min_sample_size <- min(colSums(!is.na(dataset.year)))
-
-  if (min_sample_size < 10) {
-    stop("All sites must have at least 10 years of records. So sorry, we cannot proceed.")
-  }
-
-  # Site means
+  dataset.year <- check_dataset(dataset)
   reg_mean <- colMeans(dataset.year, na.rm = TRUE)
-
-  # Center each series by its mean
-  add_data <- scale(dataset.year,
-                    center = reg_mean,
-                    scale = FALSE)
-
-  return(
-    list(
-      add_data = add_data,
-      reg_mean = reg_mean
-    )
-  )
+  add_data <- scale(dataset.year, center = reg_mean, scale = FALSE)
+  list(add_data = add_data, reg_mean = reg_mean)
 }

@@ -1,151 +1,202 @@
 #' Add_Heterogeneity
 #'
 #' @param dataset.add
-#' A numeric matrix of air temperature data as that calculated by the dataset_add().
+#' A numeric matrix of air temperature data as calculated by
+#' \code{Dataset_add()}.
 #' @param rho
-#' A single numeric value (constant) describing the average correlation among the sites.
-#' It must be larger than -1.0 and lower than 1.0.
+#' A single numeric value describing the average inter-site correlation.
+#' Must be strictly between -1 and 1.
 #' @param Ns
-#' Number of simulated groups of series.
-#' Default is 100, but at least 500 is recommended.
+#' Number of simulated groups of series. Default is 100; at least 500
+#' is recommended.
+#'
 #' @returns
 #' Hosking and Wallis' heterogeneity measure using an additive approach,
-#' as proposed in Martins et al. (2022) <doi:10.1590/1678-4499.20220061>.
+#' as proposed in Martins et al. (2022)
+#' \doi{10.1590/1678-4499.20220061}.
+#' Returns \code{NA} if the regional distribution cannot be fitted or if
+#' simulated statistics have zero variance.
+#'
 #' @export
 #' @importFrom lmomRFA regsamlmu
 #' @importFrom lmom pelkap pelwak quakap quawak
 #' @importFrom MASS mvrnorm
 #' @importFrom stats pnorm sd
 #' @importFrom Matrix nearPD
+#'
 #' @examples
-#' rho <- 0.51
-#' Ns <- 500
 #' add.data <- Dataset_add(TmaxCPC_SP)
-#' Add_Heterogeneity(dataset.add=add.data$add_data,rho = rho,Ns = Ns)
+#' Add_Heterogeneity(dataset.add = add.data$add_data, rho = 0.51, Ns = 500)
 Add_Heterogeneity <- function(dataset.add, rho, Ns) {
+  dataset.add <- check_heterogeneity_data(dataset.add) # input_checks.R
+  check_rho(rho) # input_checks.R
+  check_Ns(Ns) # input_checks.R
+
   n.sites <- ncol(dataset.add)
-  if (n.sites < 3) {
-    stop(
-      "The number of sites should be equal to or larger than 3.",
-      call. = FALSE
-    )
-  }
-
-  min_sample_size <- min(colSums(!is.na(dataset.add)))
-  if (min_sample_size < 10) {
-    stop(
-      "All sites must have at least 10 years of records. So sorry, we cannot proceed.",
-      call. = FALSE
-    )
-  }
-
-  if (Ns < 100) {
-    stop("Ns should be larger than 99.", call. = FALSE)
-  }
-  if (!is.numeric(rho) || length(rho) != 1 || rho >= 1 || rho <= -1) {
-    stop(
-      "'rho' $ust be a single numeric value strictly between -1 and 1.",
-      call. = FALSE
-    )
-  }
-
-  V.sim <- numeric(Ns)
-  vetor.numerador <- numeric(n.sites)
-
-  x1.atoutset <- regsamlmu(dataset.add, lcv = FALSE)
+  x1.atoutset <- lmomRFA::regsamlmu(dataset.add, lcv = FALSE)
   weight <- sum(x1.atoutset[, 2])
+  site_years <- x1.atoutset[, 2]
+  max.n.years <- max(site_years)
 
-  # Regional L-moments
-  reg.l2 <- sum(x1.atoutset[, 2] * x1.atoutset[, 4]) / weight
-  reg.t3 <- sum(x1.atoutset[, 2] * x1.atoutset[, 5]) / weight
-  reg.t4 <- sum(x1.atoutset[, 2] * x1.atoutset[, 6]) / weight
-  reg.t5 <- sum(x1.atoutset[, 2] * x1.atoutset[, 7]) / weight
+  wt_mean <- function(col) sum(x1.atoutset[, 2] * x1.atoutset[, col]) / weight
+  rmom <- c(0, wt_mean(4), wt_mean(5), wt_mean(6), wt_mean(7))
+  reg.l2 <- rmom[2]
 
-  rmom <- c(0, reg.l2, reg.t3, reg.t4, reg.t5)
+  reg.par <- fit_regional_dist(rmom)
 
-  reg.par <- try(pelkap(rmom), silent = TRUE)
-  is.kap <- length(reg.par)
-
-  if (is.kap == 1 || !all(is.finite(reg.par))) {
-    reg.par <- try(pelwak(rmom), silent = TRUE)
-    is.kap <- length(reg.par)
-  }
-
-  if (is.kap == 1 || !all(is.finite(reg.par))) {
+  if (is.null(reg.par)) {
     warning("Failed to fit regional distribution. Returning NA.", call. = FALSE)
     return(NA)
   }
 
-  for (v in 1:n.sites) {
-    vetor.numerador[v] <- x1.atoutset[v, 2] * (x1.atoutset[v, 4] - reg.l2)^2
-  }
-  V <- sqrt(sum(vetor.numerador) / weight)
+  V <- sqrt(sum(x1.atoutset[, 2] * (x1.atoutset[, 4] - reg.l2)^2) / weight)
 
-  max.n.years <- max(x1.atoutset[, 2])
+  sigma <- make_sigma(rho, n.sites)
+
+  V.sim <- vapply(
+    seq_len(Ns),
+    simulate_V,
+    FUN.VALUE = numeric(1),
+    sigma = sigma,
+    n.sites = n.sites,
+    site_years = site_years,
+    weight = weight,
+    reg.l2 = reg.l2,
+    x1.atoutset = x1.atoutset,
+    reg.par = reg.par,
+    max.n.years = max.n.years
+  )
+
+  return(compute_H(V, V.sim))
+}
+
+
+# -----------------------------------------------------------------------------
+# Internal: build and repair the inter-site correlation matrix.
+# -----------------------------------------------------------------------------
+#' @noRd
+make_sigma <- function(rho, n.sites) {
   sigma <- matrix(rho, n.sites, n.sites)
   diag(sigma) <- 1
 
-  # Ensure positive definiteness
-  if (any(eigen(sigma)$values <= 0)) {
-    sigma <- as.matrix(nearPD(sigma, corr = TRUE)$mat)
+  if (any(eigen(sigma, only.values = TRUE)$values <= 0)) {
+    sigma <- as.matrix(Matrix::nearPD(sigma, corr = TRUE)$mat)
   }
 
-  for (ns in 1:Ns) {
-    u.sim <- tryCatch(
-      {
-        pnorm(mvrnorm(n = max.n.years, mu = rep(0, n.sites), Sigma = sigma))
-      },
-      error = function(e) {
-        warning(
-          "mvrnorm failed (simulation ",
-          ns,
-          "): ",
-          conditionMessage(e),
-          call. = FALSE
-        )
-        return(matrix(NA, max.n.years, n.sites))
-      }
-    )
+  return(sigma)
+}
 
-    if (anyNA(u.sim)) {
-      V.sim[ns] <- NA
-      next
-    }
 
-    data.sim <- matrix(NA, max.n.years, n.sites)
-    for (site in 1:n.sites) {
-      site_years <- x1.atoutset[site, 2]
-      if (is.kap == 5) {
-        data.sim[1:site_years, site] <- quawak(
-          u.sim[1:site_years, site],
-          reg.par
-        )
-      } else {
-        data.sim[1:site_years, site] <- quakap(
-          u.sim[1:site_years, site],
-          reg.par
-        )
-      }
-    }
+# -----------------------------------------------------------------------------
+# Internal: compute H from observed V and simulated V.sim,
+# warning and returning NA if V.sim is degenerate.
+# -----------------------------------------------------------------------------
+#' @noRd
+compute_H <- function(V, V.sim) {
+  V.sim_sd <- stats::sd(V.sim, na.rm = TRUE)
 
-    x1.sim <- regsamlmu(data.sim, lcv = FALSE)
-    reg.l2.sim <- sum(x1.atoutset[, 2] * x1.sim[, 4]) / weight
-
-    for (v in 1:n.sites) {
-      vetor.numerador[v] <- x1.atoutset[v, 2] * (x1.sim[v, 4] - reg.l2.sim)^2
-    }
-    V.sim[ns] <- sqrt(sum(vetor.numerador) / weight)
-  }
-
-  if (all(is.finite(V.sim)) && sd(V.sim, na.rm = TRUE) > 0) {
-    H <- (V - mean(V.sim, na.rm = TRUE)) / sd(V.sim, na.rm = TRUE)
-  } else {
+  if (!all(is.finite(V.sim)) || V.sim_sd == 0) {
     warning(
       "V.sim contains invalid values or zero variance. Returning NA.",
       call. = FALSE
     )
-    H <- NA
+    return(NA)
   }
 
-  return(H)
+  return((V - mean(V.sim, na.rm = TRUE)) / V.sim_sd)
+}
+
+
+# -----------------------------------------------------------------------------
+# Internal: fit regional distribution, trying kappa then Wakeby as fallback.
+# Returns the parameter vector or NULL on failure.
+# -----------------------------------------------------------------------------
+#' @noRd
+fit_regional_dist <- function(rmom) {
+  reg.par <- try(lmom::pelkap(rmom), silent = TRUE)
+
+  if (inherits(reg.par, "try-error") || !all(is.finite(reg.par))) {
+    reg.par <- try(lmom::pelwak(rmom), silent = TRUE)
+  }
+
+  if (inherits(reg.par, "try-error") || !all(is.finite(reg.par))) {
+    return(NULL)
+  }
+
+  return(reg.par)
+}
+
+
+# -----------------------------------------------------------------------------
+# Internal: quantile function dispatcher — Wakeby (length 5) or kappa.
+# -----------------------------------------------------------------------------
+#' @noRd
+regional_quantile <- function(u, reg.par) {
+  if (length(reg.par) == 5) {
+    return(lmom::quawak(u, reg.par))
+  } else {
+    return(lmom::quakap(u, reg.par))
+  }
+}
+
+
+# -----------------------------------------------------------------------------
+# Internal: simulate one V statistic from the fitted regional distribution.
+# Returns NA_real_ if mvrnorm fails or produces non-finite values.
+# -----------------------------------------------------------------------------
+#' @noRd
+simulate_V <- function(
+  ns,
+  sigma,
+  n.sites,
+  site_years,
+  weight,
+  reg.l2,
+  x1.atoutset,
+  reg.par,
+  max.n.years
+) {
+  u.sim <- tryCatch(
+    stats::pnorm(
+      MASS::mvrnorm(n = max.n.years, mu = rep(0, n.sites), Sigma = sigma)
+    ),
+    error = function(e) {
+      warning(
+        "mvrnorm failed (simulation ",
+        ns,
+        "): ",
+        conditionMessage(e),
+        call. = FALSE
+      )
+      NULL
+    }
+  )
+
+  if (is.null(u.sim) || anyNA(u.sim)) {
+    return(NA_real_)
+  }
+
+  # Simulate data for each site and pad to max.n.years rows
+  data.sim <- do.call(
+    cbind,
+    mapply(
+      function(yrs, col) {
+        out <- rep(NA_real_, max.n.years)
+        out[seq_len(yrs)] <- regional_quantile(
+          u.sim[seq_len(yrs), col],
+          reg.par
+        )
+        out
+      },
+      site_years,
+      seq_len(n.sites),
+      SIMPLIFY = FALSE
+    )
+  )
+
+  x1.sim <- lmomRFA::regsamlmu(data.sim, lcv = FALSE)
+  reg.l2.sim <- sum(x1.atoutset[, 2] * x1.sim[, 4]) / weight
+  numerator <- x1.atoutset[, 2] * (x1.sim[, 4] - reg.l2.sim)^2
+
+  return(sqrt(sum(numerator) / weight))
 }

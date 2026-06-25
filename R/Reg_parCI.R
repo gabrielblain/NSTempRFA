@@ -19,11 +19,12 @@
 #' as suggested by Burn (2003) <10.1623/hysj.48.1.25.43485>
 #' and O'Brien and Burn (2014) <10.1016/j.jhydrol.2014.09.041>.
 #'
-#' @return
+#' @returns
 #' A matrix containing the 95% confidence intervals (lower and upper bounds)
 #' of the time-varying parameter estimates. The spatial dependence between sites
 #' is preserved.
 #'
+#' 
 #' @export
 #' @importFrom stats quantile
 #' @importFrom utils txtProgressBar setTxtProgressBar
@@ -40,10 +41,6 @@
 #'   n.boots = 100
 #' )
 Reg_parCI <- function(add_data, model, reg_par, n.boots = 999) {
-  # ============================================================
-  # Input checks
-  # ============================================================
-
   check_model(model)
   check_n.boots(n.boots)
   add_data <- check_add_data(add_data)
@@ -51,9 +48,6 @@ Reg_parCI <- function(add_data, model, reg_par, n.boots = 999) {
   max_time <- nrow(add_data)
   n.sites <- ncol(add_data)
 
-  # ============================================================
-  # Construct temporal parameters (unchanged)
-  # ============================================================
   time <- seq_len(max_time)
   par.temporal <- matrix(NA_real_, max_time, 3)
   par.temporal[, 1] <- reg_par[1] + reg_par[2] * time
@@ -116,24 +110,16 @@ Reg_parCI <- function(add_data, model, reg_par, n.boots = 999) {
     pb <- txtProgressBar(min = 0, max = n.boots, style = 3)
   }
 
-  # ============================================================
-  # Bootstrap loop
-  # ============================================================
   for (r in seq_len(n.boots)) {
-    # CHANGE 4: Index directly from the pre-built column — no row-range
-    # arithmetic, and the large flat IDD.series.boot matrix is never
-    # materialised; memory use is O(max_time × n.sites) per iteration.
     resampled_IDD <- IDD.series[boot_indices[, r], , drop = FALSE]
-
-    # Back-transform: vectorised over all sites simultaneously
-    back.orig <- mu_vec +
-      sigma_over_xi * (exp(resampled_IDD * xi) - 1)
-
+    back.orig <- sweep(
+      sigma_over_xi * (exp(resampled_IDD * xi) - 1),
+      1,
+      mu_vec,
+      "+"
+    )
     find.best.boot <- Fit_model(temperatures = back.orig, model = model)
-
-    reg_par.overall.boot[r, ] <- as.numeric(Reg_par(
-      best_model = find.best.boot
-    ))
+    reg_par.overall.boot[r, ] <- unlist(Reg_par(best_model = find.best.boot))
 
     if (show_pb) setTxtProgressBar(pb, r)
   }
@@ -142,36 +128,24 @@ Reg_parCI <- function(add_data, model, reg_par, n.boots = 999) {
     close(pb)
   }
 
-  # ============================================================
-  # CHANGE 5: matrixStats::colQuantiles() — same as Site_parCI
-  # ============================================================
-  if (requireNamespace("matrixStats", quietly = TRUE)) {
-    qs <- matrixStats::colQuantiles(
-      reg_par.overall.boot,
-      probs = c(0.025, 0.975),
-      na.rm = TRUE
-    )
-    CI_lower <- qs[1, ]
-    CI_upper <- qs[2, ]
-  } else {
-    CI_lower <- apply(
-      reg_par.overall.boot,
-      2,
-      quantile,
-      probs = 0.025,
-      na.rm = TRUE
-    )
-    CI_upper <- apply(
-      reg_par.overall.boot,
-      2,
-      quantile,
-      probs = 0.975,
-      na.rm = TRUE
-    )
-  }
+  CI_lower <- apply(
+    reg_par.overall.boot,
+    2,
+    quantile,
+    probs = 0.025,
+    na.rm = TRUE
+  )
+  CI_upper <- apply(
+    reg_par.overall.boot,
+    2,
+    quantile,
+    probs = 0.975,
+    na.rm = TRUE
+  )
 
   CI_matrix <- rbind(CI_lower, CI_upper)
   rownames(CI_matrix) <- c("Lower 95% CI", "Upper 95% CI")
+  print(dim(CI_matrix))
   colnames(CI_matrix) <- c(
     "weighted_mu0",
     "weighted_mu1",
