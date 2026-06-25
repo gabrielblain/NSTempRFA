@@ -24,7 +24,7 @@
 #' of the time-varying parameter estimates. The spatial dependence between sites
 #' is preserved.
 #'
-#' 
+#'
 #' @export
 #' @importFrom stats quantile
 #' @importFrom utils txtProgressBar setTxtProgressBar

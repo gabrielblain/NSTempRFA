@@ -25,7 +25,7 @@
 #' @importFrom stats na.omit
 #' @importFrom spsUtil quiet
 #' @export
-#' 
+#'
 #' @examples
 #' temperatures <- TmaxCPC_SP$Pixel_1
 #' model <- 4
@@ -53,7 +53,7 @@ Fit_model <- function(temperatures, model) {
       next
     }
 
-    par_mat[i, ] <- fit_gev_site(local, seq_len(sizes[i]), model)
+    par_mat[i, ] <- fit_gev_site(local, seq_len(sizes[i]), model_id = model)
   }
 
   out <- as.data.frame(par_mat)
