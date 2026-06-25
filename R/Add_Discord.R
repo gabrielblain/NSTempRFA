@@ -28,7 +28,8 @@
 #' @importFrom rrcov getDistance Cov
 #'
 #' @examples
-#' # Add_Discord(TmaxCPC_SP)
+#' Add_Discord(TmaxCPC_SP)
+
 Add_Discord <- function(dataset) {
   if (ncol(dataset) < 2) {
     stop(
