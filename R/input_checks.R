@@ -133,6 +133,7 @@ check_dataset <- function(dataset) {
   data_sites
 }
 
+
 #' @noRd
 check_best_model_df <- function(best_model) {
   if (!is.data.frame(best_model)) {
@@ -168,12 +169,9 @@ check_best_model_df <- function(best_model) {
     )
   }
 
-  if (!all(is.finite(as.matrix(best_model[, required_cols])))) {
-    stop("All values in 'best_model' must be finite.", call. = FALSE)
-  }
-
   invisible(NULL)
 }
+
 
 #' @noRd
 check_quantiles <- function(quantiles) {
