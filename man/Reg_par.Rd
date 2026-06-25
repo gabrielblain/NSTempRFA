@@ -16,13 +16,13 @@ Reg_par(best_model)
 }
 \value{
 A one-row \code{data.frame} with the size-weighted regional parameters of a
-time-varying generalised extreme value distribution.
+time-varying generalized extreme value distribution.
 }
 \description{
 Estimate the parameters of the regional distribution
 }
 \examples{
-add.data   <- Dataset_add(TmaxCPC_SP)
+add.data <- Dataset_add(TmaxCPC_SP)
 best.parms <- Best_model(add.data = add.data$add_data)
 Reg_par(best_model = best.parms$atsite.models)
 }
