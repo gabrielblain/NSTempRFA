@@ -234,7 +234,7 @@ rho <- 0.51
 Ns <- 500
 add.data <- Dataset_add(TmaxCPC_SP)
 Add_Heterogeneity(dataset.add = add.data$add_data, rho = rho, Ns = Ns)
-#> [1] 0.9288404
+#> [1] 0.9430057
 ```
 
 ### Function `Best_model()`
