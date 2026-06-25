@@ -13,7 +13,6 @@
 #' }
 #'
 #' @export
-#' @autoglobal
 #' @examples
 #' Dataset_add(TmaxCPC_SP)
 
