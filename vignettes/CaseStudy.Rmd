@@ -13,6 +13,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+set.seed(23)
+options(NSTempRFA.progress = FALSE) # suppress progress bar for session
 ```
 
 # Introduction
