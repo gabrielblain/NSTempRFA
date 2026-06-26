@@ -39,7 +39,7 @@
 #' @importFrom stats na.omit
 #' @importFrom spsUtil quiet
 #' @export
-#' 
+#'
 #' @examples
 #' add.data <- Dataset_add(TmaxCPC_SP)
 #' best.parms <- Best_model(add.data = add.data$add_data)
@@ -148,7 +148,7 @@ try_model <- function(local, time, model_id) {
       {
         fit <- ismev::gev.fit(
           local,
-          ydat = time,
+          ydat = as.matrix(time),
           mul = spec$mul,
           sigl = spec$sigl,
           shl = NULL,
