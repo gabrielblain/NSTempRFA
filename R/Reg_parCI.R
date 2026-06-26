@@ -13,6 +13,7 @@
 #' * 3rd is the sigma0 parameter,
 #' * 4th is the sigma1 parameter,
 #' * 5th is the shape parameter.
+#' #TODO: document `reg_mean`.
 #' @param n.boots
 #' A single number describing the number of bootstrap replicates.
 #' Whenever possible, n.boots should be set to 999 (default),
