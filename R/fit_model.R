@@ -72,18 +72,20 @@ fit_gev_single <- function(local, time, model_id, method) {
   spec <- GEV_MODEL_SPECS[[model_id]]
 
   fit <- try(
-    ismev::gev.fit(
-      local,
-      ydat = time,
-      mul = spec$mul,
-      sigl = spec$sigl,
-      shl = NULL,
-      mulink = identity,
-      siglink = identity,
-      shlink = identity,
-      show = FALSE,
-      method = method,
-      maxit = 10000L
+    spsUtil::quiet(
+      ismev::gev.fit(
+        local,
+        ydat = as.matrix(time),
+        mul = spec$mul,
+        sigl = spec$sigl,
+        shl = NULL,
+        mulink = identity,
+        siglink = identity,
+        shlink = identity,
+        show = FALSE,
+        method = method,
+        maxit = 10000L
+      )
     ),
     silent = TRUE
   )
@@ -102,7 +104,7 @@ fit_gev_single <- function(local, time, model_id, method) {
 #' @noRd
 fit_gev_site <- function(local, time, model_id) {
   for (method in OPTIM_METHODS) {
-    result <- spsUtil::quiet(fit_gev_single(local, time, model_id, method))
+    result <- fit_gev_single(local, time, model_id, method)
     if (!is.null(result)) return(result)
   }
   rep(NA_real_, 5)
