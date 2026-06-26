@@ -131,8 +131,6 @@ Reg_parCI <- function(
   # ============================================================
   for (r in seq_len(n.boots)) {
     resampled_IDD <- IDD.series[boot_indices[, r], , drop = FALSE]
-
-    # Back-transform to centered scale, then restore original scale
     back.orig <- sweep(
       sigma_over_xi * (exp(resampled_IDD * xi) - 1),
       1,
@@ -143,15 +141,13 @@ Reg_parCI <- function(
 
     find.best.boot <- tryCatch(
       Fit_model(temperatures = back.orig, model = model),
-      error = function(e) NULL,
-      warning = function(w) NULL
+      error = function(e) NULL
     )
 
     if (!is.null(find.best.boot)) {
       reg_par.overall.boot[r, ] <- tryCatch(
         unlist(Reg_par(best_model = find.best.boot)),
-        error = function(e) rep(NA_real_, 5),
-        warning = function(w) rep(NA_real_, 5)
+        error = function(e) rep(NA_real_, 5)
       )
     }
 
