@@ -8,18 +8,18 @@
 #' A numeric vector of probabilities strictly between 0 and 1, with no
 #' missing values.
 #' @param regional_pars
-#' A 1-row, 5-column \code{matrix} or \code{data.frame} containing regional
+#' A 1-row, 5-column `matrix` or `data.frame` containing regional
 #' GEV parameters: location intercept, location slope, scale intercept,
 #' scale slope, and shape.
 #' @param site_temp
 #' A numeric vector or 1-column matrix of site air temperature data.
 #' @param n.year
 #' A single integer indicating the year index for which quantiles are
-#' calculated. Must be between 1 and \code{length(site_temp)}.
+#' calculated. Must be between 1 and `length(site_temp)`.
 #'
 #' @returns
 #' A named numeric vector of adjusted regional quantiles for the specified
-#' year. Names are of the form \code{"Q90"}, \code{"Q95"}, etc.
+#' year. Names are of the form `"Q90"`, `"Q95"``, etc.
 #'
 #' @export
 #' @importFrom extRemes qevd

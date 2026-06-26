@@ -2,7 +2,7 @@
 #'
 #' @param dataset.add
 #' A numeric matrix of air temperature data as calculated by
-#' \code{Dataset_add()}.
+#' `Dataset_add()`.
 #' @param rho
 #' A single numeric value describing the average inter-site correlation.
 #' Must be strictly between -1 and 1.
@@ -14,7 +14,7 @@
 #' Hosking and Wallis' heterogeneity measure using an additive approach,
 #' as proposed in Martins et al. (2022)
 #' \doi{10.1590/1678-4499.20220061}.
-#' Returns \code{NA} if the regional distribution cannot be fitted or if
+#' Returns `NA` if the regional distribution cannot be fitted or if
 #' simulated statistics have zero variance.
 #'
 #' @export

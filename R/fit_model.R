@@ -6,19 +6,19 @@
 #'
 #' @param model
 #' A single integer between 1 and 4 defining the GEV model.
-#' May be provided by \code{Best_model()}.
+#' May be provided by `Best_model()`.
 #'
 #' @returns
-#' A \code{data.frame} containing the estimated parameters
-#' (\code{mu0}, \code{mu1}, \code{sigma0}, \code{sigma1}, \code{shape},
-#' \code{size}).  If fitting fails for a site, \code{NA}s are returned for
+#' A `data.frame` containing the estimated parameters
+#' (`mu0`, `mu1`, `sigma0`, `sigma1`, `shape`,
+#' `size`).  If fitting fails for a site, `NA`s are returned for
 #' that site.
 #'
 #' @details
-#' The function attempts to fit the model using \code{ismev::gev.fit()} with
+#' The function attempts to fit the model using `ismev::gev.fit()` with
 #' the following optimisers in sequence:
-#' \code{Nelder-Mead}, \code{BFGS}, \code{CG}, \code{L-BFGS-B}, \code{SANN}.
-#' The first optimiser that converges is used; if all fail, \code{NA}s are
+#' `Nelder-Mead`, `BFGS`, `CG`, `L-BFGS-B`, `SANN`.
+#' The first optimiser that converges is used; if all fail, `NA`s are
 #' returned for that site.
 #'
 #' @importFrom ismev gev.fit

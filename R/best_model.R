@@ -16,13 +16,13 @@
 #'   }
 #'   \item{atsite.models}{
 #'     Data frame containing the estimated parameters
-#'     (\code{mu0}, \code{mu1}, \code{sigma0}, \code{sigma1}, \code{shape})
+#'     (`mu0`, `mu1`, `sigma0`, `sigma1`, `shape`)
 #'     and sample size for each site.
 #'   }
 #' }
 #'
 #' @details
-#' Model fitting is performed via \code{ismev::gev.fit()}.  Four nested models
+#' Model fitting is performed via `ismev::gev.fit()`.  Four nested models
 #' are considered:
 #' \enumerate{
 #'   \item Stationary (constant location and scale).
@@ -31,7 +31,7 @@
 #'   \item Time-varying location and scale.
 #' }
 #' For each site the function tries up to five optimisation methods
-#' (\code{Nelder-Mead}, \code{BFGS}, \code{CG}, \code{L-BFGS-B}, \code{SANN})
+#' (`Nelder-Mead`, `BFGS`, `CG`, `L-BFGS-B`, `SANN`)
 #' and uses the first that converges.  Model selection is based on the sum of
 #' site-level AICc values.
 #'

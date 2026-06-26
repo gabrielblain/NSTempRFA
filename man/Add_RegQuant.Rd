@@ -21,7 +21,7 @@ calculated. Must be between 1 and \code{length(site_temp)}.}
 }
 \value{
 A named numeric vector of adjusted regional quantiles for the specified
-year. Names are of the form \code{"Q90"}, \code{"Q95"}, etc.
+year. Names are of the form \code{"Q90"}, `"Q95"``, etc.
 }
 \description{
 Computes quantiles for a given site based on regional GEV parameters and
