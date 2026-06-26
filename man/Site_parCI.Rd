@@ -4,7 +4,7 @@
 \alias{Site_parCI}
 \title{Confidence intervals for site-specific GEV parameters}
 \usage{
-Site_parCI(atsite_temp, model, site_par, n.boots = 999)
+Site_parCI(atsite_temp, model, site_par, n.boots = 999, progress = NULL)
 }
 \arguments{
 \item{atsite_temp}{A numeric vector or single-column matrix of air temperature data.}
@@ -15,13 +15,16 @@ Site_parCI(atsite_temp, model, site_par, n.boots = 999)
 
 \item{n.boots}{Number of bootstrap replicates. Values smaller than 100 are not allowed.
 Defaults to \code{999}.}
+
+\item{progress}{Logical scalar controlling whether a progress bar is displayed.
+\code{TRUE} forces the bar on, \code{FALSE} forces it off, and
+\code{NULL} (default) defers to \code{getOption("NSTempRFA.progress")},
+which itself falls back to \code{interactive()}. Set
+\code{options(NSTempRFA.progress = FALSE)} to suppress the bar globally.}
 }
 \value{
 A matrix containing the lower and upper 95\% confidence limits of
 the estimated parameters.
-
-A matrix containing the 95\% confidence intervals (lower and upper
-bounds) of site-specific GEV parameters.
 }
 \description{
 Confidence intervals for site-specific GEV parameters
@@ -34,9 +37,9 @@ site_par <- Fit_model(temperatures, model)
 
 Site_parCI(
   atsite_temp = temperatures,
-  model = model,
-  site_par = site_par[1:5],
-  n.boots = 100
+  model       = model,
+  site_par    = site_par[1, 1:5],
+  n.boots     = 100
 )
 \dontshow{\}) # examplesIf}
 }

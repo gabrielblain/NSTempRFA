@@ -4,7 +4,7 @@
 \alias{Reg_parCI}
 \title{Confidence intervals for regional GEV parameters}
 \usage{
-Reg_parCI(add_data, model, reg_par, reg_mean, n.boots = 999)
+Reg_parCI(add_data, model, reg_par, reg_mean, n.boots = 999, progress = NULL)
 }
 \arguments{
 \item{add_data}{A numeric matrix of air temperature data as calculated by Dataset_add().}
@@ -30,11 +30,17 @@ equal to the number of columns in \code{add_data}.}
 Whenever possible, \code{n.boots} should be set to 999 (default),
 as suggested by Burn (2003) <10.1623/hysj.48.1.25.43485>
 and O'Brien and Burn (2014) <10.1016/j.jhydrol.2014.09.041>.}
+
+\item{progress}{Logical scalar controlling whether a progress bar is displayed.
+\code{TRUE} forces the bar on, \code{FALSE} forces it off, and
+\code{NULL} (default) defers to \code{getOption("NSTempRFA.progress")},
+which itself falls back to \code{interactive()}. Set
+\code{options(NSTempRFA.progress = FALSE)} to suppress the bar globally.}
 }
 \value{
 A matrix containing the 95\% confidence intervals (lower and upper bounds)
-of the time-varying parameter estimates. The spatial dependence between sites
-is preserved.
+of the time-varying parameter estimates. The spatial dependence between
+sites is preserved.
 }
 \description{
 Confidence intervals for regional GEV parameters
@@ -46,11 +52,11 @@ best.parms <- Best_model(add.data = add.data$add_data)
 regional.parms <- Reg_par(best_model = best.parms$atsite.models)
 
 Reg_parCI(
-  add_data = add.data$add_data,
-  model = 2,
-  reg_par = regional.parms,
+  add_data  = add.data$add_data,
+  model     = best.parms$best,
+  reg_par   = regional.parms,
   reg_mean  = add.data$reg_mean,
-  n.boots = 100
+  n.boots   = 100
 )
 \dontshow{\}) # examplesIf}
 }
