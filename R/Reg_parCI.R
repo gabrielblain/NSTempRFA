@@ -38,9 +38,11 @@
 #'   add_data = add.data$add_data,
 #'   model = 2,
 #'   reg_par = regional.parms,
+#'   reg_mean  = add.data$reg_mean,
 #'   n.boots = 100
 #' )
-Reg_parCI <- function(add_data, model, reg_par, n.boots = 999) {
+
+Reg_parCI <- function(add_data, model, reg_par, reg_mean, n.boots = 999) {
   check_model(model)
   check_n.boots(n.boots)
   add_data <- check_add_data(add_data)
@@ -118,8 +120,22 @@ Reg_parCI <- function(add_data, model, reg_par, n.boots = 999) {
       mu_vec,
       "+"
     )
-    find.best.boot <- Fit_model(temperatures = back.orig, model = model)
-    reg_par.overall.boot[r, ] <- unlist(Reg_par(best_model = find.best.boot))
+
+    find.best.boot <- tryCatch(
+      Fit_model(temperatures = back.orig, model = model),
+      error = function(e) NULL,
+      warning = function(w) NULL
+    )
+
+    if (is.null(find.best.boot)) {
+      next
+    }
+
+    reg_par.overall.boot[r, ] <- tryCatch(
+      unlist(Reg_par(best_model = find.best.boot)),
+      error = function(e) rep(NA_real_, 5),
+      warning = function(w) rep(NA_real_, 5)
+    )
 
     if (show_pb) setTxtProgressBar(pb, r)
   }
