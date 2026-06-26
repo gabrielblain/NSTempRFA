@@ -15,20 +15,25 @@
 #' * 5th is the shape parameter.
 #' @param reg_mean
 #' A numeric vector of site mean temperatures as returned by
-#' `Dataset_add()$reg_mean`. Used to restore bootstrap replicates
+#' \code{Dataset_add()$reg_mean}. Used to restore bootstrap replicates
 #' from centered to original scale before refitting. Must have length
-#' equal to the number of columns in `add_data`.
+#' equal to the number of columns in \code{add_data}.
 #' @param n.boots
 #' A single number describing the number of bootstrap replicates.
-#' Whenever possible, `n.boots` should be set to 999 (default),
+#' Whenever possible, \code{n.boots} should be set to 999 (default),
 #' as suggested by Burn (2003) <10.1623/hysj.48.1.25.43485>
 #' and O'Brien and Burn (2014) <10.1016/j.jhydrol.2014.09.041>.
+#' @param progress
+#' Logical scalar controlling whether a progress bar is displayed.
+#' `TRUE` forces the bar on, `FALSE` forces it off, and
+#' `NULL` (default) defers to `getOption("NSTempRFA.progress")`,
+#' which itself falls back to `interactive()`. Set
+#' `options(NSTempRFA.progress = FALSE)` to suppress the bar globally.
 #'
 #' @returns
 #' A matrix containing the 95% confidence intervals (lower and upper bounds)
-#' of the time-varying parameter estimates. The spatial dependence between sites
-#' is preserved.
-#'
+#' of the time-varying parameter estimates. The spatial dependence between
+#' sites is preserved.
 #'
 #' @export
 #' @importFrom stats quantile
@@ -40,14 +45,23 @@
 #' regional.parms <- Reg_par(best_model = best.parms$atsite.models)
 #'
 #' Reg_parCI(
-#'   add_data = add.data$add_data,
-#'   model = 2,
-#'   reg_par = regional.parms,
+#'   add_data  = add.data$add_data,
+#'   model     = best.parms$best,
+#'   reg_par   = regional.parms,
 #'   reg_mean  = add.data$reg_mean,
-#'   n.boots = 100
+#'   n.boots   = 100
 #' )
-
-Reg_parCI <- function(add_data, model, reg_par, reg_mean, n.boots = 999) {
+Reg_parCI <- function(
+  add_data,
+  model,
+  reg_par,
+  reg_mean,
+  n.boots = 999,
+  progress = NULL
+) {
+  # ============================================================
+  # Input checks
+  # ============================================================
   check_model(model)
   check_n.boots(n.boots)
   add_data <- check_add_data(add_data)
@@ -55,6 +69,9 @@ Reg_parCI <- function(add_data, model, reg_par, reg_mean, n.boots = 999) {
   max_time <- nrow(add_data)
   n.sites <- ncol(add_data)
 
+  # ============================================================
+  # Construct temporal parameters
+  # ============================================================
   time <- seq_len(max_time)
   par.temporal <- matrix(NA_real_, max_time, 3)
   par.temporal[, 1] <- reg_par[1] + reg_par[2] * time
@@ -66,11 +83,9 @@ Reg_parCI <- function(add_data, model, reg_par, reg_mean, n.boots = 999) {
   }
 
   # ============================================================
-  # CHANGE 1: Vectorised Gumbel transform — no site loop.
-  # Broadcast the length-max_time vectors across all columns at once
-  # using sweep() instead of a for-loop over sites.
+  # Vectorised Gumbel transform
   # ============================================================
-  mu_vec <- par.temporal[, 1] # pre-extracted for reuse below
+  mu_vec <- par.temporal[, 1]
   sigma_vec <- par.temporal[, 2]
   xi <- reg_par[5]
 
@@ -87,44 +102,44 @@ Reg_parCI <- function(add_data, model, reg_par, reg_mean, n.boots = 999) {
     stop("Invalid transformed values encountered.", call. = FALSE)
   }
 
-  IDD.series <- (1 / xi) * log(z) # max_time × n.sites matrix
+  IDD.series <- (1 / xi) * log(z)
 
   # ============================================================
-  # CHANGE 2: Pre-generate all bootstrap row indices at once,
-  # then apply a single global shuffle — same statistical result
-  # as the original two-step, but one fewer full-matrix allocation.
+  # Pre-generate bootstrap indices and back-transformation constant
   # ============================================================
   boot_indices <- matrix(
     sample.int(max_time, size = max_time * n.boots, replace = TRUE),
     nrow = max_time,
     ncol = n.boots
   )
-  # Each column is one replicate's row-draw; shuffle the column order
-  # to replicate the original between-replicate scramble.
   boot_indices <- boot_indices[, sample.int(n.boots)]
-
-  # ============================================================
-  # CHANGE 3: Pre-compute back-transformation constants.
-  # sigma_vec / xi is the same every iteration — compute once.
-  # ============================================================
-  sigma_over_xi <- sigma_vec / xi # length-max_time vector
+  sigma_over_xi <- sigma_vec / xi
 
   reg_par.overall.boot <- matrix(NA_real_, n.boots, 5)
 
+  # ============================================================
+  # Progress bar — controlled by use_progress_bar()
+  # ============================================================
   message("This calculation may take some time.")
-  show_pb <- interactive()
+  show_pb <- use_progress_bar(progress)
   if (show_pb) {
-    pb <- txtProgressBar(min = 0, max = n.boots, style = 3)
+    pb <- utils::txtProgressBar(min = 0, max = n.boots, style = 3)
   }
 
+  # ============================================================
+  # Bootstrap loop
+  # ============================================================
   for (r in seq_len(n.boots)) {
     resampled_IDD <- IDD.series[boot_indices[, r], , drop = FALSE]
+
+    # Back-transform to centered scale, then restore original scale
     back.orig <- sweep(
       sigma_over_xi * (exp(resampled_IDD * xi) - 1),
       1,
       mu_vec,
       "+"
     )
+    back.orig <- sweep(back.orig, 2, reg_mean, "+")
 
     find.best.boot <- tryCatch(
       Fit_model(temperatures = back.orig, model = model),
@@ -132,23 +147,24 @@ Reg_parCI <- function(add_data, model, reg_par, reg_mean, n.boots = 999) {
       warning = function(w) NULL
     )
 
-    if (is.null(find.best.boot)) {
-      next
+    if (!is.null(find.best.boot)) {
+      reg_par.overall.boot[r, ] <- tryCatch(
+        unlist(Reg_par(best_model = find.best.boot)),
+        error = function(e) rep(NA_real_, 5),
+        warning = function(w) rep(NA_real_, 5)
+      )
     }
 
-    reg_par.overall.boot[r, ] <- tryCatch(
-      unlist(Reg_par(best_model = find.best.boot)),
-      error = function(e) rep(NA_real_, 5),
-      warning = function(w) rep(NA_real_, 5)
-    )
-
-    if (show_pb) setTxtProgressBar(pb, r)
+    if (show_pb) utils::setTxtProgressBar(pb, r)
   }
 
   if (show_pb) {
     close(pb)
   }
 
+  # ============================================================
+  # Confidence intervals
+  # ============================================================
   CI_lower <- apply(
     reg_par.overall.boot,
     2,
@@ -166,7 +182,6 @@ Reg_parCI <- function(add_data, model, reg_par, reg_mean, n.boots = 999) {
 
   CI_matrix <- rbind(CI_lower, CI_upper)
   rownames(CI_matrix) <- c("Lower 95% CI", "Upper 95% CI")
-  print(dim(CI_matrix))
   colnames(CI_matrix) <- c(
     "weighted_mu0",
     "weighted_mu1",
@@ -174,5 +189,5 @@ Reg_parCI <- function(add_data, model, reg_par, reg_mean, n.boots = 999) {
     "weighted_sigma1",
     "weighted_shape"
   )
-  return(CI_matrix)
+  CI_matrix
 }

@@ -1,3 +1,9 @@
+# =============================================================================
+# input_checks.R
+# Internal validation helpers — not exported.
+# Each function throws an informative error or returns invisibly/coerced value.
+# =============================================================================
+
 #' @noRd
 check_matrix_or_df <- function(x, arg_name) {
   if (!is.matrix(x) && !is.data.frame(x)) {
@@ -118,7 +124,6 @@ check_add_data <- function(add_data) {
   add_data
 }
 
-
 #' @noRd
 check_dataset <- function(dataset) {
   dataset <- check_matrix_or_df(dataset, "dataset")
@@ -132,7 +137,6 @@ check_dataset <- function(dataset) {
   check_min_site_records(data_sites)
   data_sites
 }
-
 
 #' @noRd
 check_best_model_df <- function(best_model) {
@@ -169,9 +173,11 @@ check_best_model_df <- function(best_model) {
     )
   }
 
+  # Note: NA parameter estimates are valid when fitting fails for a site;
+  # only the size column requires finiteness.
+
   invisible(NULL)
 }
-
 
 #' @noRd
 check_quantiles <- function(quantiles) {
@@ -199,7 +205,6 @@ check_site_temp <- function(site_temp) {
   invisible(NULL)
 }
 
-
 #' @noRd
 check_n.year <- function(n.year, site_temp) {
   if (!is.numeric(n.year) || length(n.year) != 1) {
@@ -211,16 +216,13 @@ check_n.year <- function(n.year, site_temp) {
   }
 
   if (n.year < 1 || n.year > length(site_temp)) {
-    stop(
-      "`n.year` must be between 1 and length(`site_temp`).",
-      call. = FALSE
-    )
+    stop("`n.year` must be between 1 and length(`site_temp`).", call. = FALSE)
   }
 
   invisible(NULL)
 }
 
-
+#' @noRd
 check_prob <- function(prob) {
   if (
     !is.numeric(prob) ||
@@ -229,8 +231,10 @@ check_prob <- function(prob) {
       any(prob >= 1)
   ) {
     stop(
-      "`prob` must be a numeric vector with values strictly between 0 and 1
-      and no missing data.",
+      paste0(
+        "`prob` must be a numeric vector with values strictly ",
+        "between 0 and 1 and no missing data."
+      ),
       call. = FALSE
     )
   }
@@ -242,22 +246,18 @@ check_heterogeneity_data <- function(dataset.add) {
   if (!is.matrix(dataset.add) && !is.data.frame(dataset.add)) {
     stop("'dataset.add' must be a matrix or data frame.", call. = FALSE)
   }
-
   dataset.add <- as.matrix(dataset.add)
-
   if (ncol(dataset.add) < 3) {
     stop(
       "The number of sites should be equal to or larger than 3.",
       call. = FALSE
     )
   }
-
   check_min_site_records(dataset.add)
-
   dataset.add
 }
 
-
+#' @noRd
 check_rho <- function(rho) {
   if (!is.numeric(rho) || length(rho) != 1 || rho >= 1 || rho <= -1) {
     stop(
@@ -268,9 +268,40 @@ check_rho <- function(rho) {
   invisible(NULL)
 }
 
+#' @noRd
 check_Ns <- function(Ns) {
   if (!is.numeric(Ns) || length(Ns) != 1 || Ns != as.integer(Ns) || Ns < 100) {
     stop("Ns should be larger than 99.", call. = FALSE)
   }
   invisible(NULL)
+}
+
+# =============================================================================
+# Progress bar helper
+# =============================================================================
+
+#' Show or suppress the progress bar in long-running functions
+#'
+#' Long-running functions in this package (\code{Site_parCI},
+#' \code{Reg_parCI}) display a progress bar by default when the session is
+#' interactive. This behaviour can be controlled globally via
+#' \code{options(NSTempRFA.progress = FALSE)} or overridden per-call by
+#' setting the \code{progress} argument directly on the function.
+#'
+#' @param progress
+#' \code{TRUE} to show, \code{FALSE} to hide, or \code{NULL} (default) to
+#' defer to \code{getOption("NSTempRFA.progress")}, which itself falls back
+#' to \code{interactive()}.
+#'
+#' @return Logical scalar.
+#' @noRd
+use_progress_bar <- function(progress = NULL) {
+  if (!is.null(progress)) {
+    return(isTRUE(progress))
+  }
+  opt <- getOption("NSTempRFA.progress", default = NULL)
+  if (!is.null(opt)) {
+    return(isTRUE(opt))
+  }
+  interactive()
 }
