@@ -9,6 +9,7 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
+set.seed(23) # avoid noise in Git when rerendering
 ```
 
 # NSTempRFA
@@ -27,6 +28,7 @@ You can install the development version of NSTempRFA from GitHub with:
 # install.packages("pak")
 pak::pak("gabrielblain/NSTempRFA")
 ```
+
 ## Theoretical Background
 
 The Regional Frequency Analysis (RFA; Dalrymple, 1960) technique has been widely used to improve the probabilistic assessment of extreme rainfall and flood events worldwide. The fundamental concept behind RFA is to evaluate whether a group of time series from distinct sites can be considered “acceptably homogeneous” (Hosking and Wallis, 1997). If this condition is met, data from all sites can be pooled together, effectively trading space for time, and thus extending the effective data length (Smith et al. 2015).
@@ -41,29 +43,34 @@ To overcome this limitation, Blain et al. (2026) propose the Non-stationary Addi
 
 ## Basic Instructions
 
-### **Load the library for examples below**
+**Load the library for examples below**
 
 ```{r}
 library(NSTempRFA)
 ```
 
-### Function `Add_Discord()`
+## Function `Add_Discord()`
 
 ### Description
+
 This function calculates the Hosking and Wallis’ discordance measure (discord) using the additive approach as described in Martins et al. (2022) and Blain et al (2026).
 
 ### Usage
-Add_Discord(dataset)
+
+`Add_Discord(dataset)`
 
 ### Arguments
+
 **dataset:** A numeric matrix with extreme air temperature data from multiple sites. The
 first column must contain the years, and the remaining columns contain temperature
 data from each site.
 
 ### Details
+
 The discordance measures identify sites that are potentially discordant within a regional frequency analysis framework for extreme air temperature series.
 
 ### Value
+
 A data.frame with seven columns:
 - `Local` Site identifier.
 - `SampleSize` Number of observations for each site.
@@ -81,14 +88,15 @@ dataset <- TmaxCPC_SP
 Add_Discord(dataset)
 ```
 
-### Function `Dataset_add()`
+## Function `Dataset_add()`
 
 ### Description
 
 Subtract the sample mean of each column from their corresponding data.
 
 ### Usage
-dataset_add(dataset)
+
+`dataset_add(dataset)`
 
 ### Arguments
 **dataset:** A numeric matrix with extreme air temperature data from multiple sites.
@@ -107,7 +115,7 @@ dataset <- TmaxCPC_SP
 Dataset_add(dataset)
 ```
 
-### Function `Add_Heterogeneity()`
+## Function `Add_Heterogeneity()`
 
 ### Description
 
@@ -135,7 +143,7 @@ add.data <- Dataset_add(TmaxCPC_SP)
 Add_Heterogeneity(dataset.add = add.data$add_data, rho = rho, Ns = Ns)
 ```
 
-### Function `Best_model()`
+## Function `Best_model()`
 
 ### Description
 
@@ -145,7 +153,7 @@ GEV-models considered in this package.
 
 ### Usage
 
-Best_model(add_data)
+`Best_model(add_data)`
 
 ### Arguments
 
@@ -154,8 +162,8 @@ Best_model(add_data)
 ### Value
 
 A list object with the following elements:
-- best: The best model among the six candidates.
-- atsite.models: The time-varying parameters of the best model.
+- `best`: The best model among the six candidates.
+- `atsite.models`: The time-varying parameters of the best model.
 
 ### Example
 
@@ -164,7 +172,7 @@ add.data <- Dataset_add(TmaxCPC_SP)
 Best_model(add.data = add.data$add_data)
 ```
 
-### Function `Reg_par()`
+## Function `Reg_par()`
 
 ### Description
 
@@ -172,7 +180,7 @@ Calculates the regional parameters for the regional time-varying GEV distributio
 
 ### Usage
 
-Reg_par(best_model)
+`Reg_par(best_model)`
 
 ### Arguments
 
@@ -187,7 +195,7 @@ Reg_par(best_model)
 
 ### Value
 
-A data.frame with the regional parameters of the regional time-varying distribution.
+A `data.frame` with the regional parameters of the regional time-varying distribution.
 
 ### Example
 
@@ -197,7 +205,7 @@ best.parms <- Best_model(add.data = add.data$add_data)
 Reg_par(best_model = best.parms$atsite.models)
 ```
 
-### Function `Reg_parCI()`
+## Function `Reg_parCI()`
 
 ### Description
 
@@ -205,7 +213,7 @@ Calculates the 95% confidence intervals of time-varying parameters of the region
 
 ### Usage
 
-Reg_parCI(add_data, reg_par, max_time, n.boots)
+`Reg_parCI(add_data, reg_par, reg_mean, max_time, n.boots)`
 
 ### Arguments
 
@@ -229,7 +237,7 @@ A matrix containing the 95% confidence intervals (lower and upper bounds) of the
 
 ### Example
 
-```{r example 6}
+```{r example 6, echo=FALSE}
 add.data <- Dataset_add(TmaxCPC_SP)
 best.parms <- Best_model(add.data = add.data$add_data)
 regional.parms <- Reg_par(best_model = best.parms$atsite.models)
@@ -237,11 +245,12 @@ Reg_parCI(
   add_data = add.data$add_data,
   model = 2,
   reg_par = regional.parms,
+  reg_mean = add.data$reg_meank,
   n.boots = 100
 )
 ```
 
-### Function `Site_parCI`
+## Function `Site_parCI`
 
 ### Description
 
@@ -249,7 +258,7 @@ Calculates the 95% confidence intervals of time-varying parameters of a at-site 
 
 ### Usage
 
-Site_parCI(data_site, site_par, max_time, n.boots)
+`Site_parCI(data_site, site_par, max_time, n.boots)`
 
 ### Arguments
 
@@ -287,7 +296,7 @@ Site_parCI(
 )
 ```
 
-### Function `Add_RegProb`
+## Function `Add_RegProb`
 
 ### Description
 
@@ -295,7 +304,7 @@ Calculates the cumulative probability of extreme air temperature data using the 
 
 ### Usage
 
-Add_RegProb(quantiles, reg_par, site_mean, max_time)
+`Add_RegProb(quantiles, reg_par, site_mean, max_time)`
 
 ### Arguments
 
@@ -334,7 +343,7 @@ the Additional nonstationary RFA approach.
  )
 ```
 
-### Function `Add_RegQuant`
+## Function `Add_RegQuant`
 
 ### Description
 
@@ -342,7 +351,7 @@ Calculates quantiles estimates from cumulative probabilities of extreme air temp
 
 ### Usage
 
-Add_RegQuant(prob, reg_par, site_mean, max_time)
+`Add_RegQuant(prob, reg_par, site_mean, max_time)`
 
 ### Arguments
 
