@@ -299,7 +299,9 @@ Calculates the 95% confidence intervals of time-varying parameters of the region
 - 4th is the sigma0 parameter
 - 5th is the sigma1 parameter
 - 6th is the shape parameter
-**reg_mean**: #TODO: include docs here... 
+**reg_mean**: A numeric vector of site mean temperatures as returned by `Dataset_add()$reg_mean`.
+Used to restore bootstrap replicates from centered to original scale before refitting.
+Must have length equal to the number of columns in `add_data`.
 **max_time**: A single number describing the number of the year that the time-varying parameters should be calculated. For example, if the users need to calculated the
 parameters for the first year max_time is set to 1 and the 30th year max_time is
 set to 30.
@@ -326,8 +328,8 @@ Reg_parCI(
 )
 #> This calculation may take some time.
 #>              weighted_mu0 weighted_mu1 weighted_sigma0 weighted_sigma1 weighted_shape
-#> Lower 95% CI           NA           NA              NA              NA             NA
-#> Upper 95% CI           NA           NA              NA              NA             NA
+#> Lower 95% CI     32.86543   0.02394726        0.838225               0   -0.409554221
+#> Upper 95% CI     33.89355   0.07383354        1.249760               0   -0.006401559
 ```
 
 ## Function `Site_parCI`
