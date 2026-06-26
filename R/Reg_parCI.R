@@ -13,10 +13,14 @@
 #' * 3rd is the sigma0 parameter,
 #' * 4th is the sigma1 parameter,
 #' * 5th is the shape parameter.
-#' #TODO: document `reg_mean`.
+#' @param reg_mean
+#' A numeric vector of site mean temperatures as returned by
+#' `Dataset_add()$reg_mean`. Used to restore bootstrap replicates
+#' from centered to original scale before refitting. Must have length
+#' equal to the number of columns in `add_data`.
 #' @param n.boots
 #' A single number describing the number of bootstrap replicates.
-#' Whenever possible, n.boots should be set to 999 (default),
+#' Whenever possible, `n.boots` should be set to 999 (default),
 #' as suggested by Burn (2003) <10.1623/hysj.48.1.25.43485>
 #' and O'Brien and Burn (2014) <10.1016/j.jhydrol.2014.09.041>.
 #'

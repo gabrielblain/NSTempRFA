@@ -4,7 +4,7 @@
 \alias{Reg_parCI}
 \title{Confidence intervals for regional GEV parameters}
 \usage{
-Reg_parCI(add_data, model, reg_par, n.boots = 999)
+Reg_parCI(add_data, model, reg_par, reg_mean, n.boots = 999)
 }
 \arguments{
 \item{add_data}{A numeric matrix of air temperature data as calculated by Dataset_add().}
@@ -21,8 +21,13 @@ May be provided by Best_model().}
 \item 5th is the shape parameter.
 }}
 
+\item{reg_mean}{A numeric vector of site mean temperatures as returned by
+\code{Dataset_add()$reg_mean}. Used to restore bootstrap replicates
+from centered to original scale before refitting. Must have length
+equal to the number of columns in \code{add_data}.}
+
 \item{n.boots}{A single number describing the number of bootstrap replicates.
-Whenever possible, n.boots should be set to 999 (default),
+Whenever possible, \code{n.boots} should be set to 999 (default),
 as suggested by Burn (2003) <10.1623/hysj.48.1.25.43485>
 and O'Brien and Burn (2014) <10.1016/j.jhydrol.2014.09.041>.}
 }
@@ -44,6 +49,7 @@ Reg_parCI(
   add_data = add.data$add_data,
   model = 2,
   reg_par = regional.parms,
+  reg_mean  = add.data$reg_mean,
   n.boots = 100
 )
 \dontshow{\}) # examplesIf}
