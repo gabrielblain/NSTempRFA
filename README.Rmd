@@ -10,6 +10,7 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 set.seed(23) # avoid noise in Git when rerendering
+options(NSTempRFA.progress = FALSE) # suppress progress bar for session
 ```
 
 # NSTempRFA
@@ -225,6 +226,7 @@ Calculates the 95% confidence intervals of time-varying parameters of the region
 - 4th is the sigma0 parameter
 - 5th is the sigma1 parameter
 - 6th is the shape parameter
+**reg_mean**: #TODO: include docs here... 
 **max_time**: A single number describing the number of the year that the time-varying parameters should be calculated. For example, if the users need to calculated the
 parameters for the first year max_time is set to 1 and the 30th year max_time is
 set to 30.
@@ -237,7 +239,7 @@ A matrix containing the 95% confidence intervals (lower and upper bounds) of the
 
 ### Example
 
-```{r example 6, echo=FALSE}
+```{r example 6}
 add.data <- Dataset_add(TmaxCPC_SP)
 best.parms <- Best_model(add.data = add.data$add_data)
 regional.parms <- Reg_par(best_model = best.parms$atsite.models)
@@ -245,7 +247,7 @@ Reg_parCI(
   add_data = add.data$add_data,
   model = 2,
   reg_par = regional.parms,
-  reg_mean = add.data$reg_meank,
+  reg_mean = add.data$reg_mean,
   n.boots = 100
 )
 ```
