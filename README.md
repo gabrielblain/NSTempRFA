@@ -225,20 +225,20 @@ A list object with the following elements:
 add.data <- Dataset_add(TmaxCPC_SP)
 Best_model(add.data = add.data$add_data)
 #> $best
-#> [1] 1
+#> [1] 2
 #> 
 #> $atsite.models
-#>           mu0 mu1    sigma0 sigma1        shape size
-#> 1  -0.3773912   0 0.9819214      0 -0.231044388   34
-#> 2  -0.4240669   0 1.2209652      0 -0.294153881   34
-#> 3  -0.3665661   0 1.0661606      0 -0.302389003   34
-#> 4  -0.4401185   0 0.8536704      0 -0.078929605   34
-#> 5  -0.6724306   0 0.9885704      0  0.099448040   34
-#> 6  -0.6133959   0 1.0695277      0 -0.009587089   34
-#> 7  -0.5280127   0 1.1321738      0 -0.123775011   34
-#> 8  -0.5836849   0 0.9923103      0  0.007738651   34
-#> 9  -0.6864610   0 1.2072022      0 -0.015443657   34
-#> 10 -0.6247237   0 1.2108098      0 -0.071332480   34
+#>           mu0          mu1    sigma0 sigma1       shape size
+#> 1  -0.2864336 -0.004971809 0.9852760      0 -0.23987862   34
+#> 2  -1.0227894  0.035332791 1.1698222      0 -0.29729970   34
+#> 3  -0.7748006  0.022975995 1.0269278      0 -0.26978834   34
+#> 4  -0.6901442  0.015431062 0.8563226      0 -0.11111473   34
+#> 5  -1.6362737  0.062523525 0.8888875      0  0.02677818   34
+#> 6  -1.5547575  0.059680647 1.0063711      0 -0.08750300   34
+#> 7  -1.5262793  0.063459052 1.0688034      0 -0.23920558   34
+#> 8  -1.4567797  0.057640734 1.0035459      0 -0.15821851   34
+#> 9  -2.0731388  0.094374300 1.1884099      0 -0.27779739   34
+#> 10 -2.0294572  0.096551734 1.2348429      0 -0.41420337   34
 ```
 
 ## Function `Reg_par()`
@@ -276,7 +276,7 @@ Reg_par(best_model = best.parms$atsite.models)
 #> # Data frame like object (class data.frame) 5 x 1:
 #>  │weighted_mu0│weighted_mu1│weighted_sigma0│weighted_sigma1│weighted_shape
 #>  │<dbl>       │<dbl>       │<dbl>          │<dbl>          │<dbl>         
-#> 1│       -0.53│           0│            1.1│              0│          -0.1
+#> 1│        -1.3│        0.05│              1│              0│         -0.21
 ```
 
 ## Function `Reg_parCI()`
@@ -313,7 +313,17 @@ A matrix containing the 95% confidence intervals (lower and upper bounds) of the
 ### Example
 
 
-```
+``` r
+add.data <- Dataset_add(TmaxCPC_SP)
+best.parms <- Best_model(add.data = add.data$add_data)
+regional.parms <- Reg_par(best_model = best.parms$atsite.models)
+Reg_parCI(
+  add_data = add.data$add_data,
+  model = 2,
+  reg_par = regional.parms,
+  reg_mean = add.data$reg_mean,
+  n.boots = 100
+)
 #> This calculation may take some time.
 #>              weighted_mu0 weighted_mu1 weighted_sigma0 weighted_sigma1 weighted_shape
 #> Lower 95% CI           NA           NA              NA              NA             NA
@@ -365,8 +375,10 @@ Site_parCI(
   site_par = site_par[1:5],
   n.boots = 100
 )
-#> Error:
-#> ! `site_par` cannot contain missing or infinite values.
+#> This calculation may take some time.
+#>                   mu0         mu1    sigma0 sigma1       shape
+#> Lower 95% CI 34.68693 -0.03958682 0.7951596      0 -1.04178572
+#> Upper 95% CI 35.97429  0.02140826 1.2749971      0 -0.07682126
 ```
 
 ## Function `Add_RegProb`
@@ -416,15 +428,15 @@ the Additional nonstationary RFA approach.
    n.year = 34
  )
 #>            [,1]
-#>  [1,] 0.9089908
-#>  [2,] 0.9357246
-#>  [3,] 0.9554091
-#>  [4,] 0.9606825
-#>  [5,] 0.9654017
-#>  [6,] 0.9696160
-#>  [7,] 0.9733715
-#>  [8,] 0.9822987
-#>  [9,] 0.9914240
+#>  [1,] 0.7902025
+#>  [2,] 0.8545796
+#>  [3,] 0.9038670
+#>  [4,] 0.9172022
+#>  [5,] 0.9291197
+#>  [6,] 0.9397071
+#>  [7,] 0.9490556
+#>  [8,] 0.9706002
+#>  [9,] 0.9902066
 ```
 
 ## Function `Add_RegQuant`
@@ -473,7 +485,7 @@ the Additional nonstationary RFA approach.
    n.year = 34
  )
 #>      Q80      Q85      Q90      Q92      Q93      Q94      Q95      Q97      Q99 
-#> 36.45110 36.73818 37.11595 37.31304 37.42782 37.55761 37.70762 38.10971 38.89726
+#> 37.24134 37.47600 37.77291 37.92247 38.00787 38.10295 38.21086 38.48963 38.99157
 ```
 
 ## BugReports:
