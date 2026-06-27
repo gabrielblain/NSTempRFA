@@ -21,15 +21,18 @@
 #' Reg_par(best_model = best.parms$atsite.models)
 
 Reg_par <- function(best_model) {
-  check_best_model_df(best_model) # defined in input_checks.R
+  check_best_model_df(best_model)
 
   w <- best_model$size
   par_cols <- c("mu0", "mu1", "sigma0", "sigma1", "shape")
 
-  # Compute all five weighted means in one vectorized call,
-  # then name the results — no dplyr needed.
+  # Replace non-finite parameter values with NA so they are excluded
+  # from weighted.mean() along with genuinely missing fits.
+  pars <- best_model[par_cols]
+  pars[!is.finite(as.matrix(pars))] <- NA_real_
+
   wm <- vapply(
-    best_model[par_cols],
+    pars,
     weighted.mean,
     w = w,
     na.rm = TRUE,
@@ -37,6 +40,5 @@ Reg_par <- function(best_model) {
   )
 
   names(wm) <- paste0("weighted_", par_cols)
-
   as.data.frame(as.list(wm))
 }
