@@ -90,12 +90,12 @@ test_that("Reg_par rejects NA values in size column", {
     sigma0 = 1,
     sigma1 = 1,
     shape = 0.1,
-    size = NA
+    size = NA_real_
   )
-
   expect_error(
     Reg_par(best_model),
-    "All columns in 'best_model' must be numeric."
+    "The 'size' column must contain finite non-negative values.",
+    fixed = TRUE
   )
 })
 
@@ -134,7 +134,7 @@ test_that("Reg_par works for a single site", {
   expect_identical(result$weighted_shape, 0.05)
 })
 
-test_that("Reg_par rejects NA values in parameter columns", {
+test_that("Reg_par handles NA values in parameter columns gracefully", {
   best_model <- data.frame(
     mu0 = c(10, NA),
     mu1 = c(1, 2),
@@ -143,14 +143,13 @@ test_that("Reg_par rejects NA values in parameter columns", {
     shape = c(0.05, 0.10),
     size = c(50, 100)
   )
-
-  expect_error(
-    Reg_par(best_model),
-    "All values in 'best_model' must be finite"
-  )
+  result <- Reg_par(best_model)
+  expect_s3_class(result, "data.frame")
+  # NA site is dropped by na.rm = TRUE; result is from the non-NA site only
+  expect_identical(result$weighted_mu0, 10)
 })
 
-test_that("Reg_par rejects Inf values", {
+test_that("Reg_par handles Inf values in parameter columns gracefully", {
   best_model <- data.frame(
     mu0 = c(10, Inf),
     mu1 = c(1, 2),
@@ -159,14 +158,13 @@ test_that("Reg_par rejects Inf values", {
     shape = c(0.05, 0.10),
     size = c(50, 100)
   )
-
-  expect_error(
-    Reg_par(best_model),
-    "All values in 'best_model' must be finite"
-  )
+  result <- Reg_par(best_model)
+  expect_s3_class(result, "data.frame")
+  expect_true(is.finite(result$weighted_mu0))
+  expect_identical(result$weighted_mu0, 10) # Inf site excluded
 })
 
-test_that("Reg_par rejects -Inf values", {
+test_that("Reg_par handles -Inf values in parameter columns gracefully", {
   best_model <- data.frame(
     mu0 = c(10, -Inf),
     mu1 = c(1, 2),
@@ -175,9 +173,8 @@ test_that("Reg_par rejects -Inf values", {
     shape = c(0.05, 0.10),
     size = c(50, 100)
   )
-
-  expect_error(
-    Reg_par(best_model),
-    "All values in 'best_model' must be finite"
-  )
+  result <- Reg_par(best_model)
+  expect_s3_class(result, "data.frame")
+  expect_true(is.finite(result$weighted_mu0))
+  expect_identical(result$weighted_mu0, 10) # -Inf site excluded
 })
