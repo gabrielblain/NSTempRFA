@@ -10,7 +10,7 @@ output: github_document
 [![R-CMD-check](https://github.com/gabrielblain/NSTempRFA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gabrielblain/NSTempRFA/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-A package designed to apply the RFA technique to air temperature data under climate change conditions
+A package designed to apply the RFA technique to air temperature data under climate change conditions.
 
 ## Installation
 
@@ -23,15 +23,23 @@ pak::pak("gabrielblain/NSTempRFA")
 
 ## Theoretical Background
 
-The Regional Frequency Analysis (RFA; Dalrymple, 1960) technique has been widely used to improve the probabilistic assessment of extreme rainfall and flood events worldwide. The fundamental concept behind RFA is to evaluate whether a group of time series from distinct sites can be considered “acceptably homogeneous” (Hosking and Wallis, 1997). If this condition is met, data from all sites can be pooled together, effectively trading space for time, and thus extending the effective data length (Smith et al. 2015).
+The Regional Frequency Analysis (RFA; Dalrymple, 1960) technique has been widely used to improve the probabilistic assessment of extreme rainfall and flood events worldwide.
+The fundamental concept behind RFA is to evaluate whether a group of time series from distinct sites can be considered “acceptably homogeneous” (Hosking and Wallis, 1997).
+If this condition is met, data from all sites can be pooled together, effectively trading space for time, and thus extending the effective data length (Smith et al. 2015).
 
-In its original version, the RFA is valid only when the variable of interest assumes strictly positive values. However, Martins et al. (2022) verified that this technique can be effectively applied to extreme maximum (Tmax) and minimum (Tmin) air temperature series, which may assume both positive and negative values, by adopting the so-called additive approach. 
+In its original version, the RFA is valid only when the variable of interest assumes strictly positive values.
+However, Martins et al. (2022) verified that this technique can be effectively applied to extreme maximum (Tmax) and minimum (Tmin) air temperature series, which may assume both positive and negative values, by adopting the so-called additive approach. 
 
-This additional approach is consistent with the physical characteristics of temperature data. Since the fundamental temperature scale is the Kelvin scale, where 0 K equals -273.15°C (or -459.67°F), both Tmax and Tmin values fall within a relatively narrow range compared to their distance from absolute zero. As a result, the variability in Tmax and Tmin distributions can be treated as largely independent of their sample mean (Martins et al. 2022). Moreover, when expressed in Celsius or Fahrenheit, Tmin values may be negative, further justifying the use of the additive approach.
+This additional approach is consistent with the physical characteristics of temperature data.
+Since the fundamental temperature scale is the Kelvin scale, where 0 K equals -273.15°C (or -459.67°F), both Tmax and Tmin values fall within a relatively narrow range compared to their distance from absolute zero.
+As a result, the variability in Tmax and Tmin distributions can be treated as largely independent of their sample mean (Martins et al. 2022). 
+Moreover, when expressed in Celsius or Fahrenheit, Tmin values may be negative, further justifying the use of the additive approach.
 
-Although the study by Martins et al. (2022) showed promising results, it did not address the influence of long-term warming trends, which have been documented in nearly all regions of the world (IPCC, 2021). This calls for an extension of the RFA framework to incorporate time-dependent, nonstationary statistical properties. 
+Although the study by Martins et al. (2022) showed promising results, it did not address the influence of long-term warming trends, which have been documented in nearly all regions of the world (IPCC, 2021).
+This calls for an extension of the RFA framework to incorporate time-dependent, nonstationary statistical properties.
 
-To overcome this limitation, Blain et al. (2026) propose the Non-stationary Additive Regional Frequency Analysis, an extension of the additive RFA that integrates nonstationary probabilistic models to represent temporal changes in air temperature frequency distributions at the regional scale. This package was designed to facilitate the application of this new method to extreme Tmax and Tmin data under nonstationary climate conditions.
+To overcome this limitation, Blain et al. (2026) propose the Non-stationary Additive Regional Frequency Analysis, an extension of the additive RFA that integrates nonstationary probabilistic models to represent temporal changes in air temperature frequency distributions at the regional scale.
+This package was designed to facilitate the application of this new method to extreme Tmax and Tmin data under nonstationary climate conditions.
 
 ## Basic Instructions
 
@@ -54,9 +62,8 @@ This function calculates the Hosking and Wallis’ discordance measure (discord)
 
 ### Arguments
 
-**dataset:** A numeric matrix with extreme air temperature data from multiple sites. The
-first column must contain the years, and the remaining columns contain temperature
-data from each site.
+**dataset:** A numeric matrix with extreme air temperature data from multiple sites.
+The first column must contain the years, and the remaining columns contain temperature data from each site.
 
 ### Details
 
@@ -80,19 +87,28 @@ A data.frame with seven columns:
 ``` r
 dataset <- TmaxCPC_SP
 Add_Discord(dataset)
-#> # Data frame like object (class data.frame) 8 x 10:
-#>   │Local   │SampleSize│l_1  │l_2  │t_3    │t_4  │t_5    │discord
-#>   │<chr>   │<int>     │<dbl>│<dbl>│<dbl>  │<dbl>│<dbl>  │<dbl>  
-#>  1│Pixel_1 │        34│   35│ 0.57│-0.0468│0.130│ 0.1175│   1.79
-#>  2│Pixel_2 │        34│   33│ 0.71│ 0.0085│0.129│-0.0163│   1.64
-#>  3│Pixel_3 │        34│   34│ 0.62│-0.0066│0.120│ 0.0506│   1.26
-#>  4│Pixel_4 │        34│   35│ 0.58│ 0.1032│0.057│ 0.0830│   2.42
-#>  5│Pixel_5 │        34│   35│ 0.77│ 0.1804│0.097│ 0.1016│   1.31
-#>  6│Pixel_6 │        34│   35│ 0.77│ 0.1712│0.137│ 0.0270│   0.78
-#>  7│Pixel_7 │        34│   34│ 0.72│ 0.1149│0.168│ 0.0155│   1.35
-#>  8│Pixel_8 │        34│   33│ 0.71│ 0.1939│0.156│ 0.0883│   1.99
-#>  9│Pixel_9 │        34│   36│ 0.86│ 0.1864│0.109│ 0.0119│   1.97
-#> 10│Pixel_10│        34│   35│ 0.82│ 0.1615│0.161│-0.0091│   1.31
+#>       Local SampleSize      l_1       l_2          t_3        t_4
+#> 1   Pixel_1         34 35.49129 0.5702889 -0.046839615 0.12967963
+#> 2   Pixel_2         34 33.47568 0.7114659  0.008514648 0.12875566
+#> 3   Pixel_3         34 34.42286 0.6216035 -0.006632936 0.11958897
+#> 4   Pixel_4         34 35.05986 0.5818588  0.103225296 0.05659463
+#> 5   Pixel_5         34 34.97852 0.7661857  0.180355170 0.09655880
+#> 6   Pixel_6         34 34.54346 0.7651060  0.171180354 0.13719846
+#> 7   Pixel_7         34 34.30666 0.7231769  0.114853094 0.16820816
+#> 8   Pixel_8         34 32.81977 0.7120049  0.193897168 0.15569518
+#> 9   Pixel_9         34 35.96037 0.8583378  0.186372622 0.10856159
+#> 10 Pixel_10         34 35.46055 0.8180569  0.161493008 0.16103322
+#>             t_5   discord
+#> 1   0.117454055 1.7860794
+#> 2  -0.016283412 1.6373754
+#> 3   0.050620060 1.2644379
+#> 4   0.082984024 2.4153036
+#> 5   0.101565708 1.3050367
+#> 6   0.027045326 0.7750693
+#> 7   0.015520001 1.3517363
+#> 8   0.088295774 1.9897006
+#> 9   0.011871484 1.9723056
+#> 10 -0.009130147 1.3101471
 ```
 
 ## Function `Dataset_add()`
@@ -122,56 +138,94 @@ A list object with the following elements:
 dataset <- TmaxCPC_SP
 Dataset_add(dataset)
 #> $add_data
-#>            Pixel_1     Pixel_2     Pixel_3     Pixel_4     Pixel_5     Pixel_6     Pixel_7      Pixel_8     Pixel_9   Pixel_10
-#>  [1,]  0.806680901  0.39890895  0.51382457  0.07826973 -1.26789206 -0.62984085 -0.22739680  0.101871711 -1.17935888 -1.3090836
-#>  [2,] -1.276407019 -1.07100835 -1.46701802 -1.14710640 -0.92446249 -0.79555893 -1.11911662 -1.011674659 -1.37078420 -1.4325768
-#>  [3,] -1.067941439 -0.36950841 -0.81885517 -1.31494545  0.54887659  0.35712051 -0.36224635 -1.069068689  0.51408824  0.1935943
-#>  [4,] -0.876817479 -0.68805471 -0.57519520  0.28452660  0.66295130 -0.42699433 -0.28177531 -0.048602829 -0.32252065 -0.1915604
-#>  [5,] -0.129327549 -0.74817052 -0.27107609  0.44226815 -0.18384283 -0.84130478 -0.37523539 -0.147311939 -0.98650304 -0.4959847
-#>  [6,]  0.036894071 -0.63226476 -0.60400761 -0.79813026 -1.78046530 -0.92012787 -0.72715647 -1.013328329 -1.76890889 -0.2924286
-#>  [7,]  2.638433681  1.95663676  2.08730327  1.33298088  0.14825327  0.86101532  0.91251104  0.823360671  0.64647349  0.7911132
-#>  [8,]  0.444929351 -0.47622457  0.29207241  0.47764565 -1.57320898 -0.23893738  0.33811681 -0.042125479 -1.63996068 -0.5049988
-#>  [9,]  1.040842281 -1.64627423 -1.50838841 -1.25554298 -1.11890142 -1.59651947 -1.47085078 -0.268409509 -1.41883413 -1.5299050
-#> [10,] -1.506883399 -2.42683187 -1.84099568 -0.21410774 -1.38093679 -1.37288666 -1.64861567 -1.330280079 -0.94290105 -0.8587967
-#> [11,]  0.324857941 -1.55034795 -0.66855992  0.03188683 -1.41308706 -2.18091965 -2.54513819 -1.010923159 -1.51050893 -1.5668694
-#> [12,]  0.371961821  0.58032069  0.53155910  1.13059594  0.68552286  1.42906951  0.86088292  0.210121381  0.84732112  0.2927726
-#> [13,]  0.811525571  1.88877330  1.33351146  1.41313912  1.54653818  2.03365707  1.25885122  0.920772781 -0.07001439  0.1628173
-#> [14,] -1.943567049 -2.21049085 -1.74813450 -1.44470237 -1.37753027 -1.80634308 -1.92120631 -2.161268009 -1.39242498 -2.2887703
-#> [15,]  0.049181211  1.02473674  0.53503811 -0.39466499 -1.64567678 -1.55134964 -0.35035212 -1.156675119 -2.66049520 -2.5558716
-#> [16,]  0.021272881  1.69644389  1.78262340  1.20808388 -1.49557989 -0.52707673  1.23415487  0.213909371 -1.18843786 -1.3668496
-#> [17,]  0.395166621  0.68113551  0.42061245 -0.31176399 -1.38004416 -1.31818772 -1.06052668 -0.898059619 -0.45487920 -0.5257050
-#> [18,] -0.888894809  0.04522548 -0.37732685 -1.31680320 -0.47039526 -0.38025284 -0.71214946 -1.450120699 -0.26275579 -0.2712456
-#> [19,]  0.380510551  0.32385859  0.34467708  0.10145928 -0.09685629  0.39632034  0.05151861 -1.352054369 -0.52853719 -1.0365235
-#> [20,]  1.573175651  0.94999156  0.47639858 -1.10231422  0.35593302  0.06438446 -0.76660807 -1.295602579 -0.87979070 -0.8687760
-#> [21,]  0.407774201 -0.41990819 -0.17923725 -0.53943657 -0.17395132 -0.84939194 -0.80171092 -1.016113059  0.43672999 -0.2468506
-#> [22,]  0.859503021 -0.35633626  0.36359035  0.54243828  0.29317743  0.12120056  0.12325780  0.496650921  1.04116114  1.2301925
-#> [23,] -0.951265109 -2.10568776 -1.96636570 -0.94400428 -0.74292105 -1.39243699 -1.25236781 -0.008384479 -0.45061818 -0.5201851
-#> [24,] -0.411588449  0.17400584  0.12923061  0.67784096  1.06674463  0.70520019  0.83279531  1.542698131  1.77628382  2.2546600
-#> [25,]  0.537821041  0.48855433  0.53112423  0.34025551  0.58240015  0.59571457  0.62188833  0.806156381  0.65869578  1.1264862
-#> [26,]  0.567846521 -0.29345479  0.06583797 -0.45301078  0.07931025 -0.48486710 -0.28351481  0.199932321  0.70248851  0.5215362
-#> [27,] -1.640302429 -0.43832173 -1.15145481 -1.16273521  0.23186380 -0.02808381 -0.52587779 -0.303710709  0.57683619  0.4834198
-#> [28,]  0.006403191 -0.80364766 -0.73622502 -0.89390205 -0.88955038 -0.80413437 -0.75292094 -0.970168839 -0.89823095 -0.7556092
-#> [29,]  1.060312491  1.03521952  1.04153072  0.76687600  1.53927500  1.46383285  1.14297597  0.548031081  2.41230067  1.0458702
-#> [30,]  0.902807461  2.65113673  1.84338772  1.91324593  3.89446527  3.31644058  2.90345876  3.093185651  3.94813594  3.3613800
-#> [31,] -1.427316439  0.75615916  0.48415004  0.73680855  2.06313211  2.15882492  2.03954809  2.267257911  2.89697703  2.9804519
-#> [32,] -1.255941169 -0.76440206 -0.90240467 -0.87110923 -0.38806265  0.15259933  0.48710744  0.231853711 -1.19216481 -0.7576615
-#> [33,] -0.003717199  1.76204524  1.84878170  2.50021721  2.62044031  3.17444229  3.36168020  3.492275461  2.49659404  2.9711364
-#> [34,]  0.142069091  0.58778224  0.18999111  0.18574120  1.98448069  1.31539154  1.01601903  1.605804671  2.16454371  1.9608215
+#>            Pixel_1     Pixel_2     Pixel_3     Pixel_4     Pixel_5
+#>  [1,]  0.806680901  0.39890895  0.51382457  0.07826973 -1.26789206
+#>  [2,] -1.276407019 -1.07100835 -1.46701802 -1.14710640 -0.92446249
+#>  [3,] -1.067941439 -0.36950841 -0.81885517 -1.31494545  0.54887659
+#>  [4,] -0.876817479 -0.68805471 -0.57519520  0.28452660  0.66295130
+#>  [5,] -0.129327549 -0.74817052 -0.27107609  0.44226815 -0.18384283
+#>  [6,]  0.036894071 -0.63226476 -0.60400761 -0.79813026 -1.78046530
+#>  [7,]  2.638433681  1.95663676  2.08730327  1.33298088  0.14825327
+#>  [8,]  0.444929351 -0.47622457  0.29207241  0.47764565 -1.57320898
+#>  [9,]  1.040842281 -1.64627423 -1.50838841 -1.25554298 -1.11890142
+#> [10,] -1.506883399 -2.42683187 -1.84099568 -0.21410774 -1.38093679
+#> [11,]  0.324857941 -1.55034795 -0.66855992  0.03188683 -1.41308706
+#> [12,]  0.371961821  0.58032069  0.53155910  1.13059594  0.68552286
+#> [13,]  0.811525571  1.88877330  1.33351146  1.41313912  1.54653818
+#> [14,] -1.943567049 -2.21049085 -1.74813450 -1.44470237 -1.37753027
+#> [15,]  0.049181211  1.02473674  0.53503811 -0.39466499 -1.64567678
+#> [16,]  0.021272881  1.69644389  1.78262340  1.20808388 -1.49557989
+#> [17,]  0.395166621  0.68113551  0.42061245 -0.31176399 -1.38004416
+#> [18,] -0.888894809  0.04522548 -0.37732685 -1.31680320 -0.47039526
+#> [19,]  0.380510551  0.32385859  0.34467708  0.10145928 -0.09685629
+#> [20,]  1.573175651  0.94999156  0.47639858 -1.10231422  0.35593302
+#> [21,]  0.407774201 -0.41990819 -0.17923725 -0.53943657 -0.17395132
+#> [22,]  0.859503021 -0.35633626  0.36359035  0.54243828  0.29317743
+#> [23,] -0.951265109 -2.10568776 -1.96636570 -0.94400428 -0.74292105
+#> [24,] -0.411588449  0.17400584  0.12923061  0.67784096  1.06674463
+#> [25,]  0.537821041  0.48855433  0.53112423  0.34025551  0.58240015
+#> [26,]  0.567846521 -0.29345479  0.06583797 -0.45301078  0.07931025
+#> [27,] -1.640302429 -0.43832173 -1.15145481 -1.16273521  0.23186380
+#> [28,]  0.006403191 -0.80364766 -0.73622502 -0.89390205 -0.88955038
+#> [29,]  1.060312491  1.03521952  1.04153072  0.76687600  1.53927500
+#> [30,]  0.902807461  2.65113673  1.84338772  1.91324593  3.89446527
+#> [31,] -1.427316439  0.75615916  0.48415004  0.73680855  2.06313211
+#> [32,] -1.255941169 -0.76440206 -0.90240467 -0.87110923 -0.38806265
+#> [33,] -0.003717199  1.76204524  1.84878170  2.50021721  2.62044031
+#> [34,]  0.142069091  0.58778224  0.18999111  0.18574120  1.98448069
+#>           Pixel_6     Pixel_7      Pixel_8     Pixel_9   Pixel_10
+#>  [1,] -0.62984085 -0.22739680  0.101871711 -1.17935888 -1.3090836
+#>  [2,] -0.79555893 -1.11911662 -1.011674659 -1.37078420 -1.4325768
+#>  [3,]  0.35712051 -0.36224635 -1.069068689  0.51408824  0.1935943
+#>  [4,] -0.42699433 -0.28177531 -0.048602829 -0.32252065 -0.1915604
+#>  [5,] -0.84130478 -0.37523539 -0.147311939 -0.98650304 -0.4959847
+#>  [6,] -0.92012787 -0.72715647 -1.013328329 -1.76890889 -0.2924286
+#>  [7,]  0.86101532  0.91251104  0.823360671  0.64647349  0.7911132
+#>  [8,] -0.23893738  0.33811681 -0.042125479 -1.63996068 -0.5049988
+#>  [9,] -1.59651947 -1.47085078 -0.268409509 -1.41883413 -1.5299050
+#> [10,] -1.37288666 -1.64861567 -1.330280079 -0.94290105 -0.8587967
+#> [11,] -2.18091965 -2.54513819 -1.010923159 -1.51050893 -1.5668694
+#> [12,]  1.42906951  0.86088292  0.210121381  0.84732112  0.2927726
+#> [13,]  2.03365707  1.25885122  0.920772781 -0.07001439  0.1628173
+#> [14,] -1.80634308 -1.92120631 -2.161268009 -1.39242498 -2.2887703
+#> [15,] -1.55134964 -0.35035212 -1.156675119 -2.66049520 -2.5558716
+#> [16,] -0.52707673  1.23415487  0.213909371 -1.18843786 -1.3668496
+#> [17,] -1.31818772 -1.06052668 -0.898059619 -0.45487920 -0.5257050
+#> [18,] -0.38025284 -0.71214946 -1.450120699 -0.26275579 -0.2712456
+#> [19,]  0.39632034  0.05151861 -1.352054369 -0.52853719 -1.0365235
+#> [20,]  0.06438446 -0.76660807 -1.295602579 -0.87979070 -0.8687760
+#> [21,] -0.84939194 -0.80171092 -1.016113059  0.43672999 -0.2468506
+#> [22,]  0.12120056  0.12325780  0.496650921  1.04116114  1.2301925
+#> [23,] -1.39243699 -1.25236781 -0.008384479 -0.45061818 -0.5201851
+#> [24,]  0.70520019  0.83279531  1.542698131  1.77628382  2.2546600
+#> [25,]  0.59571457  0.62188833  0.806156381  0.65869578  1.1264862
+#> [26,] -0.48486710 -0.28351481  0.199932321  0.70248851  0.5215362
+#> [27,] -0.02808381 -0.52587779 -0.303710709  0.57683619  0.4834198
+#> [28,] -0.80413437 -0.75292094 -0.970168839 -0.89823095 -0.7556092
+#> [29,]  1.46383285  1.14297597  0.548031081  2.41230067  1.0458702
+#> [30,]  3.31644058  2.90345876  3.093185651  3.94813594  3.3613800
+#> [31,]  2.15882492  2.03954809  2.267257911  2.89697703  2.9804519
+#> [32,]  0.15259933  0.48710744  0.231853711 -1.19216481 -0.7576615
+#> [33,]  3.17444229  3.36168020  3.492275461  2.49659404  2.9711364
+#> [34,]  1.31539154  1.01601903  1.605804671  2.16454371  1.9608215
 #> attr(,"scaled:center")
-#>  Pixel_1  Pixel_2  Pixel_3  Pixel_4  Pixel_5  Pixel_6  Pixel_7  Pixel_8  Pixel_9 Pixel_10 
-#> 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>  Pixel_1  Pixel_2  Pixel_3  Pixel_4  Pixel_5  Pixel_6  Pixel_7  Pixel_8 
+#> 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 
+#>  Pixel_9 Pixel_10 
+#> 35.96037 35.46055 
 #> 
 #> $reg_mean
-#>  Pixel_1  Pixel_2  Pixel_3  Pixel_4  Pixel_5  Pixel_6  Pixel_7  Pixel_8  Pixel_9 Pixel_10 
-#> 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055
+#>  Pixel_1  Pixel_2  Pixel_3  Pixel_4  Pixel_5  Pixel_6  Pixel_7  Pixel_8 
+#> 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 
+#>  Pixel_9 Pixel_10 
+#> 35.96037 35.46055
 ```
 
 ## Function `Add_Heterogeneity()`
 
 ### Description
 
-Calculates Hosking and Wallis' heterogeneity measure using the additive approach
-as described in Martins et al. (2022) and Blain et al (2026).
+Calculates Hosking and Wallis' heterogeneity measure using the additive approach as described in Martins et al. (2022) and Blain et al (2026).
 
 ### Usage
 
@@ -179,10 +233,9 @@ Add_Heterogeneity(dataset.add, rho, Ns)
 
 ### Arguments
 
-**dataset.add**: A matrix of temperature values subtracted by their sample mean, as
-calculated by the `Add_Discord()` function.
-**rho**: A single numeric value (constant) describing the average correlation among the
-sites. It must be larger than -1.0 and lower than 1.0.
+**dataset.add**: A matrix of temperature values subtracted by their sample mean, as calculated by the `Add_Discord()` function.
+**rho**: A single numeric value (constant) describing the average correlation among the sites.
+It must be larger than -1.0 and lower than 1.0.
 **Ns**: Number of simulated groups of series. Default is 100, but at least 500 is recommended.
 
 ### Example
@@ -193,7 +246,7 @@ rho <- 0.51
 Ns <- 500
 add.data <- Dataset_add(TmaxCPC_SP)
 Add_Heterogeneity(dataset.add = add.data$add_data, rho = rho, Ns = Ns)
-#> [1] 0.8951683
+#> [1] 0.933545
 ```
 
 ## Function `Best_model()`
@@ -201,8 +254,7 @@ Add_Heterogeneity(dataset.add = add.data$add_data, rho = rho, Ns = Ns)
 ### Description
 
 Calculates the time-varying parameters of the best fitting GEV model for each site.
-See **Methodological Details** for more information on the candidate
-GEV-models considered in this package.
+See **Methodological Details** for more information on the candidate GEV-models considered in this package.
 
 ### Usage
 
@@ -210,7 +262,8 @@ GEV-models considered in this package.
 
 ### Arguments
 
-**add_data**: A matrix of temperature values subtracted by their sample mean. May be generated by the `dataset_add()` function
+**add_data**: A matrix of temperature values subtracted by their sample mean.
+May be generated by the `dataset_add()` function
 
 ### Value
 
@@ -225,20 +278,20 @@ A list object with the following elements:
 add.data <- Dataset_add(TmaxCPC_SP)
 Best_model(add.data = add.data$add_data)
 #> $best
-#> [1] 2
+#> [1] 1
 #> 
 #> $atsite.models
-#>           mu0          mu1    sigma0 sigma1       shape size
-#> 1  -0.2864336 -0.004971809 0.9852760      0 -0.23987862   34
-#> 2  -1.0227894  0.035332791 1.1698222      0 -0.29729970   34
-#> 3  -0.7748006  0.022975995 1.0269278      0 -0.26978834   34
-#> 4  -0.6901442  0.015431062 0.8563226      0 -0.11111473   34
-#> 5  -1.6362737  0.062523525 0.8888875      0  0.02677818   34
-#> 6  -1.5547575  0.059680647 1.0063711      0 -0.08750300   34
-#> 7  -1.5262793  0.063459052 1.0688034      0 -0.23920558   34
-#> 8  -1.4567797  0.057640734 1.0035459      0 -0.15821851   34
-#> 9  -2.0731388  0.094374300 1.1884099      0 -0.27779739   34
-#> 10 -2.0294572  0.096551734 1.2348429      0 -0.41420337   34
+#>           mu0 mu1    sigma0 sigma1        shape size
+#> 1  -0.3773912   0 0.9819214      0 -0.231044388   34
+#> 2  -0.4240669   0 1.2209652      0 -0.294153881   34
+#> 3  -0.3665661   0 1.0661606      0 -0.302389003   34
+#> 4  -0.4401185   0 0.8536704      0 -0.078929605   34
+#> 5  -0.6724306   0 0.9885704      0  0.099448040   34
+#> 6  -0.6133959   0 1.0695277      0 -0.009587089   34
+#> 7  -0.5280127   0 1.1321738      0 -0.123775011   34
+#> 8  -0.5836849   0 0.9923103      0  0.007738651   34
+#> 9  -0.6864610   0 1.2072022      0 -0.015443657   34
+#> 10 -0.6247237   0 1.2108098      0 -0.071332480   34
 ```
 
 ## Function `Reg_par()`
@@ -273,17 +326,16 @@ A `data.frame` with the regional parameters of the regional time-varying distrib
 add.data <- Dataset_add(TmaxCPC_SP)
 best.parms <- Best_model(add.data = add.data$add_data)
 Reg_par(best_model = best.parms$atsite.models)
-#> # Data frame like object (class data.frame) 5 x 1:
-#>  │weighted_mu0│weighted_mu1│weighted_sigma0│weighted_sigma1│weighted_shape
-#>  │<dbl>       │<dbl>       │<dbl>          │<dbl>          │<dbl>         
-#> 1│        -1.3│        0.05│              1│              0│         -0.21
+#>   weighted_mu0 weighted_mu1 weighted_sigma0 weighted_sigma1 weighted_shape
+#> 1   -0.5316852            0        1.072331               0     -0.1019468
 ```
 
 ## Function `Reg_parCI()`
 
 ### Description
 
-Calculates the 95% confidence intervals of time-varying parameters of the regional GEV distribution. It follows the method proposed by Burn (2003) and O’Brien and Burn (2014). The spatial dependence between sites is preserved.
+Calculates the 95% confidence intervals of time-varying parameters of the regional GEV distribution.
+It follows the method proposed by Burn (2003) and O’Brien and Burn (2014). The spatial dependence between sites is preserved.
 
 ### Usage
 
@@ -291,7 +343,8 @@ Calculates the 95% confidence intervals of time-varying parameters of the region
 
 ### Arguments
 
-**add_data**: A matrix of temperature values subtracted by their sample mean. May be generated by the `dataset_add()` function.
+**add_data**: A matrix of temperature values subtracted by their sample mean.
+May be generated by the `dataset_add()` function.
 **reg_par**: A 6-column and 1-row data.frame as that generated by `reg_par()`, that is:
 - 1st column is the mu0 parameter
 - 2nd is the mu1 parameter
@@ -302,15 +355,15 @@ Calculates the 95% confidence intervals of time-varying parameters of the region
 **reg_mean**: A numeric vector of site mean temperatures as returned by `Dataset_add()$reg_mean`.
 Used to restore bootstrap replicates from centered to original scale before refitting.
 Must have length equal to the number of columns in `add_data`.
-**max_time**: A single number describing the number of the year that the time-varying parameters should be calculated. For example, if the users need to calculated the
-parameters for the first year max_time is set to 1 and the 30th year max_time is
+**max_time**: A single number describing the number of the year that the time-varying parameters should be calculated.
+For example, if the users need to calculated the parameters for the first year max_time is set to 1 and the 30th year max_time is
 set to 30.
-**n.boots**: A single number describing the number of copies of the original dataset. Whenever possible n.boots should be set to 999 (its default value), as suggested by
-Burn (2003) and O’Brien and Burn (2014).
+**n.boots**: A single number describing the number of copies of the original dataset.
+Whenever possible n.boots should be set to 999 (its default value), as suggested by Burn (2003) and O’Brien and Burn (2014).
 
 ### Value
 
-A matrix containing the 95% confidence intervals (lower and upper bounds) of the time-varying parameter estimates. 
+A matrix containing the 95% confidence intervals (lower and upper bounds) of the time-varying parameter estimates.
 
 ### Example
 
@@ -327,9 +380,314 @@ Reg_parCI(
   n.boots = 100
 )
 #> This calculation may take some time.
-#>              weighted_mu0 weighted_mu1 weighted_sigma0 weighted_sigma1 weighted_shape
-#> Lower 95% CI     32.86543   0.02394726        0.838225               0   -0.409554221
-#> Upper 95% CI     33.89355   0.07383354        1.249760               0   -0.006401559
+#>   |                                                                            |                                                                    |   0%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=                                                                   |   1%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=                                                                   |   2%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |==                                                                  |   3%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |===                                                                 |   4%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |===                                                                 |   5%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |====                                                                |   6%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=====                                                               |   7%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=====                                                               |   8%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |======                                                              |   9%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=======                                                             |  10%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=======                                                             |  11%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |========                                                            |  12%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=========                                                           |  13%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |==========                                                          |  14%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |==========                                                          |  15%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |===========                                                         |  16%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |============                                                        |  17%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |============                                                        |  18%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=============                                                       |  19%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |==============                                                      |  20%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |==============                                                      |  21%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |===============                                                     |  22%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |================                                                    |  23%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |================                                                    |  24%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=================                                                   |  25%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |==================                                                  |  26%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |==================                                                  |  27%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |===================                                                 |  28%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |====================                                                |  29%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |====================                                                |  30%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=====================                                               |  31%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |======================                                              |  32%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |======================                                              |  33%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=======================                                             |  34%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |========================                                            |  35%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |========================                                            |  36%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=========================                                           |  37%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |==========================                                          |  38%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |===========================                                         |  39%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |===========================                                         |  40%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |============================                                        |  41%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=============================                                       |  42%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=============================                                       |  43%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |==============================                                      |  44%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |===============================                                     |  45%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |===============================                                     |  46%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |================================                                    |  47%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=================================                                   |  48%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=================================                                   |  49%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |==================================                                  |  50%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |===================================                                 |  51%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |===================================                                 |  52%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |====================================                                |  53%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=====================================                               |  54%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=====================================                               |  55%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |======================================                              |  56%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=======================================                             |  57%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=======================================                             |  58%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |========================================                            |  59%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=========================================                           |  60%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=========================================                           |  61%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |==========================================                          |  62%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |===========================================                         |  63%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |============================================                        |  64%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |============================================                        |  65%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=============================================                       |  66%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |==============================================                      |  67%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |==============================================                      |  68%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |===============================================                     |  69%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |================================================                    |  70%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |================================================                    |  71%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=================================================                   |  72%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |==================================================                  |  73%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |==================================================                  |  74%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |===================================================                 |  75%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |====================================================                |  76%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |====================================================                |  77%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=====================================================               |  78%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |======================================================              |  79%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |======================================================              |  80%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=======================================================             |  81%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |========================================================            |  82%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |========================================================            |  83%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=========================================================           |  84%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |==========================================================          |  85%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |==========================================================          |  86%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |===========================================================         |  87%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |============================================================        |  88%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=============================================================       |  89%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=============================================================       |  90%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |==============================================================      |  91%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |===============================================================     |  92%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |===============================================================     |  93%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |================================================================    |  94%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=================================================================   |  95%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=================================================================   |  96%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |==================================================================  |  97%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=================================================================== |  98%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |=================================================================== |  99%original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055 
+#>   |                                                                            |====================================================================| 100%
+#> [1] 2 5
+#>              weighted_mu0 weighted_mu1 weighted_sigma0 weighted_sigma1
+#> Lower 95% CI           NA           NA              NA              NA
+#> Upper 95% CI           NA           NA              NA              NA
+#>              weighted_shape
+#> Lower 95% CI             NA
+#> Upper 95% CI             NA
 ```
 
 ## Function `Site_parCI`
@@ -344,21 +702,19 @@ Calculates the 95% confidence intervals of time-varying parameters of a at-site 
 
 ### Arguments
 
-**data_site**: A vector or single column matrix of temperature values subtracted by its sample mean
-**site_par**: A 6-column and 1-row data.frame. It may be obtained from `best.parms()`.
+**data_site**: A vector or single column matrix of temperature values subtracted by its sample mean.
+**site_par**: A 6-column and 1-row data.frame; it may be obtained from `best.parms()`.
 • 1st column is the mu0 parameter
 • 2nd is the mu1 parameter
 • 3rd is the mu2 parameter
 • 4th is the sigma0 parameter
 • 5th is the sigma1 parameter
 • 6th is the shape parameter
-**max_time**: A single number describing the number of the year that the time-varying parameters
-should be calculated. For example, if the users need to calculated the
-parameters for the first year max_time is set to 1 and the 30th year max_time is
+**max_time**: A single number describing the number of the year that the time-varying parameters should be calculated. 
+For example, if the users need to calculated the parameters for the first year max_time is set to 1 and the 30th year max_time is
 set to 30.
 **n.boots**: A single number describing the number of copies of the original data sample.
-Whenever possible n.boots should be set to 999 (its default value), as suggested
-by Burn (2003).
+Whenever possible n.boots should be set to 999 (its default value), as suggested by Burn (2003).
 
 ### Value
 
@@ -371,16 +727,17 @@ A matrix containing the 95% confidence intervals of the time-varying parameter e
 temperatures <- TmaxCPC_SP$Pixel_1
 model <- 2
 site_par <- Fit_model(temperatures, model)
+#> original range: 30.6585 39.9085 
+#> centered range: -2.660495 3.948136 
+#> reg_mean: 35.49129 33.47568 34.42286 35.05986 34.97852 34.54346 34.30666 32.81977 35.96037 35.46055
 Site_parCI(
   atsite_temp = temperatures,
   model = model,
   site_par = site_par[1:5],
   n.boots = 100
 )
-#> This calculation may take some time.
-#>                   mu0         mu1    sigma0 sigma1       shape
-#> Lower 95% CI 34.68693 -0.03958682 0.7951596      0 -1.04178572
-#> Upper 95% CI 35.97429  0.02140826 1.2749971      0 -0.07682126
+#> Error:
+#> ! `site_par` cannot contain missing or infinite values.
 ```
 
 ## Function `Add_RegProb`
@@ -395,7 +752,7 @@ Calculates the cumulative probability of extreme air temperature data using the 
 
 ### Arguments
 
-**quantiles**: A numeric vector with no missing data with extreme air temperatures
+**quantiles**: A numeric vector with no missing data with extreme air temperatures.
 **reg_par**: A 6-column and 1-row data.frame as that generated by reg_par(), that is:
 - 1st column is the mu0 parameter
 - 2nd is the mu1 parameter
@@ -404,16 +761,14 @@ Calculates the cumulative probability of extreme air temperature data using the 
 - 5th is the sigma1 parameter
 - 6th is the shape parameter
 
-**site_mean**: A single number with site’s average value for the air temperature data\
-**max_time**: A single number describing the number of the year that the time-varying parameters
-should be calculated. For example, if the users need to calculated the
-parameters for the first year max_time is set to 1 and the 30th year max_time is
+**site_mean**: A single number with site’s average value for the air temperature data.
+**max_time**: A single number describing the number of the year that the time-varying parameters should be calculated.
+For example, if the users need to calculated the parameters for the first year `max_time` is set to 1 and the 30th year max_time is
 set to 30.
 
 ### Value
 
-Cumulative probabilities of extreme air temperature data calculated from
-the Additional nonstationary RFA approach.
+Cumulative probabilities of extreme air temperature data calculated from the Additional nonstationary RFA approach.
 
 ### Example
 
@@ -430,15 +785,15 @@ the Additional nonstationary RFA approach.
    n.year = 34
  )
 #>            [,1]
-#>  [1,] 0.7902025
-#>  [2,] 0.8545796
-#>  [3,] 0.9038670
-#>  [4,] 0.9172022
-#>  [5,] 0.9291197
-#>  [6,] 0.9397071
-#>  [7,] 0.9490556
-#>  [8,] 0.9706002
-#>  [9,] 0.9902066
+#>  [1,] 0.9089908
+#>  [2,] 0.9357246
+#>  [3,] 0.9554091
+#>  [4,] 0.9606825
+#>  [5,] 0.9654017
+#>  [6,] 0.9696160
+#>  [7,] 0.9733715
+#>  [8,] 0.9822987
+#>  [9,] 0.9914240
 ```
 
 ## Function `Add_RegQuant`
@@ -454,7 +809,7 @@ Calculates quantiles estimates from cumulative probabilities of extreme air temp
 ### Arguments
 
 **prob**: A numeric vector with no missing data with the cumulative probabilities (between 0 and 1).
-**reg_par**: A 6-column and 1-row data.frame as that generated by reg_par(), that is:
+**reg_par**: A 6-column and 1-row data.frame as that generated by `reg_par()`, that is:
 - 1st column is the mu0 parameter
 - 2nd is the mu1 parameter
 - 3rd is the mu2 parameter
@@ -462,15 +817,13 @@ Calculates quantiles estimates from cumulative probabilities of extreme air temp
 - 5th is the sigma1 parameter
 - 6th is the shape parameter
 
-**site_mean**: A single number with site’s average value for the air temperature data\
-**max_time**: A single number describing the number of the year that the time-varying parameters
-should be calculated. For example, if the users need to calculated the
-parameters for the first year max_time is set to 1 and the 30th year max_time is set to 30.
+**site_mean**: A single number with site’s average value for the air temperature data
+**max_time**: A single number describing the number of the year that the time-varying parameters should be calculated. For example, if the users need to calculated the
+parameters for the first year `max_time` is set to 1 and the 30th year `max_time` is set to 30.
 
 ### Value
 
-Quantile estimates of extreme air temperature data calculated from
-the Additional nonstationary RFA approach.
+Quantile estimates of extreme air temperature data calculated from the Additional nonstationary RFA approach.
 
 ### Example
 
@@ -486,8 +839,10 @@ the Additional nonstationary RFA approach.
    site_temp = TmaxCPC_SP$Pixel_1,
    n.year = 34
  )
-#>      Q80      Q85      Q90      Q92      Q93      Q94      Q95      Q97      Q99 
-#> 37.24134 37.47600 37.77291 37.92247 38.00787 38.10295 38.21086 38.48963 38.99157
+#>      Q80      Q85      Q90      Q92      Q93      Q94      Q95      Q97 
+#> 36.45110 36.73818 37.11595 37.31304 37.42782 37.55761 37.70762 38.10971 
+#>      Q99 
+#> 38.89726
 ```
 
 ## BugReports:
