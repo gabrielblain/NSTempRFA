@@ -19,7 +19,7 @@ options(NSTempRFA.progress = FALSE) # suppress progress bar for session
 [![R-CMD-check](https://github.com/gabrielblain/NSTempRFA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gabrielblain/NSTempRFA/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-A package designed to apply the RFA technique to air temperature data under climate change conditions
+A package designed to apply the RFA technique to air temperature data under climate change conditions.
 
 ## Installation
 
@@ -32,15 +32,23 @@ pak::pak("gabrielblain/NSTempRFA")
 
 ## Theoretical Background
 
-The Regional Frequency Analysis (RFA; Dalrymple, 1960) technique has been widely used to improve the probabilistic assessment of extreme rainfall and flood events worldwide. The fundamental concept behind RFA is to evaluate whether a group of time series from distinct sites can be considered “acceptably homogeneous” (Hosking and Wallis, 1997). If this condition is met, data from all sites can be pooled together, effectively trading space for time, and thus extending the effective data length (Smith et al. 2015).
+The Regional Frequency Analysis (RFA; Dalrymple, 1960) technique has been widely used to improve the probabilistic assessment of extreme rainfall and flood events worldwide.
+The fundamental concept behind RFA is to evaluate whether a group of time series from distinct sites can be considered “acceptably homogeneous” (Hosking and Wallis, 1997).
+If this condition is met, data from all sites can be pooled together, effectively trading space for time, and thus extending the effective data length (Smith et al. 2015).
 
-In its original version, the RFA is valid only when the variable of interest assumes strictly positive values. However, Martins et al. (2022) verified that this technique can be effectively applied to extreme maximum (Tmax) and minimum (Tmin) air temperature series, which may assume both positive and negative values, by adopting the so-called additive approach. 
+In its original version, the RFA is valid only when the variable of interest assumes strictly positive values.
+However, Martins et al. (2022) verified that this technique can be effectively applied to extreme maximum (Tmax) and minimum (Tmin) air temperature series, which may assume both positive and negative values, by adopting the so-called additive approach. 
 
-This additional approach is consistent with the physical characteristics of temperature data. Since the fundamental temperature scale is the Kelvin scale, where 0 K equals -273.15°C (or -459.67°F), both Tmax and Tmin values fall within a relatively narrow range compared to their distance from absolute zero. As a result, the variability in Tmax and Tmin distributions can be treated as largely independent of their sample mean (Martins et al. 2022). Moreover, when expressed in Celsius or Fahrenheit, Tmin values may be negative, further justifying the use of the additive approach.
+This additional approach is consistent with the physical characteristics of temperature data.
+Since the fundamental temperature scale is the Kelvin scale, where 0 K equals -273.15°C (or -459.67°F), both Tmax and Tmin values fall within a relatively narrow range compared to their distance from absolute zero.
+As a result, the variability in Tmax and Tmin distributions can be treated as largely independent of their sample mean (Martins et al. 2022). 
+Moreover, when expressed in Celsius or Fahrenheit, Tmin values may be negative, further justifying the use of the additive approach.
 
-Although the study by Martins et al. (2022) showed promising results, it did not address the influence of long-term warming trends, which have been documented in nearly all regions of the world (IPCC, 2021). This calls for an extension of the RFA framework to incorporate time-dependent, nonstationary statistical properties. 
+Although the study by Martins et al. (2022) showed promising results, it did not address the influence of long-term warming trends, which have been documented in nearly all regions of the world (IPCC, 2021).
+This calls for an extension of the RFA framework to incorporate time-dependent, nonstationary statistical properties.
 
-To overcome this limitation, Blain et al. (2026) propose the Non-stationary Additive Regional Frequency Analysis, an extension of the additive RFA that integrates nonstationary probabilistic models to represent temporal changes in air temperature frequency distributions at the regional scale. This package was designed to facilitate the application of this new method to extreme Tmax and Tmin data under nonstationary climate conditions.
+To overcome this limitation, Blain et al. (2026) propose the Non-stationary Additive Regional Frequency Analysis, an extension of the additive RFA that integrates nonstationary probabilistic models to represent temporal changes in air temperature frequency distributions at the regional scale.
+This package was designed to facilitate the application of this new method to extreme Tmax and Tmin data under nonstationary climate conditions.
 
 ## Basic Instructions
 
@@ -62,9 +70,8 @@ This function calculates the Hosking and Wallis’ discordance measure (discord)
 
 ### Arguments
 
-**dataset:** A numeric matrix with extreme air temperature data from multiple sites. The
-first column must contain the years, and the remaining columns contain temperature
-data from each site.
+**dataset:** A numeric matrix with extreme air temperature data from multiple sites.
+The first column must contain the years, and the remaining columns contain temperature data from each site.
 
 ### Details
 
@@ -120,8 +127,7 @@ Dataset_add(dataset)
 
 ### Description
 
-Calculates Hosking and Wallis' heterogeneity measure using the additive approach
-as described in Martins et al. (2022) and Blain et al (2026).
+Calculates Hosking and Wallis' heterogeneity measure using the additive approach as described in Martins et al. (2022) and Blain et al (2026).
 
 ### Usage
 
@@ -129,10 +135,9 @@ Add_Heterogeneity(dataset.add, rho, Ns)
 
 ### Arguments
 
-**dataset.add**: A matrix of temperature values subtracted by their sample mean, as
-calculated by the `Add_Discord()` function.
-**rho**: A single numeric value (constant) describing the average correlation among the
-sites. It must be larger than -1.0 and lower than 1.0.
+**dataset.add**: A matrix of temperature values subtracted by their sample mean, as calculated by the `Add_Discord()` function.
+**rho**: A single numeric value (constant) describing the average correlation among the sites.
+It must be larger than -1.0 and lower than 1.0.
 **Ns**: Number of simulated groups of series. Default is 100, but at least 500 is recommended.
 
 ### Example
@@ -149,8 +154,7 @@ Add_Heterogeneity(dataset.add = add.data$add_data, rho = rho, Ns = Ns)
 ### Description
 
 Calculates the time-varying parameters of the best fitting GEV model for each site.
-See **Methodological Details** for more information on the candidate
-GEV-models considered in this package.
+See **Methodological Details** for more information on the candidate GEV-models considered in this package.
 
 ### Usage
 
@@ -158,7 +162,8 @@ GEV-models considered in this package.
 
 ### Arguments
 
-**add_data**: A matrix of temperature values subtracted by their sample mean. May be generated by the `dataset_add()` function
+**add_data**: A matrix of temperature values subtracted by their sample mean.
+May be generated by the `dataset_add()` function
 
 ### Value
 
@@ -210,7 +215,8 @@ Reg_par(best_model = best.parms$atsite.models)
 
 ### Description
 
-Calculates the 95% confidence intervals of time-varying parameters of the regional GEV distribution. It follows the method proposed by Burn (2003) and O’Brien and Burn (2014). The spatial dependence between sites is preserved.
+Calculates the 95% confidence intervals of time-varying parameters of the regional GEV distribution.
+It follows the method proposed by Burn (2003) and O’Brien and Burn (2014). The spatial dependence between sites is preserved.
 
 ### Usage
 
@@ -218,7 +224,8 @@ Calculates the 95% confidence intervals of time-varying parameters of the region
 
 ### Arguments
 
-**add_data**: A matrix of temperature values subtracted by their sample mean. May be generated by the `dataset_add()` function.
+**add_data**: A matrix of temperature values subtracted by their sample mean.
+May be generated by the `dataset_add()` function.
 **reg_par**: A 6-column and 1-row data.frame as that generated by `reg_par()`, that is:
 - 1st column is the mu0 parameter
 - 2nd is the mu1 parameter
@@ -229,15 +236,15 @@ Calculates the 95% confidence intervals of time-varying parameters of the region
 **reg_mean**: A numeric vector of site mean temperatures as returned by `Dataset_add()$reg_mean`.
 Used to restore bootstrap replicates from centered to original scale before refitting.
 Must have length equal to the number of columns in `add_data`.
-**max_time**: A single number describing the number of the year that the time-varying parameters should be calculated. For example, if the users need to calculated the
-parameters for the first year max_time is set to 1 and the 30th year max_time is
+**max_time**: A single number describing the number of the year that the time-varying parameters should be calculated.
+For example, if the users need to calculated the parameters for the first year max_time is set to 1 and the 30th year max_time is
 set to 30.
-**n.boots**: A single number describing the number of copies of the original dataset. Whenever possible n.boots should be set to 999 (its default value), as suggested by
-Burn (2003) and O’Brien and Burn (2014).
+**n.boots**: A single number describing the number of copies of the original dataset.
+Whenever possible n.boots should be set to 999 (its default value), as suggested by Burn (2003) and O’Brien and Burn (2014).
 
 ### Value
 
-A matrix containing the 95% confidence intervals (lower and upper bounds) of the time-varying parameter estimates. 
+A matrix containing the 95% confidence intervals (lower and upper bounds) of the time-varying parameter estimates.
 
 ### Example
 
@@ -266,21 +273,19 @@ Calculates the 95% confidence intervals of time-varying parameters of a at-site 
 
 ### Arguments
 
-**data_site**: A vector or single column matrix of temperature values subtracted by its sample mean
-**site_par**: A 6-column and 1-row data.frame. It may be obtained from `best.parms()`.
+**data_site**: A vector or single column matrix of temperature values subtracted by its sample mean.
+**site_par**: A 6-column and 1-row data.frame; it may be obtained from `best.parms()`.
 • 1st column is the mu0 parameter
 • 2nd is the mu1 parameter
 • 3rd is the mu2 parameter
 • 4th is the sigma0 parameter
 • 5th is the sigma1 parameter
 • 6th is the shape parameter
-**max_time**: A single number describing the number of the year that the time-varying parameters
-should be calculated. For example, if the users need to calculated the
-parameters for the first year max_time is set to 1 and the 30th year max_time is
+**max_time**: A single number describing the number of the year that the time-varying parameters should be calculated. 
+For example, if the users need to calculated the parameters for the first year max_time is set to 1 and the 30th year max_time is
 set to 30.
 **n.boots**: A single number describing the number of copies of the original data sample.
-Whenever possible n.boots should be set to 999 (its default value), as suggested
-by Burn (2003).
+Whenever possible n.boots should be set to 999 (its default value), as suggested by Burn (2003).
 
 ### Value
 
@@ -312,7 +317,7 @@ Calculates the cumulative probability of extreme air temperature data using the 
 
 ### Arguments
 
-**quantiles**: A numeric vector with no missing data with extreme air temperatures
+**quantiles**: A numeric vector with no missing data with extreme air temperatures.
 **reg_par**: A 6-column and 1-row data.frame as that generated by reg_par(), that is:
 - 1st column is the mu0 parameter
 - 2nd is the mu1 parameter
@@ -321,16 +326,14 @@ Calculates the cumulative probability of extreme air temperature data using the 
 - 5th is the sigma1 parameter
 - 6th is the shape parameter
 
-**site_mean**: A single number with site’s average value for the air temperature data\
-**max_time**: A single number describing the number of the year that the time-varying parameters
-should be calculated. For example, if the users need to calculated the
-parameters for the first year max_time is set to 1 and the 30th year max_time is
+**site_mean**: A single number with site’s average value for the air temperature data.
+**max_time**: A single number describing the number of the year that the time-varying parameters should be calculated.
+For example, if the users need to calculated the parameters for the first year `max_time` is set to 1 and the 30th year max_time is
 set to 30.
 
 ### Value
 
-Cumulative probabilities of extreme air temperature data calculated from
-the Additional nonstationary RFA approach.
+Cumulative probabilities of extreme air temperature data calculated from the Additional nonstationary RFA approach.
 
 ### Example
 
@@ -360,7 +363,7 @@ Calculates quantiles estimates from cumulative probabilities of extreme air temp
 ### Arguments
 
 **prob**: A numeric vector with no missing data with the cumulative probabilities (between 0 and 1).
-**reg_par**: A 6-column and 1-row data.frame as that generated by reg_par(), that is:
+**reg_par**: A 6-column and 1-row data.frame as that generated by `reg_par()`, that is:
 - 1st column is the mu0 parameter
 - 2nd is the mu1 parameter
 - 3rd is the mu2 parameter
@@ -368,15 +371,13 @@ Calculates quantiles estimates from cumulative probabilities of extreme air temp
 - 5th is the sigma1 parameter
 - 6th is the shape parameter
 
-**site_mean**: A single number with site’s average value for the air temperature data\
-**max_time**: A single number describing the number of the year that the time-varying parameters
-should be calculated. For example, if the users need to calculated the
-parameters for the first year max_time is set to 1 and the 30th year max_time is set to 30.
+**site_mean**: A single number with site’s average value for the air temperature data
+**max_time**: A single number describing the number of the year that the time-varying parameters should be calculated. For example, if the users need to calculated the
+parameters for the first year `max_time` is set to 1 and the 30th year `max_time` is set to 30.
 
 ### Value
 
-Quantile estimates of extreme air temperature data calculated from
-the Additional nonstationary RFA approach.
+Quantile estimates of extreme air temperature data calculated from the Additional nonstationary RFA approach.
 
 ### Example
 
