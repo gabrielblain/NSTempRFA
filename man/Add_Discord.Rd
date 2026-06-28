@@ -34,5 +34,5 @@ The discordance measures identify sites that are potentially discordant
 within a regional frequency analysis framework for extreme air temperature series.
 }
 \examples{
-# Add_Discord(TmaxCPC_SP)
+Add_Discord(TmaxCPC_SP)
 }

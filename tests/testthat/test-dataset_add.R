@@ -1,5 +1,4 @@
 test_that("Dataset_add returns the expected structure", {
-
   set.seed(123)
 
   years <- 1980:2009
@@ -13,9 +12,9 @@ test_that("Dataset_add returns the expected structure", {
   expect_named(result, c("add_data", "reg_mean"))
 
   expect_true(is.matrix(result$add_data))
-  expect_true(is.numeric(result$reg_mean))
+  expect_type(result$reg_mean, "double")
 
-  expect_equal(
+  expect_identical(
     dim(result$add_data),
     dim(temp)
   )
@@ -28,7 +27,6 @@ test_that("Dataset_add returns the expected structure", {
 
 
 test_that("Dataset_add centers each site", {
-
   set.seed(123)
 
   years <- 1980:2009
@@ -47,7 +45,6 @@ test_that("Dataset_add centers each site", {
 
 
 test_that("Dataset_add preserves missing values", {
-
   set.seed(123)
 
   years <- 1980:2009
@@ -60,7 +57,7 @@ test_that("Dataset_add preserves missing values", {
 
   result <- Dataset_add(dataset)
 
-  expect_equal(
+  expect_identical(
     sum(is.na(result$add_data)),
     sum(is.na(temp))
   )
@@ -68,7 +65,6 @@ test_that("Dataset_add preserves missing values", {
 
 
 test_that("Dataset_add returns the correct site means", {
-
   set.seed(123)
 
   years <- 1980:2009
@@ -78,7 +74,7 @@ test_that("Dataset_add returns the correct site means", {
 
   result <- Dataset_add(dataset)
 
-  expect_equal(
+  expect_identical(
     unname(result$reg_mean),
     unname(colMeans(temp))
   )
@@ -86,7 +82,6 @@ test_that("Dataset_add returns the correct site means", {
 
 
 test_that("Dataset_add throws error when Years contains NA", {
-
   years <- 1980:2009
   years[5] <- NA
 
@@ -102,7 +97,6 @@ test_that("Dataset_add throws error when Years contains NA", {
 
 
 test_that("Dataset_add throws error when number of sites is too small", {
-
   years <- 1980:2009
   temp <- matrix(rnorm(30 * 2), ncol = 2)
 
@@ -116,7 +110,6 @@ test_that("Dataset_add throws error when number of sites is too small", {
 
 
 test_that("Dataset_add throws error when a site has fewer than 10 observations", {
-
   years <- 1980:2009
   temp <- matrix(rnorm(30 * 3), ncol = 3)
 
@@ -127,22 +120,21 @@ test_that("Dataset_add throws error when a site has fewer than 10 observations",
 
   expect_error(
     Dataset_add(dataset),
-    "All sites must have at least 10 years of records"
+    "All sites must have at least 10 observations."
   )
 })
 
 
 test_that("Dataset_add throws error for invalid input type", {
-
+  dataset <- "bad data"
   expect_error(
-    Dataset_add("abc"),
+    Dataset_add(dataset),
     "Input 'dataset' must be a matrix or data frame."
   )
 })
 
 
 test_that("Dataset_add works with a data frame input", {
-
   set.seed(123)
 
   years <- 1980:2009
@@ -164,7 +156,6 @@ test_that("Dataset_add works with a data frame input", {
 
 
 test_that("Dataset_add returns add_data with same dimensions as the original site matrix", {
-
   set.seed(123)
 
   years <- 1980:2009
@@ -174,8 +165,8 @@ test_that("Dataset_add returns add_data with same dimensions as the original sit
 
   result <- Dataset_add(dataset)
 
-  expect_equal(
+  expect_identical(
     dim(result$add_data),
-    c(30, 5)
+    c(30L, 5L)
   )
 })

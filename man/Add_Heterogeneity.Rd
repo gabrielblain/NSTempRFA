@@ -7,24 +7,26 @@
 Add_Heterogeneity(dataset.add, rho, Ns)
 }
 \arguments{
-\item{dataset.add}{A numeric matrix of air temperature data as that calculated by the dataset_add().}
+\item{dataset.add}{A numeric matrix of air temperature data as calculated by
+\code{Dataset_add()}.}
 
-\item{rho}{A single numeric value (constant) describing the average correlation among the sites.
-It must be larger than -1.0 and lower than 1.0.}
+\item{rho}{A single numeric value describing the average inter-site correlation.
+Must be strictly between -1 and 1.}
 
-\item{Ns}{Number of simulated groups of series.
-Default is 100, but at least 500 is recommended.}
+\item{Ns}{Number of simulated groups of series. Default is 100; at least 500
+is recommended.}
 }
 \value{
 Hosking and Wallis' heterogeneity measure using an additive approach,
-as proposed in Martins et al. (2022) \url{doi:10.1590/1678-4499.20220061}.
+as proposed in Martins et al. (2022)
+\doi{10.1590/1678-4499.20220061}.
+Returns \code{NA} if the regional distribution cannot be fitted or if
+simulated statistics have zero variance.
 }
 \description{
 Add_Heterogeneity
 }
 \examples{
-rho <- 0.51
-Ns <- 500
 add.data <- Dataset_add(TmaxCPC_SP)
-Add_Heterogeneity(dataset.add=add.data$add_data,rho = rho,Ns = Ns)
+Add_Heterogeneity(dataset.add = add.data$add_data, rho = 0.51, Ns = 500)
 }

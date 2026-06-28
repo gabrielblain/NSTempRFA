@@ -1,5 +1,4 @@
 test_that("Add_Heterogeneity returns a numeric H value", {
-
   set.seed(123)
 
   dataset.add <- matrix(rnorm(1500), ncol = 15)
@@ -11,14 +10,13 @@ test_that("Add_Heterogeneity returns a numeric H value", {
   )
 
   expect_length(result, 1)
-  expect_true(is.numeric(result))
+  expect_type(result, "double")
   expect_false(is.na(result))
   expect_true(is.finite(result))
 })
 
 
 test_that("Add_Heterogeneity accepts the minimum number of sites", {
-
   set.seed(123)
 
   dataset.add <- matrix(rnorm(300), ncol = 3)
@@ -29,37 +27,35 @@ test_that("Add_Heterogeneity accepts the minimum number of sites", {
     Ns = 100
   )
 
-  expect_true(is.numeric(result))
+  expect_type(result, "double")
   expect_length(result, 1)
 })
 
 
 test_that("Add_Heterogeneity throws error when fewer than 3 sites are supplied", {
-
   dataset.add <- matrix(rnorm(300), ncol = 2)
 
   expect_error(
     Add_Heterogeneity(dataset.add, rho = 0.5, Ns = 100),
-    "The number of sites should be equal to or larger than 3."
+    "The number of sites should be equal to or larger than 3.",
+    fixed = TRUE
   )
 })
 
 
 test_that("Add_Heterogeneity throws error for sites with less than 10 years", {
-
   dataset.add <- matrix(rnorm(1500), ncol = 15)
 
   dataset.add[1:95, 1] <- NA
 
   expect_error(
     Add_Heterogeneity(dataset.add, rho = 0.5, Ns = 100),
-    "All sites must have at least 10 years of records"
+    "All sites must have at least 10 observations."
   )
 })
 
 
 test_that("Add_Heterogeneity accepts exactly 10 observations", {
-
   set.seed(123)
 
   dataset.add <- matrix(rnorm(150), nrow = 10, ncol = 15)
@@ -70,12 +66,11 @@ test_that("Add_Heterogeneity accepts exactly 10 observations", {
     Ns = 100
   )
 
-  expect_true(is.numeric(result))
+  expect_type(result, "double")
 })
 
 
 test_that("Add_Heterogeneity throws error if Ns is too small", {
-
   dataset.add <- matrix(rnorm(1500), ncol = 15)
 
   expect_error(
@@ -86,7 +81,6 @@ test_that("Add_Heterogeneity throws error if Ns is too small", {
 
 
 test_that("Add_Heterogeneity accepts Ns equal to 100", {
-
   set.seed(123)
 
   dataset.add <- matrix(rnorm(1500), ncol = 15)
@@ -97,12 +91,11 @@ test_that("Add_Heterogeneity accepts Ns equal to 100", {
     Ns = 100
   )
 
-  expect_true(is.numeric(result))
+  expect_type(result, "double")
 })
 
 
 test_that("Add_Heterogeneity accepts negative correlations", {
-
   set.seed(123)
 
   dataset.add <- matrix(rnorm(1500), ncol = 15)
@@ -113,13 +106,12 @@ test_that("Add_Heterogeneity accepts negative correlations", {
     Ns = 100
   )
 
-  expect_true(is.numeric(result))
+  expect_type(result, "double")
   expect_true(is.finite(result))
 })
 
 
 test_that("Add_Heterogeneity accepts correlations close to one", {
-
   set.seed(123)
 
   dataset.add <- matrix(rnorm(1500), ncol = 15)
@@ -130,12 +122,11 @@ test_that("Add_Heterogeneity accepts correlations close to one", {
     Ns = 100
   )
 
-  expect_true(is.numeric(result))
+  expect_type(result, "double")
 })
 
 
 test_that("Add_Heterogeneity rejects rho greater than one", {
-
   dataset.add <- matrix(rnorm(1500), ncol = 15)
 
   expect_error(
@@ -146,7 +137,6 @@ test_that("Add_Heterogeneity rejects rho greater than one", {
 
 
 test_that("Add_Heterogeneity rejects rho smaller than minus one", {
-
   dataset.add <- matrix(rnorm(1500), ncol = 15)
 
   expect_error(
@@ -157,7 +147,6 @@ test_that("Add_Heterogeneity rejects rho smaller than minus one", {
 
 
 test_that("Add_Heterogeneity rejects rho equal to one", {
-
   dataset.add <- matrix(rnorm(1500), ncol = 15)
 
   expect_error(
@@ -168,7 +157,6 @@ test_that("Add_Heterogeneity rejects rho equal to one", {
 
 
 test_that("Add_Heterogeneity rejects rho equal to minus one", {
-
   dataset.add <- matrix(rnorm(1500), ncol = 15)
 
   expect_error(
@@ -179,7 +167,6 @@ test_that("Add_Heterogeneity rejects rho equal to minus one", {
 
 
 test_that("Add_Heterogeneity rejects rho vectors", {
-
   dataset.add <- matrix(rnorm(1500), ncol = 15)
 
   expect_error(
@@ -190,7 +177,6 @@ test_that("Add_Heterogeneity rejects rho vectors", {
 
 
 test_that("Add_Heterogeneity rejects non-numeric rho", {
-
   dataset.add <- matrix(rnorm(1500), ncol = 15)
 
   expect_error(
@@ -201,7 +187,6 @@ test_that("Add_Heterogeneity rejects non-numeric rho", {
 
 
 test_that("Add_Heterogeneity returns a finite value", {
-
   set.seed(123)
 
   dataset.add <- matrix(rnorm(1500), ncol = 15)
@@ -217,7 +202,6 @@ test_that("Add_Heterogeneity returns a finite value", {
 
 
 test_that("Add_Heterogeneity returns a scalar", {
-
   set.seed(123)
 
   dataset.add <- matrix(rnorm(1500), ncol = 15)
@@ -228,11 +212,10 @@ test_that("Add_Heterogeneity returns a scalar", {
     Ns = 100
   )
 
-  expect_equal(length(result), 1)
+  expect_length(result, 1)
 })
 
 test_that("Add_Heterogeneity falls back to Wakeby when Kappa fails", {
-
   local_mocked_bindings(
     pelkap = function(...) NA,
     .package = "NSTempRFA"
@@ -249,14 +232,10 @@ test_that("Add_Heterogeneity falls back to Wakeby when Kappa fails", {
 })
 
 test_that("Add_Heterogeneity returns NA when both regional distributions fail", {
-
   local_mocked_bindings(
-
     pelkap = function(...) NA,
-
     pelwak = function(...) NA,
-
-    .package = "NSTempRFA"
+    .package = "lmom" # <-- mock in lmom, not NSTempRFA
   )
 
   set.seed(123)
@@ -264,7 +243,6 @@ test_that("Add_Heterogeneity returns NA when both regional distributions fail", 
   dataset.add <- matrix(rnorm(1500), ncol = 15)
 
   expect_warning(
-
     result <- Add_Heterogeneity(
       dataset.add,
       rho = 0.5,
@@ -278,28 +256,41 @@ test_that("Add_Heterogeneity returns NA when both regional distributions fail", 
 })
 
 test_that("Add_Heterogeneity returns NA when V.sim has zero variance", {
-
   fake_lmom <- matrix(
     c(
-      1,100,0,1,0.1,0.2,0.3,
-      2,100,0,1,0.1,0.2,0.3,
-      3,100,0,1,0.1,0.2,0.3
+      1,
+      100,
+      0,
+      1,
+      0.1,
+      0.2,
+      0.3,
+      2,
+      100,
+      0,
+      1,
+      0.1,
+      0.2,
+      0.3,
+      3,
+      100,
+      0,
+      1,
+      0.1,
+      0.2,
+      0.3
     ),
     nrow = 3,
     byrow = TRUE
   )
 
   local_mocked_bindings(
-
     regsamlmu = function(...) fake_lmom,
-
-    .package = "NSTempRFA"
+    .package = "lmomRFA" # <-- mock in lmomRFA, not NSTempRFA
   )
-
   dataset.add <- matrix(rnorm(300), ncol = 3)
 
   expect_warning(
-
     result <- Add_Heterogeneity(
       dataset.add,
       rho = 0.5,
@@ -313,7 +304,6 @@ test_that("Add_Heterogeneity returns NA when V.sim has zero variance", {
 })
 
 test_that("Add_Heterogeneity repairs non positive definite correlation matrices", {
-
   set.seed(123)
 
   dataset.add <- matrix(rnorm(1500), ncol = 15)
@@ -324,6 +314,6 @@ test_that("Add_Heterogeneity repairs non positive definite correlation matrices"
     Ns = 100
   )
 
-  expect_true(is.numeric(result))
+  expect_type(result, "double")
   expect_true(is.finite(result))
 })

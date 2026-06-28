@@ -13,6 +13,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+set.seed(23)
+options(NSTempRFA.progress = FALSE) # suppress progress bar for session
 ```
 
 # Introduction
@@ -42,7 +44,7 @@ Table1
 
 **Table 2** displays the Tmax data, in Celsius degrees.
 ```{r Table 2}
-TmaxCPC_SP[,2:11] <- round(TmaxCPC_SP[,2:11],1)
+TmaxCPC_SP[, 2:11] <- round(TmaxCPC_SP[, 2:11], 1)
 Table2 <- TmaxCPC_SP
 Table2
 ```
@@ -69,8 +71,8 @@ add.data$reg_mean
 ```{r Add_H}
 set.seed(123)
 rho <- 0.49 # The average spatial correlation among the series
-Ns <- 500   # Number of Simulation required for calculating 
-Add_H <- Add_Heterogeneity(dataset.add=add.data$add_data,rho = rho,Ns = Ns)
+Ns <- 500 # Number of Simulation required for calculating
+Add_H <- Add_Heterogeneity(dataset.add = add.data$add_data, rho = rho, Ns = Ns)
 Add_H
 ```
 
@@ -95,7 +97,7 @@ In its current version, the NS-Add-RFA method offers four nonstationary models t
 The `Best_model()` function selects the best model among these four candidates using the second-order Akaike Information Criterion.
 
 ```{r Best_model}
-best.parms <- Best_model(add.data=add.data$add_data)
+best.parms <- Best_model(add.data = add.data$add_data)
 # The best model is:
 as.numeric(best.parms$best) #Model 2
 # The at-site parameters are:
@@ -105,7 +107,7 @@ best.parms$atsite.models
 Having defined the best GEV model, the `Reg_par()` function can be applied to specify the parameters of the regional distribution, which is valid for all 13 series.
 
 ```{r Reg_par}
-regional.parms <- Reg_par(best_model=best.parms$atsite.models)
+regional.parms <- Reg_par(best_model = best.parms$atsite.models)
 regional.parms
 ```
 
@@ -115,10 +117,13 @@ Additionally, we may also calculate the confidence intervals for the parameters 
 
 ```{r Reg_parCI}
 set.seed(123)
-Reg_parCI(add_data=add.data$add_data,
-model=best.parms$best,
-reg_par=regional.parms,
-n.boots=500)
+Reg_parCI(
+  add_data = add.data$add_data,
+  model = best.parms$best,
+  reg_par = regional.parms,
+  reg_mean = add.data$reg_mean,
+  n.boots = 500
+)
 ```
 
 Because the Regional Frequency Analysis uses all series within a homogeneous region to fit the regional distribution, it is expect to reduce parameter estimation uncertainties in respect to the at-site approach. To verify such assumption, we will calculate the confidence interval, through the at-site approach, for the Tmax series of Pixel_1 (see Table 2).
@@ -128,10 +133,14 @@ set.seed(123)
 temperatures <- TmaxCPC_SP$Pixel_1
 model <- 2
 site_par <- Fit_model(temperatures, model)
-Site_parCI(atsite_temp=temperatures,
-            model=model,
-            site_par=site_par[1:5],
-            n.boots=500)
+if (all(is.finite(as.numeric(site_par[1, 1:5])))) {
+  Site_parCI(
+    atsite_temp = temperatures,
+    model = model,
+    site_par = site_par[1, 1:5],
+    n.boots = 500
+  )
+}
 ```
 The differences between the upper and lower 95% confidence intervals (CI) of the regional estimates are lower than those of the at-site approach for all GEV parameter. Additionally,  both upper and lower limits for weighted_mu1 - regional approach (~ 0.079 and ~0.021, respectively) - indicate changes toward warmer conditions. However, for the at-site approach, while the lower limit for mu1  (~ -0.046), indicates a change toward cooler conditions, the upper limit (~0.035) indicates a change towards warmer conditions.
 
@@ -140,18 +149,20 @@ The narrower CI of the parameters of the regional distribution are consistent wi
 ```{r Add_RegQuant}
 prob <- c(0.8, 0.85, 0.90, 0.92, 0.93, 0.94, 0.95, 0.97, 0.99)
 add.data <- Dataset_add(TmaxCPC_SP)
-best.parms <- Best_model(add.data=add.data$add_data)
+best.parms <- Best_model(add.data = add.data$add_data)
 regional_pars <- Reg_par(best_model = best.parms$atsite.models)
 Quantiles_1991 <- Add_RegQuant(
-   prob = prob,
-   regional_pars = regional_pars,
-   site_temp = TmaxCPC_SP$Pixel_1,
-   n.year = 1)
+  prob = prob,
+  regional_pars = regional_pars,
+  site_temp = TmaxCPC_SP$Pixel_1,
+  n.year = 1
+)
 Quantiles_2024 <- Add_RegQuant(
-   prob = prob,
-   regional_pars = regional_pars,
-   site_temp = TmaxCPC_SP$Pixel_1,
-   n.year = 34)
+  prob = prob,
+  regional_pars = regional_pars,
+  site_temp = TmaxCPC_SP$Pixel_1,
+  n.year = 34
+)
 Quantiles_1991
 Quantiles_2024
 ```
@@ -161,20 +172,32 @@ The analysis of the quantile estimates for 1991 and 2024 highlights the changes 
 This package also allows an equivalent analysis to that of the `Add_RegQuant()`that indicates whether and how the cumulative probabilities of a given quantile changed over time. This assessment can be carried out using `Add_RegProb()` function.
 
 ```{r Add_RegProb}
- quantiles <- c(35.58301, 35.81863, 36.11727, 36.26792,
-                36.35403, 36.44996, 36.55892, 36.84087,
-                37.35040)
+ quantiles <- c(
+   35.58301,
+   35.81863,
+   36.11727,
+   36.26792,
+   36.35403,
+   36.44996,
+   36.55892,
+   36.84087,
+   37.35040
+ )
  add.data <- Dataset_add(TmaxCPC_SP)
- best.parms <- Best_model(add.data=add.data$add_data)
+ best.parms <- Best_model(add.data = add.data$add_data)
  regional_pars <- Reg_par(best_model = best.parms$atsite.models)
- Probs_1991 <- Add_RegProb(quantiles=quantiles,
-                   regional_pars=regional_pars,
-                   site_temp=TmaxCPC_SP$Pixel_1,
-                   n.year=1)
- Probs_2024 <- Add_RegProb(quantiles=quantiles,
-                   regional_pars=regional_pars,
-                   site_temp=TmaxCPC_SP$Pixel_1,
-                   n.year=34)
+ Probs_1991 <- Add_RegProb(
+   quantiles = quantiles,
+   regional_pars = regional_pars,
+   site_temp = TmaxCPC_SP$Pixel_1,
+   n.year = 1
+ )
+ Probs_2024 <- Add_RegProb(
+   quantiles = quantiles,
+   regional_pars = regional_pars,
+   site_temp = TmaxCPC_SP$Pixel_1,
+   n.year = 34
+ )
  Probs_1991
  Probs_2024
 ```

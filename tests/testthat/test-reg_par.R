@@ -1,5 +1,4 @@
 test_that("Reg_par returns a one-row data frame with five columns", {
-
   best_model <- data.frame(
     mu0 = c(10, 20),
     mu1 = c(1, 2),
@@ -12,8 +11,8 @@ test_that("Reg_par returns a one-row data frame with five columns", {
   result <- Reg_par(best_model)
 
   expect_s3_class(result, "data.frame")
-  expect_equal(nrow(result), 1)
-  expect_equal(ncol(result), 5)
+  expect_identical(nrow(result), 1L)
+  expect_identical(ncol(result), 5L)
 
   expect_named(
     result,
@@ -28,7 +27,6 @@ test_that("Reg_par returns a one-row data frame with five columns", {
 })
 
 test_that("Reg_par computes weighted means correctly", {
-
   best_model <- data.frame(
     mu0 = c(10, 20),
     mu1 = c(1, 3),
@@ -40,15 +38,14 @@ test_that("Reg_par computes weighted means correctly", {
 
   result <- Reg_par(best_model)
 
-  expect_equal(result$weighted_mu0, (10*1 + 20*3)/4)
-  expect_equal(result$weighted_mu1, (1*1 + 3*3)/4)
-  expect_equal(result$weighted_sigma0, (2*1 + 6*3)/4)
-  expect_equal(result$weighted_sigma1, (0.1*1 + 0.5*3)/4)
-  expect_equal(result$weighted_shape, (0.05*1 + 0.15*3)/4)
+  expect_identical(result$weighted_mu0, (10 * 1 + 20 * 3) / 4)
+  expect_identical(result$weighted_mu1, (1 * 1 + 3 * 3) / 4)
+  expect_identical(result$weighted_sigma0, (2 * 1 + 6 * 3) / 4)
+  expect_identical(result$weighted_sigma1, (0.1 * 1 + 0.5 * 3) / 4)
+  expect_identical(result$weighted_shape, (0.05 * 1 + 0.15 * 3) / 4)
 })
 
 test_that("Reg_par rejects non-data-frame input", {
-
   expect_error(
     Reg_par(matrix(1:12, ncol = 6)),
     "Input 'best_model' must be a data frame."
@@ -56,7 +53,6 @@ test_that("Reg_par rejects non-data-frame input", {
 })
 
 test_that("Reg_par rejects missing columns", {
-
   best_model <- data.frame(
     mu0 = 1,
     mu1 = 1,
@@ -72,7 +68,6 @@ test_that("Reg_par rejects missing columns", {
 })
 
 test_that("Reg_par rejects non-numeric columns", {
-
   best_model <- data.frame(
     mu0 = 1,
     mu1 = 1,
@@ -89,24 +84,22 @@ test_that("Reg_par rejects non-numeric columns", {
 })
 
 test_that("Reg_par rejects NA values in size column", {
-
   best_model <- data.frame(
     mu0 = 1,
     mu1 = 1,
     sigma0 = 1,
     sigma1 = 1,
     shape = 0.1,
-    size = NA
+    size = NA_real_
   )
-
   expect_error(
     Reg_par(best_model),
-    "All columns in 'best_model' must be numeric."
+    "The 'size' column must contain finite non-negative values.",
+    fixed = TRUE
   )
 })
 
 test_that("Reg_par rejects zero total sample size", {
-
   best_model <- data.frame(
     mu0 = c(1, 2),
     mu1 = c(1, 2),
@@ -123,7 +116,6 @@ test_that("Reg_par rejects zero total sample size", {
 })
 
 test_that("Reg_par works for a single site", {
-
   best_model <- data.frame(
     mu0 = 10,
     mu1 = 1,
@@ -135,15 +127,14 @@ test_that("Reg_par works for a single site", {
 
   result <- Reg_par(best_model)
 
-  expect_equal(result$weighted_mu0, 10)
-  expect_equal(result$weighted_mu1, 1)
-  expect_equal(result$weighted_sigma0, 2)
-  expect_equal(result$weighted_sigma1, 0.1)
-  expect_equal(result$weighted_shape, 0.05)
+  expect_identical(result$weighted_mu0, 10)
+  expect_identical(result$weighted_mu1, 1)
+  expect_identical(result$weighted_sigma0, 2)
+  expect_identical(result$weighted_sigma1, 0.1)
+  expect_identical(result$weighted_shape, 0.05)
 })
 
-test_that("Reg_par rejects NA values in parameter columns", {
-
+test_that("Reg_par handles NA values in parameter columns gracefully", {
   best_model <- data.frame(
     mu0 = c(10, NA),
     mu1 = c(1, 2),
@@ -152,15 +143,13 @@ test_that("Reg_par rejects NA values in parameter columns", {
     shape = c(0.05, 0.10),
     size = c(50, 100)
   )
-
-  expect_error(
-    Reg_par(best_model),
-    "All values in 'best_model' must be finite"
-  )
+  result <- Reg_par(best_model)
+  expect_s3_class(result, "data.frame")
+  # NA site is dropped by na.rm = TRUE; result is from the non-NA site only
+  expect_identical(result$weighted_mu0, 10)
 })
 
-test_that("Reg_par rejects Inf values", {
-
+test_that("Reg_par handles Inf values in parameter columns gracefully", {
   best_model <- data.frame(
     mu0 = c(10, Inf),
     mu1 = c(1, 2),
@@ -169,15 +158,13 @@ test_that("Reg_par rejects Inf values", {
     shape = c(0.05, 0.10),
     size = c(50, 100)
   )
-
-  expect_error(
-    Reg_par(best_model),
-    "All values in 'best_model' must be finite"
-  )
+  result <- Reg_par(best_model)
+  expect_s3_class(result, "data.frame")
+  expect_true(is.finite(result$weighted_mu0))
+  expect_identical(result$weighted_mu0, 10) # Inf site excluded
 })
 
-test_that("Reg_par rejects -Inf values", {
-
+test_that("Reg_par handles -Inf values in parameter columns gracefully", {
   best_model <- data.frame(
     mu0 = c(10, -Inf),
     mu1 = c(1, 2),
@@ -186,9 +173,8 @@ test_that("Reg_par rejects -Inf values", {
     shape = c(0.05, 0.10),
     size = c(50, 100)
   )
-
-  expect_error(
-    Reg_par(best_model),
-    "All values in 'best_model' must be finite"
-  )
+  result <- Reg_par(best_model)
+  expect_s3_class(result, "data.frame")
+  expect_true(is.finite(result$weighted_mu0))
+  expect_identical(result$weighted_mu0, 10) # -Inf site excluded
 })
