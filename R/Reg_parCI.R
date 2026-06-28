@@ -13,11 +13,6 @@
 #' * 3rd is the sigma0 parameter,
 #' * 4th is the sigma1 parameter,
 #' * 5th is the shape parameter.
-#' @param reg_mean
-#' A numeric vector of site mean temperatures as returned by
-#' `Dataset_add()$reg_mean`. Used to restore bootstrap replicates
-#' from centered to original scale before refitting. Must have length
-#' equal to the number of columns in `add_data`.
 #' @param n.boots
 #' A single number describing the number of bootstrap replicates.
 #' Whenever possible, `n.boots` should be set to 999 (default),
@@ -48,110 +43,146 @@
 #'   add_data  = add.data$add_data,
 #'   model     = best.parms$best,
 #'   reg_par   = regional.parms,
-#'   reg_mean  = add.data$reg_mean,
 #'   n.boots   = 100
 #' )
 Reg_parCI <- function(
-  add_data,
-  model,
-  reg_par,
-  reg_mean,
-  n.boots = 999,
-  progress = NULL
+    add_data,
+    model,
+    reg_par,
+    n.boots = 999,
+    progress = NULL
 ) {
+
   # ============================================================
   # Input checks
   # ============================================================
+
   check_model(model)
   check_n.boots(n.boots)
+
   add_data <- check_add_data(add_data)
   reg_par <- check_reg_par(reg_par)
+
   max_time <- nrow(add_data)
-  n.sites <- ncol(add_data)
 
   # ============================================================
   # Construct temporal parameters
   # ============================================================
+
   time <- seq_len(max_time)
+
   par.temporal <- matrix(NA_real_, max_time, 3)
+
   par.temporal[, 1] <- reg_par[1] + reg_par[2] * time
   par.temporal[, 2] <- reg_par[3] + reg_par[4] * time
   par.temporal[, 3] <- reg_par[5]
 
   if (any(par.temporal[, 2] <= 0)) {
-    stop("Time-varying scale parameter became non-positive.", call. = FALSE)
+    stop(
+      "Time-varying scale parameter became non-positive.",
+      call. = FALSE
+    )
   }
 
   # ============================================================
-  # Vectorised Gumbel transform
+  # Transform to Gumbel space
   # ============================================================
+
   mu_vec <- par.temporal[, 1]
   sigma_vec <- par.temporal[, 2]
   xi <- reg_par[5]
 
-  z <- 1 +
+  z <-
+    1 +
     xi *
-      sweep(
-        sweep(add_data, 1, mu_vec, "-"),
-        1,
-        sigma_vec,
-        "/"
-      )
+    sweep(
+      sweep(add_data, 1, mu_vec, "-"),
+      1,
+      sigma_vec,
+      "/"
+    )
 
   if (any(z <= 0, na.rm = TRUE)) {
-    stop("Invalid transformed values encountered.", call. = FALSE)
+    stop(
+      "Invalid transformed values encountered.",
+      call. = FALSE
+    )
   }
 
   IDD.series <- (1 / xi) * log(z)
 
   # ============================================================
-  # Pre-generate bootstrap indices and back-transformation constant
+  # Bootstrap setup
   # ============================================================
-  boot_indices <- matrix(
-    sample.int(max_time, size = max_time * n.boots, replace = TRUE),
-    nrow = max_time,
-    ncol = n.boots
-  )
-  boot_indices <- boot_indices[, sample.int(n.boots)]
+
   sigma_over_xi <- sigma_vec / xi
 
-  reg_par.overall.boot <- matrix(NA_real_, n.boots, 5)
+  reg_par.overall.boot <-
+    matrix(
+      NA_real_,
+      n.boots,
+      5
+    )
 
-  # ============================================================
-  # Progress bar — controlled by use_progress_bar()
-  # ============================================================
   message("This calculation may take some time.")
+
   show_pb <- use_progress_bar(progress)
+
   if (show_pb) {
-    pb <- utils::txtProgressBar(min = 0, max = n.boots, style = 3)
+    pb <- utils::txtProgressBar(
+      min = 0,
+      max = n.boots,
+      style = 3
+    )
   }
 
   # ============================================================
   # Bootstrap loop
   # ============================================================
+
   for (r in seq_len(n.boots)) {
-    resampled_IDD <- IDD.series[boot_indices[, r], , drop = FALSE]
-    back.orig <- sweep(
-      sigma_over_xi * (exp(resampled_IDD * xi) - 1),
-      1,
-      mu_vec,
-      "+"
-    )
-    back.orig <- sweep(back.orig, 2, reg_mean, "+")
 
-    find.best.boot <- tryCatch(
-      Fit_model(temperatures = back.orig, model = model),
-      error = function(e) NULL
+    rows <- sample.int(
+      max_time,
+      size = max_time,
+      replace = TRUE
     )
 
-    if (!is.null(find.best.boot)) {
-      reg_par.overall.boot[r, ] <- tryCatch(
-        unlist(Reg_par(best_model = find.best.boot)),
-        error = function(e) rep(NA_real_, 5)
+    resampled_IDD <-
+      IDD.series[rows, , drop = FALSE]
+
+    back.orig <-
+      sweep(
+        sigma_over_xi *
+          (exp(resampled_IDD * xi) - 1),
+        1,
+        mu_vec,
+        "+"
       )
+
+    fit.boot <-
+      tryCatch(
+        Fit_model(
+          temperatures = back.orig,
+          model = model
+        ),
+        error = function(e) NULL
+      )
+
+    if (!is.null(fit.boot)) {
+
+      reg_par.overall.boot[r, ] <-
+        tryCatch(
+          as.numeric(
+            Reg_par(fit.boot)
+          ),
+          error = function(e) rep(NA_real_, 5)
+        )
     }
 
-    if (show_pb) utils::setTxtProgressBar(pb, r)
+    if (show_pb) {
+      utils::setTxtProgressBar(pb, r)
+    }
   }
 
   if (show_pb) {
@@ -161,29 +192,48 @@ Reg_parCI <- function(
   # ============================================================
   # Confidence intervals
   # ============================================================
-  CI_lower <- apply(
-    reg_par.overall.boot,
-    2,
-    quantile,
-    probs = 0.025,
-    na.rm = TRUE
-  )
-  CI_upper <- apply(
-    reg_par.overall.boot,
-    2,
-    quantile,
-    probs = 0.975,
-    na.rm = TRUE
-  )
 
-  CI_matrix <- rbind(CI_lower, CI_upper)
-  rownames(CI_matrix) <- c("Lower 95% CI", "Upper 95% CI")
-  colnames(CI_matrix) <- c(
-    "weighted_mu0",
-    "weighted_mu1",
-    "weighted_sigma0",
-    "weighted_sigma1",
-    "weighted_shape"
-  )
-  CI_matrix
+  CI_lower <-
+    apply(
+      reg_par.overall.boot,
+      2,
+      quantile,
+      probs = 0.025,
+      na.rm = TRUE
+    )
+
+  CI_upper <-
+    apply(
+      reg_par.overall.boot,
+      2,
+      quantile,
+      probs = 0.975,
+      na.rm = TRUE
+    )
+
+  CI_matrix <-
+    rbind(
+      CI_lower,
+      CI_upper
+    )
+
+  rownames(CI_matrix) <-
+    c(
+      "Lower 95% CI",
+      "Upper 95% CI"
+    )
+
+  colnames(CI_matrix) <-
+    paste0(
+      "weighted_",
+      c(
+        "mu0",
+        "mu1",
+        "sigma0",
+        "sigma1",
+        "shape"
+      )
+    )
+
+  return(CI_matrix)
 }
