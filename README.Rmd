@@ -256,7 +256,6 @@ Reg_parCI(
   add_data = add.data$add_data,
   model = 2,
   reg_par = regional.parms,
-  reg_mean = add.data$reg_mean,
   n.boots = 100
 )
 ```
