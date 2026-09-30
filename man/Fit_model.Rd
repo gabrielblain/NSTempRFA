@@ -10,13 +10,19 @@ Fit_model(temperatures, model)
 \item{temperatures}{A vector or single-column matrix of air temperature data, either original
 or centered by subtracting the sample mean.}
 
-\item{model}{A single integer between 1 and 4 defining the GEV model.
+\item{model}{A single integer between 1 and 6 defining the GEV model
+(see \code{Best_model()} for the description of each model).
 May be provided by \code{Best_model()}.}
 }
 \value{
 A \code{data.frame} containing the estimated parameters
-(\code{mu0}, \code{mu1}, \code{sigma0}, \code{sigma1}, \code{shape},
-\code{size}).  If fitting fails for a site, \code{NA}s are returned for
+(\code{mu0}, \code{mu1}, \code{mu2}, \code{sigma0}, \code{sigma1}, \code{shape}, \code{size}).
+The location is mu(t) = \code{mu0} + \code{mu1} * t + \code{mu2} * t^2 and the scale is
+sigma(t) = exp(\code{sigma0} + \code{sigma1} * t), so \code{sigma0} and \code{sigma1} are
+coefficients on the log scale (in models with constant scale,
+\code{sigma0} is the log of the scale parameter).
+Parameters that are not part of the selected model are set to
+zero. If fitting fails for a site, \code{NA}s are returned for
 that site.
 }
 \description{
@@ -24,7 +30,8 @@ Time-varying parameters of a given GEV model
 }
 \details{
 The function attempts to fit the model using \code{ismev::gev.fit()} with
-the following optimisers in sequence:
+a log link for the scale parameter (which keeps the scale positive at all
+times) and the following optimisers in sequence:
 \code{Nelder-Mead}, \code{BFGS}, \code{CG}, \code{L-BFGS-B}, \code{SANN}.
 The first optimiser that converges is used; if all fail, \code{NA}s are
 returned for that site.
@@ -33,4 +40,7 @@ returned for that site.
 temperatures <- TmaxCPC_SP$Pixel_1
 model <- 4
 Fit_model(temperatures, model)
+
+# Quadratic time-varying location and log-linear time-varying scale
+Fit_model(temperatures, model = 6)
 }

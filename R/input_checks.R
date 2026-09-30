@@ -29,9 +29,9 @@ check_model <- function(model) {
     !is.numeric(model) ||
       length(model) != 1 ||
       model != as.integer(model) ||
-      !(model %in% 1:4)
+      !(model %in% 1:6)
   ) {
-    stop("`model` must be a single integer between 1 and 4.", call. = FALSE)
+    stop("`model` must be a single integer between 1 and 6.", call. = FALSE)
   }
   invisible(NULL)
 }
@@ -58,8 +58,8 @@ check_reg_par <- function(reg_par) {
   if (!is.numeric(reg_par) || !all(is.finite(reg_par))) {
     stop("`reg_par` must contain finite numeric values.", call. = FALSE)
   }
-  if (nrow(reg_par) != 1 || ncol(reg_par) != 5) {
-    stop("`reg_par` must have exactly 1 row and 5 columns.", call. = FALSE)
+  if (nrow(reg_par) != 1 || ncol(reg_par) != 6) {
+    stop("`reg_par` must have exactly 1 row and 6 columns.", call. = FALSE)
   }
   as.numeric(reg_par)
 }
@@ -70,8 +70,8 @@ check_site_par <- function(site_par) {
   if (!is.numeric(site_par)) {
     stop("`site_par` must be numeric.", call. = FALSE)
   }
-  if (nrow(site_par) != 1 || ncol(site_par) != 5) {
-    stop("`site_par` must have exactly 1 row and 5 columns.", call. = FALSE)
+  if (nrow(site_par) != 1 || ncol(site_par) != 6) {
+    stop("`site_par` must have exactly 1 row and 6 columns.", call. = FALSE)
   }
   if (!all(is.finite(site_par))) {
     stop("`site_par` cannot contain missing or infinite values.", call. = FALSE)
@@ -144,7 +144,7 @@ check_best_model_df <- function(best_model) {
     stop("Input 'best_model' must be a data frame.", call. = FALSE)
   }
 
-  required_cols <- c("mu0", "mu1", "sigma0", "sigma1", "shape", "size")
+  required_cols <- c("mu0", "mu1", "mu2", "sigma0", "sigma1", "shape", "size")
 
   if (!all(required_cols %in% names(best_model))) {
     stop(

@@ -12,21 +12,32 @@ export(Reg_parCI)
 export(Site_parCI)
 importFrom(MASS,mvrnorm)
 importFrom(Matrix,nearPD)
-importFrom(extRemes,pevd)
-importFrom(extRemes,qevd)
+importFrom(extRemes,
+  pevd,
+  qevd
+)
 importFrom(ismev,gev.fit)
-importFrom(lmom,pelkap)
-importFrom(lmom,pelwak)
-importFrom(lmom,quakap)
-importFrom(lmom,quawak)
+importFrom(lmom,
+  pelkap,
+  pelwak,
+  quakap,
+  quawak
+)
 importFrom(lmomRFA,regsamlmu)
-importFrom(rrcov,Cov)
-importFrom(rrcov,getDistance)
+importFrom(rrcov,
+  Cov,
+  getDistance
+)
 importFrom(spsUtil,quiet)
-importFrom(stats,na.omit)
-importFrom(stats,pnorm)
-importFrom(stats,quantile)
-importFrom(stats,sd)
-importFrom(stats,weighted.mean)
-importFrom(utils,setTxtProgressBar)
-importFrom(utils,txtProgressBar)
+importFrom(stats,
+  na.omit,
+  pnorm,
+  quantile,
+  sd,
+  var,
+  weighted.mean
+)
+importFrom(utils,
+  setTxtProgressBar,
+  txtProgressBar
+)

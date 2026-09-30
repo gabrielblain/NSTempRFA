@@ -294,12 +294,12 @@ A matrix containing the 95% confidence intervals of the time-varying parameter e
 
 ```{r example 7}
 temperatures <- TmaxCPC_SP$Pixel_1
-model <- 2
+model <- 5
 site_par <- Fit_model(temperatures, model)
 Site_parCI(
   atsite_temp = temperatures,
   model = model,
-  site_par = site_par[1:5],
+  site_par = site_par[1:6],
   n.boots = 100
 )
 ```

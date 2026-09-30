@@ -57,9 +57,9 @@ Site_parCI <- function(
   #----------------------------------------------------------
   time <- seq_len(max_time)
   par.temporal <- matrix(NA_real_, max_time, 3)
-  par.temporal[, 1] <- site_par[1] + site_par[2] * time
-  par.temporal[, 2] <- site_par[3] + site_par[4] * time
-  par.temporal[, 3] <- site_par[5]
+  par.temporal[, 1] <- site_par[1] + site_par[2] * time + site_par[3] * time^2
+  par.temporal[, 2] <- site_par[4] + site_par[5] * time
+  par.temporal[, 3] <- site_par[6]
 
   if (any(par.temporal[, 2] <= 0)) {
     stop("The scale parameter becomes non-positive over time.", call. = FALSE)
@@ -68,7 +68,7 @@ Site_parCI <- function(
   #----------------------------------------------------------
   # Transform to Gumbel space
   #----------------------------------------------------------
-  use_gumbel <- abs(site_par[5]) < sqrt(.Machine$double.eps)
+  use_gumbel <- abs(site_par[6]) < sqrt(.Machine$double.eps)
 
   if (use_gumbel) {
     IDD.series <- (data_site - par.temporal[, 1]) / par.temporal[, 2]
@@ -93,9 +93,9 @@ Site_parCI <- function(
 
   mu_vec <- par.temporal[, 1]
   sigma_vec <- par.temporal[, 2]
-  xi <- site_par[5]
+  xi <- site_par[6]
 
-  site_par.overall.boot <- matrix(NA_real_, nrow = n.boots, ncol = 5)
+  site_par.overall.boot <- matrix(NA_real_, nrow = n.boots, ncol = 6)
 
   #----------------------------------------------------------
   # Progress bar — controlled by use_progress_bar()
@@ -119,7 +119,7 @@ Site_parCI <- function(
     }
 
     parameters <- Fit_model(temperatures = back.orig, model = model)
-    site_par.overall.boot[r, ] <- as.numeric(parameters[1, 1:5, drop = FALSE])
+    site_par.overall.boot[r, ] <- as.numeric(parameters[1, 1:6, drop = FALSE])
 
     if (show_pb) utils::setTxtProgressBar(pb, r)
   }
@@ -148,6 +148,6 @@ Site_parCI <- function(
 
   CI_matrix <- rbind(CI_lower, CI_upper)
   rownames(CI_matrix) <- c("Lower 95% CI", "Upper 95% CI")
-  colnames(CI_matrix) <- c("mu0", "mu1", "sigma0", "sigma1", "shape")
+  colnames(CI_matrix) <- c("mu0", "mu1", "mu2", "sigma0", "sigma1", "shape")
   CI_matrix
 }

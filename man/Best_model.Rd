@@ -13,29 +13,34 @@ Best_model(add.data)
 A list with:
 \describe{
 \item{best}{
-Index (1--4) of the model with the lowest total AICc across all sites.
+Index (1--6) of the model with the lowest total AICc across all sites.
 }
 \item{atsite.models}{
 Data frame containing the estimated parameters
-(\code{mu0}, \code{mu1}, \code{sigma0}, \code{sigma1}, \code{shape})
-and sample size for each site.
+(\code{mu0}, \code{mu1}, \code{mu2}, \code{sigma0}, \code{sigma1}, \code{shape})
+and sample size for each site. Parameters that are not part of the
+selected model are set to zero.
 }
 }
 }
 \description{
-This function fits four time-varying GEV models (with different assumptions
+This function fits six time-varying GEV models (with different assumptions
 on non-stationarity in location and/or scale) to each temperature series,
 computes the AICc of each model, and selects the best one according to the
 lowest total AICc.
 }
 \details{
-Model fitting is performed via \code{ismev::gev.fit()}.  Four nested models
-are considered:
+Model fitting is performed via \code{ismev::gev.fit()}.  Six models
+are considered, where location is mu(t) = mu0 + mu1 * t + mu2 * t^2 and
+scale is sigma(t) = sigma0 + sigma1 * t:
 \enumerate{
 \item Stationary (constant location and scale).
-\item Time-varying location only.
-\item Time-varying scale only.
-\item Time-varying location and scale.
+\item Linear time-varying location only.
+\item Linear time-varying scale only.
+\item Linear time-varying location and scale.
+\item Quadratic time-varying location only, GEV(2,0,0).
+\item Quadratic time-varying location and linear time-varying scale,
+GEV(2,1,0).
 }
 For each site the function tries up to five optimisation methods
 (\code{Nelder-Mead}, \code{BFGS}, \code{CG}, \code{L-BFGS-B}, \code{SANN})

@@ -8,9 +8,9 @@
 #' A numeric vector of probabilities strictly between 0 and 1, with no
 #' missing values.
 #' @param regional_pars
-#' A 1-row, 5-column `matrix` or `data.frame` containing regional
-#' GEV parameters: location intercept, location slope, scale intercept,
-#' scale slope, and shape.
+#' A 1-row, 6-column `matrix` or `data.frame` containing regional
+#' GEV parameters: location intercept, location slope, location slope (quadratic),
+#' scale intercept, scale slope, and shape.
 #' @param site_temp
 #' A numeric vector or 1-column matrix of site air temperature data.
 #' @param n.year
@@ -41,9 +41,10 @@ Add_RegQuant <- function(prob, regional_pars, site_temp, n.year) {
   check_site_temp(site_temp) # defined in input_checks.R
   check_n.year(n.year, site_temp) # defined in input_checks.R
 
-  loc <- regional_pars[1] + regional_pars[2] * n.year
-  scale_val <- regional_pars[3] + regional_pars[4] * n.year
-  shape <- regional_pars[5]
+  loc <- regional_pars[1] + regional_pars[2] * n.year +
+  regional_pars[3] * n.year^2
+  scale_val <- regional_pars[4] + regional_pars[5] * n.year
+  shape <- regional_pars[6]
 
   if (scale_val <= 0) {
     stop("Calculated scale parameter must be positive.", call. = FALSE)

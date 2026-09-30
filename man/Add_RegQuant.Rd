@@ -10,9 +10,9 @@ Add_RegQuant(prob, regional_pars, site_temp, n.year)
 \item{prob}{A numeric vector of probabilities strictly between 0 and 1, with no
 missing values.}
 
-\item{regional_pars}{A 1-row, 5-column \code{matrix} or \code{data.frame} containing regional
-GEV parameters: location intercept, location slope, scale intercept,
-scale slope, and shape.}
+\item{regional_pars}{A 1-row, 6-column \code{matrix} or \code{data.frame} containing regional
+GEV parameters: location intercept, location slope, location slope (quadratic),
+scale intercept, scale slope, and shape.}
 
 \item{site_temp}{A numeric vector or 1-column matrix of site air temperature data.}
 
