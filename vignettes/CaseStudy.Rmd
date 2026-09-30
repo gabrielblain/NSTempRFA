@@ -99,7 +99,7 @@ The `Best_model()` function selects the best model among these four candidates u
 ```{r Best_model}
 best.parms <- Best_model(add.data = add.data$add_data)
 # The best model is:
-as.numeric(best.parms$best) #Model 2
+as.numeric(best.parms$best) #Model 5
 # The at-site parameters are:
 best.parms$atsite.models
 ```
@@ -130,13 +130,13 @@ Because the Regional Frequency Analysis uses all series within a homogeneous reg
 ```{r Site_parCI}
 set.seed(123)
 temperatures <- TmaxCPC_SP$Pixel_1
-model <- 2
+model <- 5
 site_par <- Fit_model(temperatures, model)
-if (all(is.finite(as.numeric(site_par[1, 1:5])))) {
+if (all(is.finite(as.numeric(site_par[1, 1:6])))) {
   Site_parCI(
     atsite_temp = temperatures,
     model = model,
-    site_par = site_par[1, 1:5],
+    site_par = site_par[1, 1:6],
     n.boots = 500
   )
 }
