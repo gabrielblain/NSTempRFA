@@ -9,17 +9,17 @@ test_that("Best_model returns correct structure", {
   expect_named(result, c("best", "atsite.models"))
 
   # Best model index
-  expect_true(result$best %in% 1:4)
+  expect_true(result$best %in% 1:6)
 
   # atsite.models structure
   expect_s3_class(result$atsite.models, "data.frame")
 
   expect_named(
     result$atsite.models,
-    c("mu0", "mu1", "sigma0", "sigma1", "shape", "size")
+    c("mu0", "mu1", "mu2", "sigma0", "sigma1", "shape", "size")
   )
 
-  expect_identical(ncol(result$atsite.models), 6L)
+  expect_identical(ncol(result$atsite.models), 7L)
 
   # Number of rows = number of sites
   expect_identical(
@@ -147,7 +147,7 @@ test_that("Best_model returns a valid best model index", {
   )
 
   expect_true(
-    result$best %in% 1:4
+    result$best %in% 1:6
   )
 })
 
@@ -196,7 +196,7 @@ test_that("Best_model works with a single site", {
   )
 
   expect_true(
-    result$best %in% 1:4
+    result$best %in% 1:6
   )
 })
 
@@ -218,6 +218,6 @@ test_that("Best_model returns an integer model index", {
   )
 
   expect_true(
-    result$best %in% 1:4
+    result$best %in% 1:6
   )
 })

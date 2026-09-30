@@ -1,6 +1,6 @@
 test_that("Add_RegProb returns probabilities between 0.0001 and 0.9999", {
   quantiles <- c(39.5, 40.0, 40.5)
-  regional_pars <- data.frame(matrix(c(40, 0.1, 2, 0.05, 0.1), nrow = 1))
+  regional_pars <- data.frame(matrix(c(40, 0.1, 0, 2, 0.05, 0.1), nrow = 1))
   site_temp <- rnorm(100, mean = 40, sd = 2)
   n.year <- 50
 
@@ -14,7 +14,7 @@ test_that("Add_RegProb returns probabilities between 0.0001 and 0.9999", {
 
 test_that("Add_RegProb throws error with missing quantiles", {
   quantiles <- c(39.5, NA, 40.5)
-  regional_pars <- data.frame(matrix(c(40, 0.1, 2, 0.05, 0.1), nrow = 1))
+  regional_pars <- data.frame(matrix(c(40, 0.1, 0, 2, 0.05, 0.1), nrow = 1))
   site_temp <- rnorm(100, mean = 40, sd = 2)
   n.year <- 50
 
@@ -26,20 +26,20 @@ test_that("Add_RegProb throws error with missing quantiles", {
 
 test_that("Add_RegProb throws error for invalid regional_pars dimensions", {
   quantiles <- c(39.5, 40.0, 40.5)
-  wrong_regional_pars <- data.frame(matrix(c(40, 0.1, 2, 0.05), nrow = 1)) # Only 4 columns
+  wrong_regional_pars <- data.frame(matrix(c(40, 0.1, 0, 2, 0.05), nrow = 1)) # Only 4 columns
   site_temp <- rnorm(100, mean = 40, sd = 2)
   n.year <- 30
 
   expect_error(
     Add_RegProb(quantiles, wrong_regional_pars, site_temp, n.year),
-    "`reg_par` must have exactly 1 row and 5 columns.",
+    "`reg_par` must have exactly 1 row and 6 columns.",
     fixed = TRUE
   )
 })
 
 test_that("Add_RegProb throws error for non-numeric site_temp", {
   quantiles <- c(39.5, 40.0, 40.5)
-  regional_pars <- data.frame(matrix(c(40, 0.1, 2, 0.05, 0.1), nrow = 1))
+  regional_pars <- data.frame(matrix(c(40, 0.1, 0, 2, 0.05, 0.1), nrow = 1))
   site_temp <- as.character(rnorm(100, mean = 40, sd = 2)) # Non-numeric
   n.year <- 30
 
@@ -52,7 +52,7 @@ test_that("Add_RegProb throws error for non-numeric site_temp", {
 
 test_that("Add_RegProb throws error if scale parameter becomes non-positive", {
   quantiles <- c(39.5, 40.0, 40.5)
-  regional_pars <- data.frame(matrix(c(40, 0.1, -2, -0.05, 0.1), nrow = 1)) # Negative scale intercept and slope
+  regional_pars <- data.frame(matrix(c(40, 0.1, 0, -2, -0.05, 0.1), nrow = 1)) # Negative scale intercept and slope
   site_temp <- rnorm(100, mean = 40, sd = 2)
   n.year <- 30
 
@@ -64,7 +64,7 @@ test_that("Add_RegProb throws error if scale parameter becomes non-positive", {
 
 test_that("Add_RegProb returns correct number of probabilities", {
   quantiles <- seq(38, 42, by = 0.5)
-  regional_pars <- data.frame(matrix(c(40, 0.1, 2, 0.05, 0.1), nrow = 1))
+  regional_pars <- data.frame(matrix(c(40, 0.1, 0, 2, 0.05, 0.1), nrow = 1))
   site_temp <- rnorm(100, mean = 40, sd = 2)
   n.year <- 20
 
@@ -74,7 +74,7 @@ test_that("Add_RegProb returns correct number of probabilities", {
 
 test_that("Add_RegProb throws error for non-integer n.year", {
   quantiles <- c(39.5, 40.0, 40.5)
-  regional_pars <- data.frame(matrix(c(40, 0.1, 2, 0.05, 0.1), nrow = 1))
+  regional_pars <- data.frame(matrix(c(40, 0.1, 0, 2, 0.05, 0.1), nrow = 1))
   site_temp <- rnorm(100, mean = 40, sd = 2)
 
   expect_error(
@@ -90,7 +90,7 @@ test_that("Add_RegProb throws error for non-integer n.year", {
 
 test_that("Add_RegProb throws error for empty site_temp", {
   quantiles <- c(39.5, 40.0, 40.5)
-  regional_pars <- data.frame(matrix(c(40, 0.1, 2, 0.05, 0.1), nrow = 1))
+  regional_pars <- data.frame(matrix(c(40, 0.1, 0, 2, 0.05, 0.1), nrow = 1))
 
   expect_error(
     Add_RegProb(
@@ -105,7 +105,7 @@ test_that("Add_RegProb throws error for empty site_temp", {
 
 test_that("Add_RegProb is deterministic", {
   quantiles <- seq(38, 42, by = 0.5)
-  regional_pars <- data.frame(matrix(c(40, 0.1, 2, 0.05, 0.1), nrow = 1))
+  regional_pars <- data.frame(matrix(c(40, 0.1, 0, 2, 0.05, 0.1), nrow = 1))
   site_temp <- rnorm(100, mean = 40, sd = 2)
   n.year <- 20
 
@@ -128,7 +128,7 @@ test_that("Add_RegProb is deterministic", {
 
 test_that("Add_RegProb works for the first year", {
   quantiles <- seq(38, 42, by = 0.5)
-  regional_pars <- data.frame(matrix(c(40, 0.1, 2, 0.05, 0.1), nrow = 1))
+  regional_pars <- data.frame(matrix(c(40, 0.1, 0, 2, 0.05, 0.1), nrow = 1))
   site_temp <- rnorm(100, mean = 40, sd = 2)
 
   result <- Add_RegProb(
@@ -143,7 +143,7 @@ test_that("Add_RegProb works for the first year", {
 
 test_that("Add_RegProb works for the last year", {
   quantiles <- seq(38, 42, by = 0.5)
-  regional_pars <- data.frame(matrix(c(40, 0.1, 2, 0.05, 0.1), nrow = 1))
+  regional_pars <- data.frame(matrix(c(40, 0.1, 0, 2, 0.05, 0.1), nrow = 1))
   site_temp <- rnorm(100, mean = 40, sd = 2)
 
   result <- Add_RegProb(
@@ -158,7 +158,7 @@ test_that("Add_RegProb works for the last year", {
 
 test_that("Add_RegProb returns increasing probabilities for increasing quantiles", {
   quantiles <- seq(38, 42, by = 0.5)
-  regional_pars <- data.frame(matrix(c(40, 0.1, 2, 0.05, 0.1), nrow = 1))
+  regional_pars <- data.frame(matrix(c(40, 0.1, 0, 2, 0.05, 0.1), nrow = 1))
   site_temp <- rnorm(100, mean = 40, sd = 2)
 
   result <- Add_RegProb(

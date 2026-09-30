@@ -5,22 +5,22 @@ test_that("Site_parCI returns a matrix with the correct dimensions", {
   site_par <- Fit_model(temperatures, model)
 
   skip_if(
-    anyNA(site_par[1, 1:5]),
+    anyNA(site_par[1, 1:6]),
     "Fit_model did not converge — skipping"
   )
 
   result <- Site_parCI(
     atsite_temp = temperatures,
     model = model,
-    site_par = site_par[1, 1:5],
+    site_par = site_par[1, 1:6],
     n.boots = 100
   )
 
   expect_true(is.matrix(result))
-  expect_identical(dim(result), c(2L, 5L))
+  expect_identical(dim(result), c(2L, 6L))
   expect_named(
     as.data.frame(result),
-    c("mu0", "mu1", "sigma0", "sigma1", "shape")
+    c("mu0", "mu1", "mu2", "sigma0", "sigma1", "shape")
   )
   expect_true(all(is.finite(result[, c(1, 3, 5)])))
 })
@@ -30,7 +30,7 @@ test_that("Site_parCI accepts a single-column matrix", {
   set.seed(123)
 
   atsite_temp <- matrix(rnorm(50), ncol = 1)
-  site_par <- matrix(c(0, 0.02, 1, 0.001, 0.1), nrow = 1)
+  site_par <- matrix(c(0, 0.02, 0, 1, 0.001, 0.1), nrow = 1)
 
   result <- Site_parCI(
     atsite_temp = atsite_temp,
@@ -45,28 +45,28 @@ test_that("Site_parCI accepts a single-column matrix", {
 
 test_that("Site_parCI rejects invalid model values", {
   temp <- rnorm(50)
-  pars <- matrix(c(0, 0, 1, 0, 0.1), nrow = 1)
+  pars <- matrix(c(0, 0, 0, 1, 0, 0.1), nrow = 1)
 
   expect_error(
     Site_parCI(temp, 0, pars, 100),
-    "`model` must be a single integer"
+    "`model` must be a single integer between 1 and 6."
   )
 
   expect_error(
-    Site_parCI(temp, 5, pars, 100),
-    "`model` must be a single integer"
+    Site_parCI(temp, 7, pars, 100),
+    "`model` must be a single integer between 1 and 6."
   )
 
   expect_error(
     Site_parCI(temp, "two", pars, 100),
-    "`model` must be a single integer"
+    "`model` must be a single integer between 1 and 6."
   )
 })
 
 
 test_that("Site_parCI rejects invalid n.boots", {
   temp <- rnorm(50)
-  pars <- matrix(c(0, 0, 1, 0, 0.1), nrow = 1)
+  pars <- matrix(c(0, 0, 0, 1, 0, 0.1), nrow = 1)
 
   expect_error(
     Site_parCI(temp, 1, pars, 50),
@@ -82,7 +82,7 @@ test_that("Site_parCI rejects invalid n.boots", {
 
 test_that("Site_parCI rejects series shorter than 10 observations", {
   temp <- rnorm(9)
-  pars <- matrix(c(0, 0, 1, 0, 0.1), nrow = 1)
+  pars <- matrix(c(0, 0, 0, 1, 0, 0.1), nrow = 1)
 
   expect_error(
     Site_parCI(temp, 1, pars, 100),
@@ -93,7 +93,7 @@ test_that("Site_parCI rejects series shorter than 10 observations", {
 
 test_that("Site_parCI rejects all missing values", {
   temp <- rep(NA, 50)
-  pars <- matrix(c(0, 0, 1, 0, 0.1), nrow = 1)
+  pars <- matrix(c(0, 0, 0, 1, 0, 0.1), nrow = 1)
 
   expect_error(
     Site_parCI(temp, 1, pars, 100),
@@ -104,7 +104,7 @@ test_that("Site_parCI rejects all missing values", {
 
 test_that("Site_parCI rejects matrices with more than one column", {
   temp <- matrix(rnorm(100), ncol = 2)
-  pars <- matrix(c(0, 0, 1, 0, 0.1), nrow = 1)
+  pars <- matrix(c(0, 0, 0, 1, 0, 0.1), nrow = 1)
 
   expect_error(
     Site_parCI(temp, 1, pars, 100),
@@ -117,7 +117,7 @@ test_that("Site_parCI rejects non-numeric site_par", {
   temp <- rnorm(50)
 
   pars <- matrix(
-    c("a", "b", "c", "d", "e"),
+    c("a", "b", "c", "d", "e", "f"),
     nrow = 1
   )
 
@@ -135,19 +135,17 @@ test_that("Site_parCI rejects site_par with incorrect dimensions", {
 
   expect_error(
     Site_parCI(temp, 1, pars, 100),
-    "exactly 1 row and 5 columns"
+    "exactly 1 row and 6 columns"
   )
 })
 
 
 test_that("Site_parCI rejects missing values in site_par", {
   temp <- rnorm(50)
-
   pars <- matrix(
-    c(0, 0, 1, NA, 0.1),
+    c(0, 0, 0, 1, NA, 0.1),
     nrow = 1
   )
-
   expect_error(
     Site_parCI(temp, 1, pars, 100),
     "cannot contain missing or infinite values"
@@ -159,7 +157,7 @@ test_that("Site_parCI rejects non-positive scale parameters", {
   temp <- rnorm(50)
 
   pars <- matrix(
-    c(0, 0, -1, 0, 0.1),
+    c(0, 0, 0, -1, 0, 0.1),
     nrow = 1
   )
 
@@ -176,7 +174,7 @@ test_that("Site_parCI works when shape parameter equals zero", {
   temp <- rnorm(50)
 
   pars <- matrix(
-    c(0, 0.01, 1, 0.001, 0),
+    c(0, 0.01, 0, 1, 0.001, 0),
     nrow = 1
   )
 
@@ -188,5 +186,5 @@ test_that("Site_parCI works when shape parameter equals zero", {
   )
 
   expect_true(is.matrix(result))
-  expect_identical(dim(result), c(2L, 5L))
+  expect_identical(dim(result), c(2L, 6L))
 })

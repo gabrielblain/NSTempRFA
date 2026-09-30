@@ -1,6 +1,6 @@
 test_that("Add_RegQuant works with valid inputs", {
   prob <- c(0.8, 0.9, 0.95)
-  regional_pars <- matrix(c(10, 0.5, 5, 0.2, 0.1), nrow = 1)
+  regional_pars <- matrix(c(10, 0.5, 0.05, 5, 0.2, 0.1), nrow = 1)
   site_temp <- seq(25, 35, length.out = 50)
   n.year <- 10
 
@@ -14,7 +14,7 @@ test_that("Add_RegQuant works with valid inputs", {
 })
 
 test_that("Add_RegQuant errors with invalid prob", {
-  rp <- matrix(c(10, 0.5, 5, 0.2, 0.1), nrow = 1)
+  rp <- matrix(c(10, 0.5, 0.05, 5, 0.2, 0.1), nrow = 1)
   temp <- rep(30, 50)
 
   expect_error(
@@ -31,18 +31,18 @@ test_that("Add_RegQuant errors with invalid regional_pars", {
   temp <- rep(30, 50)
   expect_error(
     Add_RegQuant(0.9, matrix(1:4, nrow = 1), temp, 5),
-    "`reg_par` must have exactly 1 row and 5 columns.",
+    "`reg_par` must have exactly 1 row and 6 columns.",
     fixed = TRUE
   )
   expect_error(
     Add_RegQuant(0.9, matrix(1:10, nrow = 2), temp, 5),
-    "`reg_par` must have exactly 1 row and 5 columns.",
+    "`reg_par` must have exactly 1 row and 6 columns.",
     fixed = TRUE
   )
 })
 
 test_that("Add_RegQuant errors with invalid site_temp", {
-  rp <- matrix(c(10, 0.5, 5, 0.2, 0.1), nrow = 1)
+  rp <- matrix(c(10, 0.5, 0.05, 5, 0.2, 0.1), nrow = 1)
   expect_error(
     Add_RegQuant(0.9, rp, NA, 5),
     "`site_temp` must be a non-empty numeric vector or 1-column matrix.",
@@ -56,7 +56,7 @@ test_that("Add_RegQuant errors with invalid site_temp", {
 })
 
 test_that("Add_RegQuant errors with invalid n.year", {
-  rp <- matrix(c(10, 0.5, 5, 0.2, 0.1), nrow = 1)
+  rp <- matrix(c(10, 0.5, 0.05, 5, 0.2, 0.1), nrow = 1)
   temp <- rep(30, 50)
 
   expect_error(
@@ -77,7 +77,7 @@ test_that("Add_RegQuant errors with invalid n.year", {
 })
 
 test_that("Add_RegQuant errors with non-integer n.year", {
-  rp <- matrix(c(10, 0.5, 5, 0.2, 0.1), nrow = 1)
+  rp <- matrix(c(10, 0.5, 0.05, 5, 0.2, 0.1), nrow = 1)
   temp <- rep(30, 50)
 
   expect_error(
@@ -92,7 +92,7 @@ test_that("Add_RegQuant errors when scale parameter becomes non-positive", {
   site_temp <- rep(30, 50)
 
   regional_pars <- matrix(
-    c(10, 0.5, -2, -0.2, 0.1),
+    c(10, 0.5, 0.05, -2, -0.2, 0.1),
     nrow = 1
   )
 
@@ -112,7 +112,7 @@ test_that("Add_RegQuant and Add_RegProb are approximately inverse functions", {
   prob <- c(0.90, 0.95, 0.99)
 
   regional_pars <- matrix(
-    c(10, 0.5, 5, 0.2, 0.1),
+    c(10, 0.5, 0.05, 5, 0.2, 0.1),
     nrow = 1
   )
 
@@ -141,7 +141,7 @@ test_that("Add_RegQuant and Add_RegProb are approximately inverse functions", {
 
 test_that("Add_RegQuant returns correctly named quantiles", {
   prob <- c(0.90, 0.95, 0.99)
-  regional_pars <- matrix(c(10, 0.5, 5, 0.2, 0.1), nrow = 1)
+  regional_pars <- matrix(c(10, 0.5, 0.05, 5, 0.2, 0.1), nrow = 1)
   site_temp <- rep(30, 50)
 
   result <- Add_RegQuant(
@@ -159,7 +159,7 @@ test_that("Add_RegQuant returns correctly named quantiles", {
 
 test_that("Add_RegQuant returns increasing quantiles for increasing probabilities", {
   prob <- c(0.80, 0.90, 0.95, 0.99)
-  regional_pars <- matrix(c(10, 0.5, 5, 0.2, 0.1), nrow = 1)
+  regional_pars <- matrix(c(10, 0.5, 0.05, 5, 0.2, 0.1), nrow = 1)
   site_temp <- rep(30, 50)
 
   result <- Add_RegQuant(
@@ -174,7 +174,7 @@ test_that("Add_RegQuant returns increasing quantiles for increasing probabilitie
 
 test_that("Add_RegQuant works for the first year", {
   prob <- 0.9
-  regional_pars <- matrix(c(10, 0.5, 5, 0.2, 0.1), nrow = 1)
+  regional_pars <- matrix(c(10, 0.5, 0.05, 5, 0.2, 0.1), nrow = 1)
   site_temp <- rep(30, 50)
 
   result <- Add_RegQuant(
@@ -189,7 +189,7 @@ test_that("Add_RegQuant works for the first year", {
 
 test_that("Add_RegQuant works for the last year", {
   prob <- 0.9
-  regional_pars <- matrix(c(10, 0.5, 5, 0.2, 0.1), nrow = 1)
+  regional_pars <- matrix(c(10, 0.5, 0.05, 5, 0.2, 0.1), nrow = 1)
   site_temp <- rep(30, 50)
 
   result <- Add_RegQuant(

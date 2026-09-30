@@ -6,8 +6,8 @@ test_that("Fit_model returns correct output structure for multiple sites", {
 
   expect_s3_class(result, "data.frame")
   expect_identical(nrow(result), 15L)
-  expect_identical(ncol(result), 6L)
-  expect_named(result, c("mu0", "mu1", "sigma0", "sigma1", "shape", "size"))
+  expect_identical(ncol(result), 7L)
+  expect_named(result, c("mu0", "mu1", "mu2", "sigma0", "sigma1", "shape", "size"))
 })
 
 
@@ -40,19 +40,19 @@ test_that("Fit_model rejects invalid model values", {
 
   expect_error(
     Fit_model(temperatures, model = "two"),
-    "`model` must be a single integer between 1 and 4."
+    "`model` must be a single integer between 1 and 6."
   )
   expect_error(
     Fit_model(temperatures, model = 7L),
-    "`model` must be a single integer between 1 and 4."
+    "`model` must be a single integer between 1 and 6."
   )
   expect_error(
     Fit_model(temperatures, model = 0),
-    "`model` must be a single integer between 1 and 4."
+    "`model` must be a single integer between 1 and 6."
   )
   expect_error(
     Fit_model(temperatures, model = 2.5),
-    "`model` must be a single integer between 1 and 4."
+    "`model` must be a single integer between 1 and 6."
   )
 })
 
@@ -201,13 +201,13 @@ test_that("Fit_model preserves zero coefficients for stationary parameters", {
 })
 
 
-test_that("Fit_model handles all models returning length-5 parameter rows", {
+test_that("Fit_model handles all models returning length-6 parameter rows", {
   set.seed(123)
   temperatures <- rnorm(100)
 
-  for (m in 1:4) {
+  for (m in 1:6) {
     result <- Fit_model(temperatures, model = m)
-    expect_identical(ncol(result), 6L)
+    expect_identical(ncol(result), 7L)
     expect_length(as.numeric(result[1, 1:5]), 5)
   }
 })
