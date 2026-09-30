@@ -27,13 +27,13 @@
 #'
 #' @examplesIf interactive()
 #' temperatures <- TmaxCPC_SP$Pixel_1
-#' model <- 2
+#' model <- 5
 #' site_par <- Fit_model(temperatures, model)
 #'
 #' Site_parCI(
 #'   atsite_temp = temperatures,
 #'   model       = model,
-#'   site_par    = site_par[1, 1:5],
+#'   site_par    = site_par[1, 1:6],
 #'   n.boots     = 100
 #' )
 Site_parCI <- function(

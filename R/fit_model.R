@@ -13,9 +13,9 @@
 #' A `data.frame` containing the estimated parameters
 #' (`mu0`, `mu1`, `mu2`, `sigma0`, `sigma1`, `shape`, `size`).
 #' The location is mu(t) = `mu0` + `mu1` * t + `mu2` * t^2 and the scale is
-#' sigma(t) = exp(`sigma0` + `sigma1` * t), so `sigma0` and `sigma1` are
-#' coefficients on the log scale (in models with constant scale,
-#' `sigma0` is the log of the scale parameter).
+#' sigma(t) = `sigma0` * exp(`sigma1` * t), where t = 1, 2, ..., `size`.
+#' Thus `sigma0` is the scale at t = 0 and `sigma1` is the log rate of
+#' change of the scale (`sigma1` = 0 means a constant scale).
 #' Parameters that are not part of the selected model are set to
 #' zero. If fitting fails for a site, `NA`s are returned for
 #' that site.
@@ -27,6 +27,10 @@
 #' `Nelder-Mead`, `BFGS`, `CG`, `L-BFGS-B`, `SANN`.
 #' The first optimiser that converges is used; if all fail, `NA`s are
 #' returned for that site.
+#' Internally, the series is centred on its mean and a standardised time
+#' variable is used to reduce the collinearity between t and t^2.  The
+#' estimates are converted back to the original units and to the original
+#' time index, so `mu0` is expressed in the same units as `temperatures`.
 #'
 #' @importFrom ismev gev.fit
 #' @importFrom stats na.omit var
@@ -86,20 +90,23 @@ gev_siginit <- function(local, spec) {
   if (is.null(spec$sigl)) sig0 else c(sig0, 0)
 }
 
+
 # -----------------------------------------------------------------------------
 # Internal: call ismev::gev.fit() for a given model and optimiser,
-# returning a 6-element numeric parameter vector or NULL on failure.
+# returning a 6-element numeric parameter vector (referring to the original
+# time index) or NULL on failure.
 # Replaces fit_gev_ismev() + fit_gev_alt() + fit_gev().
 # -----------------------------------------------------------------------------
 #' @noRd
 fit_gev_single <- function(local, time, model_id, method) {
   spec <- GEV_MODEL_SPECS[[model_id]]
+  st <- scale_time(time) # defined in Best_model.R
 
   fit <- try(
     spsUtil::quiet(
       ismev::gev.fit(
         local,
-        ydat = cbind(time, time^2),
+        ydat = cbind(st$z, st$z^2),
         mul = spec$mul,
         sigl = spec$sigl,
         shl = NULL,
@@ -119,17 +126,27 @@ fit_gev_single <- function(local, time, model_id, method) {
     return(NULL)
   }
 
-  extract_pars(fit, model_id) # defined in best_model.R
+  # defined in Best_model.R
+  unscale_pars(extract_pars(fit, model_id), st$centre, st$spread)
 }
+
 
 # -----------------------------------------------------------------------------
 # Internal: try each optimiser in turn; return the first success or NA vector.
+# The series is centred before fitting (so that raw and centred inputs start
+# the optimiser from equivalent points) and the mean is added back to mu0.
 # -----------------------------------------------------------------------------
 #' @noRd
 fit_gev_site <- function(local, time, model_id) {
+  centre <- mean(local)
+  local_c <- local - centre
+
   for (method in OPTIM_METHODS) {
-    result <- fit_gev_single(local, time, model_id, method)
-    if (!is.null(result)) return(result)
+    result <- fit_gev_single(local_c, time, model_id, method)
+    if (!is.null(result)) {
+      result[1L] <- result[1L] + centre # mu0 back in the input's units
+      return(result)
+    }
   }
   rep(NA_real_, 6)
 }

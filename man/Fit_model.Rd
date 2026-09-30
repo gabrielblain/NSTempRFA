@@ -18,9 +18,9 @@ May be provided by \code{Best_model()}.}
 A \code{data.frame} containing the estimated parameters
 (\code{mu0}, \code{mu1}, \code{mu2}, \code{sigma0}, \code{sigma1}, \code{shape}, \code{size}).
 The location is mu(t) = \code{mu0} + \code{mu1} * t + \code{mu2} * t^2 and the scale is
-sigma(t) = exp(\code{sigma0} + \code{sigma1} * t), so \code{sigma0} and \code{sigma1} are
-coefficients on the log scale (in models with constant scale,
-\code{sigma0} is the log of the scale parameter).
+sigma(t) = \code{sigma0} * exp(\code{sigma1} * t), where t = 1, 2, ..., \code{size}.
+Thus \code{sigma0} is the scale at t = 0 and \code{sigma1} is the log rate of
+change of the scale (\code{sigma1} = 0 means a constant scale).
 Parameters that are not part of the selected model are set to
 zero. If fitting fails for a site, \code{NA}s are returned for
 that site.
@@ -35,6 +35,10 @@ times) and the following optimisers in sequence:
 \code{Nelder-Mead}, \code{BFGS}, \code{CG}, \code{L-BFGS-B}, \code{SANN}.
 The first optimiser that converges is used; if all fail, \code{NA}s are
 returned for that site.
+Internally, the series is centred on its mean and a standardised time
+variable is used to reduce the collinearity between t and t^2.  The
+estimates are converted back to the original units and to the original
+time index, so \code{mu0} is expressed in the same units as \code{temperatures}.
 }
 \examples{
 temperatures <- TmaxCPC_SP$Pixel_1

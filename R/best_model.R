@@ -17,31 +17,39 @@
 #'   \item{atsite.models}{
 #'     Data frame containing the estimated parameters
 #'     (`mu0`, `mu1`, `mu2`, `sigma0`, `sigma1`, `shape`)
-#'     and sample size for each site. Parameters that are not part of the
+#'     and sample size for each site. The location is
+#'     mu(t) = `mu0` + `mu1` * t + `mu2` * t^2 and the scale is
+#'     sigma(t) = `sigma0` * exp(`sigma1` * t), where t = 1, 2, ..., `size`.
+#'     Thus `sigma0` is the scale at t = 0 and `sigma1` is the log rate of
+#'     change of the scale. Parameters that are not part of the
 #'     selected model are set to zero.
 #'   }
 #' }
 #'
 #' @details
-#' Model fitting is performed via `ismev::gev.fit()`.  Six models
-#' are considered, where location is mu(t) = mu0 + mu1 * t + mu2 * t^2 and
-#' scale is sigma(t) = sigma0 + sigma1 * t:
+#' Model fitting is performed via `ismev::gev.fit()`, using a log link for the
+#' scale parameter (which keeps the scale positive at all times).  Six models
+#' are considered:
 #' \enumerate{
 #'   \item Stationary (constant location and scale).
 #'   \item Linear time-varying location only.
-#'   \item Linear time-varying scale only.
-#'   \item Linear time-varying location and scale.
+#'   \item Log-linear time-varying scale only.
+#'   \item Linear time-varying location and log-linear time-varying scale.
 #'   \item Quadratic time-varying location only, GEV(2,0,0).
-#'   \item Quadratic time-varying location and linear time-varying scale,
+#'   \item Quadratic time-varying location and log-linear time-varying scale,
 #'   GEV(2,1,0).
 #' }
+#' To reduce the collinearity between t and t^2, the models are fitted using
+#' a centred and standardised time variable.  The estimates are then
+#' converted back to the original time index (t = 1, 2, ..., `size`), so the
+#' reported parameters refer to t, not to the standardised variable.
 #' For each site the function tries up to five optimisation methods
 #' (`Nelder-Mead`, `BFGS`, `CG`, `L-BFGS-B`, `SANN`)
 #' and uses the first that converges.  Model selection is based on the sum of
 #' site-level AICc values.
 #'
 #' @importFrom ismev gev.fit
-#' @importFrom stats na.omit
+#' @importFrom stats na.omit sd
 #' @importFrom spsUtil quiet
 #' @export
 #'
@@ -119,7 +127,8 @@ Best_model <- function(add.data) {
 # Package-level constants — defined once, referenced everywhere
 # -----------------------------------------------------------------------------
 
-# Columns of ydat passed to ismev::gev.fit(): column 1 = t, column 2 = t^2.
+# Columns of ydat passed to ismev::gev.fit(): column 1 = z, column 2 = z^2,
+# where z is the standardised time (see scale_time()).
 # `mul` / `sigl` are column indices of ydat.
 #' @noRd
 GEV_MODEL_SPECS <- list(
@@ -158,27 +167,61 @@ OPTIM_METHODS <- c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN")
 
 
 # -----------------------------------------------------------------------------
+# Internal: centre and standardise the time index used as covariate.
+# -----------------------------------------------------------------------------
+#' @noRd
+scale_time <- function(time) {
+  centre <- mean(time)
+  spread <- stats::sd(time)
+  list(z = (time - centre) / spread, centre = centre, spread = spread)
+}
+
+
+# -----------------------------------------------------------------------------
+# Internal: convert a 6-element parameter vector estimated on the standardised
+# time z = (t - centre) / spread back to the original time t.
+# Input:  (mu0, mu1, mu2, sigma0, sigma1, shape), with sigma0 already
+#         back-transformed from the log scale (see extract_pars()).
+# -----------------------------------------------------------------------------
+#' @noRd
+unscale_pars <- function(p, centre, spread) {
+  if (anyNA(p)) {
+    return(p)
+  }
+  c(
+    p[1] - p[2] * centre / spread + p[3] * centre^2 / spread^2, # mu0
+    p[2] / spread - 2 * p[3] * centre / spread^2,               # mu1
+    p[3] / spread^2,                                            # mu2
+    p[4] * exp(-p[5] * centre / spread),                        # sigma0
+    p[5] / spread,                                              # sigma1
+    p[6]                                                        # shape
+  )
+}
+
+
+# -----------------------------------------------------------------------------
 # Internal: fit one GEV model, cycling through optimisers until one succeeds.
 # Returns the fit object or NULL on total failure.
 # -----------------------------------------------------------------------------
 #' @noRd
 try_model <- function(local, time, model_id) {
   spec <- GEV_MODEL_SPECS[[model_id]]
-  ydat <- cbind(time, time^2)
+  st <- scale_time(time)
+  ydat <- cbind(st$z, st$z^2)
 
   for (method in OPTIM_METHODS) {
     result <- try(
       {
         fit <- ismev::gev.fit(
           local,
-          ydat = cbind(time, time^2),
+          ydat = ydat,
           mul = spec$mul,
           sigl = spec$sigl,
           shl = NULL,
           mulink = identity,
-          siglink = exp,                          # was: identity
+          siglink = exp,
           shlink = identity,
-          siginit = gev_siginit(local, spec),     # new
+          siginit = gev_siginit(local, spec), # defined in Fit_model.R
           method = method,
           maxit = 10000L,
           show = FALSE
@@ -201,6 +244,8 @@ try_model <- function(local, time, model_id) {
 # -----------------------------------------------------------------------------
 # Internal: extract a 6-element parameter vector from a fitted model,
 # placing MLE estimates in the correct slots and zeroing the rest.
+# The scale intercept is returned on the original scale, not its log.
+# The vector still refers to the standardised time (see unscale_pars()).
 # -----------------------------------------------------------------------------
 #' @noRd
 extract_pars <- function(model, model_id) {
@@ -209,7 +254,7 @@ extract_pars <- function(model, model_id) {
   }
   out <- numeric(N_PARS)
   out[GEV_PAR_MAP[[model_id]]] <- model$mle
-  out[4L] <- exp(out[4L]) # sigma0 is now the scale itself, not its log
+  out[4L] <- exp(out[4L]) # sigma0 is the scale itself, not its log
   out
 }
 
@@ -230,15 +275,22 @@ safe_AICc <- function(model, k, n) {
 
 # -----------------------------------------------------------------------------
 # Internal: fit all six GEV models to one site and return parameters + AICc.
+# Parameters are returned on the original time index.
 # -----------------------------------------------------------------------------
 #' @noRd
 fit.models <- function(local, time) {
   n <- length(local)
   ids <- seq_along(GEV_MODEL_SPECS)
   models <- lapply(ids, try_model, local = local, time = time)
+  st <- scale_time(time)
 
   list(
-    pars = lapply(ids, function(i) extract_pars(models[[i]], i)),
+    pars = lapply(
+      ids,
+      function(i) {
+        unscale_pars(extract_pars(models[[i]], i), st$centre, st$spread)
+      }
+    ),
     at.site.AIC = mapply(safe_AICc, models, GEV_K_VALS, MoreArgs = list(n = n))
   )
 }

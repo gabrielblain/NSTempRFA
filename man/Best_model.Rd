@@ -18,7 +18,11 @@ Index (1--6) of the model with the lowest total AICc across all sites.
 \item{atsite.models}{
 Data frame containing the estimated parameters
 (\code{mu0}, \code{mu1}, \code{mu2}, \code{sigma0}, \code{sigma1}, \code{shape})
-and sample size for each site. Parameters that are not part of the
+and sample size for each site. The location is
+mu(t) = \code{mu0} + \code{mu1} * t + \code{mu2} * t^2 and the scale is
+sigma(t) = \code{sigma0} * exp(\code{sigma1} * t), where t = 1, 2, ..., \code{size}.
+Thus \code{sigma0} is the scale at t = 0 and \code{sigma1} is the log rate of
+change of the scale. Parameters that are not part of the
 selected model are set to zero.
 }
 }
@@ -30,18 +34,22 @@ computes the AICc of each model, and selects the best one according to the
 lowest total AICc.
 }
 \details{
-Model fitting is performed via \code{ismev::gev.fit()}.  Six models
-are considered, where location is mu(t) = mu0 + mu1 * t + mu2 * t^2 and
-scale is sigma(t) = sigma0 + sigma1 * t:
+Model fitting is performed via \code{ismev::gev.fit()}, using a log link for the
+scale parameter (which keeps the scale positive at all times).  Six models
+are considered:
 \enumerate{
 \item Stationary (constant location and scale).
 \item Linear time-varying location only.
-\item Linear time-varying scale only.
-\item Linear time-varying location and scale.
+\item Log-linear time-varying scale only.
+\item Linear time-varying location and log-linear time-varying scale.
 \item Quadratic time-varying location only, GEV(2,0,0).
-\item Quadratic time-varying location and linear time-varying scale,
+\item Quadratic time-varying location and log-linear time-varying scale,
 GEV(2,1,0).
 }
+To reduce the collinearity between t and t^2, the models are fitted using
+a centred and standardised time variable.  The estimates are then
+converted back to the original time index (t = 1, 2, ..., \code{size}), so the
+reported parameters refer to t, not to the standardised variable.
 For each site the function tries up to five optimisation methods
 (\code{Nelder-Mead}, \code{BFGS}, \code{CG}, \code{L-BFGS-B}, \code{SANN})
 and uses the first that converges.  Model selection is based on the sum of
